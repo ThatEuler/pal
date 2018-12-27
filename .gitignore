@@ -4,3 +4,4 @@
 # Ignore options directories
 .vs/
 .idea/
+dark_addon/
