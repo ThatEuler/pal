@@ -7,7 +7,7 @@
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.druid
-
+local DS = dark_addon.rotation.dispellbooks.soothe
 
 --Spells not in spellbook
 SB.StellarDrift = 163222
@@ -157,7 +157,7 @@ local function combat()
 
     --trinkets
 
-    local useTrinkets = "true"
+    local useTrinkets = "false"
 
     --Ancient knot of wisdom
     if useTrinkets == "true" and GetItemCount(166793) == 1 and GetItemCooldown(166793) == 0 and ((player.buff(SB.CelestialAlignment).up or player.buff(SB.IncarnationBalance).up) or (-spell(SB.CelestialAlignment) > 30 or -spell(SB.IncarnationBalance) > 30)) then
@@ -192,6 +192,17 @@ local function combat()
     -- Barkskin
     if player.health.percent < 65 and -spell(SB.Barkskin) == 0 then
         cast(SB.Barkskin, 'player')
+    end
+
+    --soothe
+    if target.castable(SB.Soothe) then
+        for i = 1, 40 do
+            local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+            if name and DS[spell_id] then
+                print("Soothing " .. name .. " off the target.")
+                return cast(SB.Soothe, target)
+            end
+        end
     end
 
     -----------------------------
@@ -386,13 +397,11 @@ local function combat()
             if target.castable(SB.SolarWrath) then
                 return cast(SB.SolarWrath, 'target')
             end
+        elseif y == 3 and power.astral.actual >= 40 then
+            print("opener stop")
+            y = 99
         end
     end -- standard opener
-
-    if toggle('opener', false) and power.astral.actual >= 40 and y ~= 99 then
-        print("opener stop")
-        y = 99
-    end -- all opener done
 
 
     --- CD /Healing
@@ -419,6 +428,7 @@ local function combat()
         end
     end
 
+    --print(target.time_to_die)
     -----------------------------
     --- CoolDowns
     -----------------------------
@@ -576,20 +586,10 @@ end
 ]]--
 
 
+
+
+
 --[[
-if target.castable(SB.Soothe) then
-  for i = 1, 40 do
-    local name, _, _, count, debuff_type, _, _, _, _, _, spell_id = UnitAura("target", i)
-    print(name)
-    print(spell_id)
-    if name and DS[spell_id] then
-      print("Soothing " .. name .. " off the target.")
-      return cast(SB.Soothe, target)
-    end
-  end
-end
-
-
 --Cooldowns
 if toggle('cooldowns', false) then
     if talent(5, 3) and -spell(SB.IncarnationBalance) == 0 and power.astral.actual >= 40 and target.health.percent > 80 then
