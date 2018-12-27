@@ -155,24 +155,34 @@ local function combat()
         macro('/use Coastal Healing Potion')
     end
 
+    --trinkets
+
+    local useTrinkets = "true"
+
+    --Ancient knot of wisdom
+    if useTrinkets == "true" and GetItemCount(166793) == 1 and GetItemCooldown(166793) == 0 and ((player.buff(SB.CelestialAlignment).up or player.buff(SB.IncarnationBalance).up) or (-spell(SB.CelestialAlignment) > 30 or -spell(SB.IncarnationBalance) > 30)) then
+        macro('/use 13')
+    end
+
     --potions
-    if autoPotion == "pot_b" and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(163222) >= 1 and GetItemCooldown(163222) == 0 then
+    if autoPotion == "pot_b" and target.time_to_die > 20 and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(163222) >= 1 and GetItemCooldown(163222) == 0 then
         macro('/use Battle Potion of Intellect')
         print("glug - battle potion of intellect - glug")
     end
-    if autoPotion == "pot_c" and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(109218) >= 1 and GetItemCooldown(109218) == 0 then
+    if autoPotion == "pot_c" and target.time_to_die > 20 and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(109218) >= 1 and GetItemCooldown(109218) == 0 then
         print("glug - Draenic int - glug")
         macro('/use Draenic Intellect Potion')
     end
 
-    if autoPotion == "pot_d" and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(152559) >= 1 and GetItemCooldown(152559) == 0 then
+    if autoPotion == "pot_d" and target.time_to_die > 20 and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(152559) >= 1 and GetItemCooldown(152559) == 0 then
         macro('/use Potion of rising death')
         print("glug - deadly grace - glug")
     end
 
-    --if autoRune == "rune_b" and (player.buff(SB.WhisperInsanityBuff).down or player.buff(SB.WhisperInsanityBuff).remain < 600) and GetItemCount(118922) == 1 and GetItemCooldown(118922) == 0 then
-    --    macro('/use item:118922')
-    --end
+    if autoRune == "rune_b" and (player.buff(SB.WhisperInsanityBuff).down or player.buff(SB.WhisperInsanityBuff).remains < 600) and GetItemCount(118922) == 1 and GetItemCooldown(118922) == 0 then
+        macro('/use item:118922')
+        print("Applying WhisperInsanityBuff")
+    end
 
     -- Interupts
     if toggle('interrupts', false) and target.interrupt(intpercent) and target.distance <= 45 and -spell(SB.SolarBeam) == 0 then
@@ -414,7 +424,7 @@ local function combat()
     -----------------------------
     badguy = UnitClassification("target")
     -- and badguy ~= "normal" and badguy ~= "minus"
-    if toggle('cooldowns', false) then
+    if toggle('cooldowns', false) and target.time_to_die > 20 then
         if talent(5, 3) and power.astral.actual > 40 and -spell(SB.IncarnationBalance) == 0 then
             return cast(SB.IncarnationBalance)
         elseif talent(5, 2) and player.buff(SB.Starlord).count >= 2 and power.astral.actual > 40 and -spell(SB.CelestialAlignment) == 0 then
@@ -435,7 +445,7 @@ local function combat()
     --- Treants
     -----------------------------
 
-    if talent(1, 3) and toggle('FON', false) and -spell(SB.ForceofNature) == 0 and mouseover.alive and mouseover.enemy then
+    if talent(1, 3) and toggle('FON', false) and -spell(SB.ForceofNature) == 0 and mouseover.alive and UnitAffectingCombat and mouseover.enemy then
         return cast(SB.ForceofNature, 'ground')
     end
 
