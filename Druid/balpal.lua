@@ -77,7 +77,7 @@ local function combat()
     -----------------------------
     --- Reading from settings
     -----------------------------
-    local intpercent = dark_addon.settings.fetch('balpal_settings_intpercent')
+    local intpercent = dark_addon.settings.fetch('balpal_settings_intpercent', 80)
     local usehealthstone = dark_addon.settings.fetch('balpal_settings_healthstone.check')
     local usehealpot = dark_addon.settings.fetch('balpal_settings_usehealpot')
     local healthstonepercent = dark_addon.settings.fetch('balpal_settings_healthstone.spin')
