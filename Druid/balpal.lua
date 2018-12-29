@@ -29,6 +29,9 @@ SB.Revive = 50769
 SB.BearForm = 5487
 SB.WhisperInsanityBuff = 176151
 SB.StreakingStars = 272871
+SB.Fullmoon = 274283
+SB.Halfmoon = 202768
+SB.Newmoon = 274281
 
 local x = 0 -- counting seconds in resting
 local y = 0 -- counter for opener
@@ -202,6 +205,11 @@ local function combat()
     -- Barkskin
     if player.health.percent < 65 and -spell(SB.Barkskin) == 0 then
         cast(SB.Barkskin, 'player')
+    end
+
+    --Renewal
+    if talent(2, 2) and -spell(SB.Renewal) == 0 and player.health.percent < 50 then
+        return cast(SB.Renewal, player)
     end
 
     --soothe
@@ -435,9 +443,7 @@ local function combat()
             return cast(SB.Regrowth, player)
         end
 
-        if talent(2, 2) and -spell(SB.Renewal) == 0 and player.health.percent < 50 then
-            return cast(SB.Renewal, player)
-        end
+
     end
 
     -----------------------------
@@ -473,7 +479,7 @@ local function combat()
 
 
     if power.astral.actual >= 87 and player.buff(SB.Starlord).up and player.buff(SB.Starlord).remains <= 7 then
-        print("canceling at: " .. player.buff(SB.Starlord).remains)
+       -- print("canceling at: " .. player.buff(SB.Starlord).remains)
         macro('/cancelaura Starlord')
     end
 
@@ -519,7 +525,21 @@ local function combat()
         return cast(SB.StellarFlare, 'target')
     end
 
-    --todo support for 7,3 - moon spells
+
+
+    if talent(7, 3) then
+        if target.castable(SB.Fullmoon) and power.astral.actual <= 55 then
+            return cast(SB.Fullmoon, target)
+        elseif target.castable(SB.Halfmoon) and power.astal.actual <= 78 then
+            return cast(SB.Halfmoon, target)
+        elseif target.castable(SB.Newmoon) and power.astral.actual <= 86 then
+            return cast(SB.Newmoon, target)
+        end
+    end
+
+
+
+
     -- lunar lunar_strike
     if target.castable(SB.LunarStrike) and (player.buff(SB.SolarEmpowerment).count < 3 or player.buff(SB.SolarEmpowerment).down)
             --ap_check
@@ -643,7 +663,7 @@ local function resting()
             end
         end
         local outdoor = IsOutdoors()
-        if toggle('Forms', false) and player.moving and player.buff(SB.Prowl).down and player.buff(SB.MoonkinForm).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
+        if toggle('Forms', false) and player.moving and player.buff(SB.Prowl).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
             x = x + 1
 
             if outdoor and x >= 8 then
