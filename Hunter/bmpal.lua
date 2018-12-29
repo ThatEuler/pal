@@ -15,8 +15,6 @@ SB.AncestralCall = 274738
 SB.Fireblood = 265221
 SB.SpittingCobra = 194407
 
-local barbedChargeTime
-
 local function GroupType()
    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
@@ -26,13 +24,6 @@ local function combat()
     local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect')
     local race = UnitRace('player')
     local group_type = GroupType()
-
-    if spell(SB.BarbedShot).charges > 1 then
-        barbedChargeTime = spell(SB.BarbedShot).remains
-    end
-    if spell(SB.BarbedShot).charges < 1 then
-        barbedChargeTime = spell(SB.BarbedShot).remains + 12
-    end
 
     if target.alive and target.enemy and not player.channeling() then
         auto_shot()
@@ -63,16 +54,16 @@ local function combat()
                 cast(SB.AncestralCall)
             end
         end
-        if pet.buff(SB.PetFrenzy).up and pet.buff(SB.PetFrenzy).remains <= 1.5 or barbedChargeTime < 1.5 and barbedChargeTime < spell(SB.BeastialWrath).remains and target.castable(SB.BarbedShot) then
+        if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
             return cast(SB.BarbedShot, 'target')
         end
-        if talen(7,3) and castable(SB.SpittingCobra) then
+        if talent(7,3) and castable(SB.SpittingCobra) then
             return cast(SB.SpittingCobra)
         end
         if talent(4,3) and castable(SB.AMurderOfCrows) then
             return cast(SB.AMurderOfCrows, 'target')
         end
-        if talen(6,3) and castable(SB.Stampede) and buff(SB.AspectOfTheWild).up and buff(SB.BeastialWrath).up or target.time_to_die < 15 then
+        if talent(6,3) and castable(SB.Stampede) and buff(SB.AspectOfTheWild).up and buff(SB.BeastialWrath).up or target.time_to_die < 15 then
             return cast(SB.Stampede)
         end
         if toggle('multitarget', false) and enemies.around(40) > 2 and target.castable(SB.MultiShot) then
