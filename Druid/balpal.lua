@@ -28,41 +28,64 @@ SB.ArcanicPulsar = 287790
 SB.Revive = 50769
 SB.BearForm = 5487
 SB.WhisperInsanityBuff = 176151
+SB.StreakingStars = 272871
 
 local x = 0 -- counting seconds in resting
 local y = 0 -- counter for opener
 local z = 0 -- time in combat
 local enemyCount
+local burst
 
 local function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
 
-local function findHealer()
+local function findHealer(name)
     local members = GetNumGroupMembers()
     local group_type = GroupType()
+
     if group_type ~= 'solo' then
+        if name ~= nil and name ~= '' then
+            for i = 1, (members - 1) do
+                local unit = group_type .. i
+                local unitName, _ = UnitName(unit)
+                if unitName == name then
+                    return unit
+                end
+            end
+        end
+
         for i = 1, (members - 1) do
             local unit = group_type .. i
+
             if (UnitGroupRolesAssigned(unit) == 'HEALER') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
                 return unit
             end
         end
     end
+
     return 'player'
 end
 
-local function GCD()
+local function gcd()
 end
 
 --- Combat Rotation
 local function combat()
 
+
+    if talent(5, 3) then
+        burst = SB.IncarnationBalance
+    else
+        burst = SB.CelestialAlignment
+    end
+
     local aoeTarget = 4
-    if talent(6, 1) then
+
+    if not arcanicPulsar == true and not talent(5, 2) and talent(6, 1) then
         aoeTarget = 3
     end
-    if arcanicPulsar == true then
+    if talent(6, 2) and (arcanicPulsar == true or talent(5, 2)) then
         aoeTarget = 5
     end
 
@@ -78,14 +101,18 @@ local function combat()
     --- Reading from settings
     -----------------------------
     local intpercent = dark_addon.settings.fetch('balpal_settings_intpercent', 80)
-    local usehealthstone = dark_addon.settings.fetch('balpal_settings_healthstone.check')
-    local usehealpot = dark_addon.settings.fetch('balpal_settings_usehealpot')
-    local healthstonepercent = dark_addon.settings.fetch('balpal_settings_healthstone.spin')
-    local autoRacial = dark_addon.settings.fetch('balpal_settings_autoRacial')
-    local arcanicPulsar = dark_addon.settings.fetch('balpal_settings_arcanicPulsar')
-    local innervateTarget = dark_addon.settings.fetch('balpal_settings_innervateTarget')
-    local autoPotion = dark_addon.settings.fetch('balpal_settings_autoPotion')
-    local autoRune = dark_addon.settings.fetch('balpal_settings_autoRune')
+    local usehealthstone = dark_addon.settings.fetch('balpal_settings_healthstone.check', 25)
+    local usehealpot = dark_addon.settings.fetch('balpal_settings_usehealpot', true)
+    local healthstonepercent = dark_addon.settings.fetch('balpal_settings_healthstone.spin', 20)
+    local autoRacial = dark_addon.settings.fetch('balpal_settings_autoRacial', true)
+    local arcanicPulsar = dark_addon.settings.fetch('balpal_settings_arcanicPulsar', false)
+    local innervateTarget = dark_addon.settings.fetch('balpal_settings_innervateTarget', '')
+    local autoPotion = dark_addon.settings.fetch('balpal_settings_autoPotion', 'pot_a')
+    local autoRune = dark_addon.settings.fetch('balpal_settings_autoRune', 'rune_a')
+    local az_ss = dark_addon.settings.fetch('balpal_settings_az_ss', false)
+    local az_ls = dark_addon.settings.fetch('balpal_settings_az_ls', false)
+
+
 
     -----------------------------
     --- Modifiers
@@ -109,9 +136,9 @@ local function combat()
         if castable(SB.Barkskin) and not -buff(SB.Barkskin) then
             return cast(SB.Barkskin)
         end
-        --  if -buff(SB.Bearform) and talent(3, 2) and castable(SB.FrenziedRegeneration) then
-        --    return cast(SB.FrenziedRegeneration)
-        --  end
+        if player.buff(SB.Bearform).up and talent(3, 2) and castable(SB.FrenziedRegeneration) and player.health.percent < 50 then
+            return cast(SB.FrenziedRegeneration)
+        end
         if -buff(SB.Barkskin) and -buff(SB.BearForm) then
             return
         end
@@ -120,31 +147,14 @@ local function combat()
     if talent(1, 3) and modifier.ralt and -spell(SB.ForceofNature) == 0 then
         return cast(SB.ForceofNature, 'ground')
     end
-    -----------------------------
-    --- Determine mobs in range (not 100% right)
-    -----------------------------
-    local mobsinRange = 0
-
-    if toggle('multitarget', false) then
-        for i = 1, 40 do
-            if UnitExists('nameplate' .. i) and IsSpellInRange('Moonfire', 'nameplate' .. i) == 1 and UnitAffectingCombat('nameplate' .. i) then
-                mobsinRange = mobsinRange + 1
-            end
-        end
-    else
-        mobsinRange = 1
-    end
-
-    --print(mobsinRange)
 
     if GetShapeshiftForm() == 3 or player.buff(SB.Prowl).up or player.buff(SB.TigerDashBuff).up or player.buff(SB.Dash).up or not player.alive then
         return
     end
 
-
-    -----------------------------
+    ----------------------------------------------------------
     --- Health stone / Trinket  / Items / etc
-    -----------------------------
+    ----------------------------------------------------------
 
     --Health stone
     if usehealthstone == true and player.health.percent < healthstonepercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
@@ -165,16 +175,16 @@ local function combat()
     end
 
     --potions
-    if autoPotion == "pot_b" and target.time_to_die > 20 and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(163222) >= 1 and GetItemCooldown(163222) == 0 then
+    if autoPotion == "pot_b" and target.time_to_die > 20 and player.buff(burst).remains > 6 and GetItemCount(163222) >= 1 and GetItemCooldown(163222) == 0 then
         macro('/use Battle Potion of Intellect')
         print("glug - battle potion of intellect - glug")
     end
-    if autoPotion == "pot_c" and target.time_to_die > 20 and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(109218) >= 1 and GetItemCooldown(109218) == 0 then
+    if autoPotion == "pot_c" and target.time_to_die > 20 and player.buff(burst).remains > 6 and GetItemCount(109218) >= 1 and GetItemCooldown(109218) == 0 then
         print("glug - Draenic int - glug")
         macro('/use Draenic Intellect Potion')
     end
 
-    if autoPotion == "pot_d" and target.time_to_die > 20 and (player.buff(SB.IncarnationBalance).remains > 10 or player.buff(SB.CelestialAlignment).remains > 10) and GetItemCount(152559) >= 1 and GetItemCooldown(152559) == 0 then
+    if autoPotion == "pot_d" and target.time_to_die > 20 and player.buff(burst).remains > 6 and GetItemCount(152559) >= 1 and GetItemCooldown(152559) == 0 then
         macro('/use Potion of rising death')
         print("glug - deadly grace - glug")
     end
@@ -206,6 +216,14 @@ local function combat()
     end
 
     -----------------------------
+    --- Racial active ability
+    -----------------------------
+    if autoRacial == true and castable(SB.Berserking) and player.buff(burst).remains > 10 or -spell(burst) > 30 then
+        cast(SB.Berserking)
+    end
+    --todo add other races
+
+    -----------------------------
     --- WarriorOfElune
     -----------------------------
     if talent(1, 2) and -spell(SB.WarriorOfElune) == 0 and player.buff(SB.WarriorOfElune).down then
@@ -215,25 +233,18 @@ local function combat()
     -----------------------------
     ---     Innervate
     -----------------------------
+
     if toggle('Innervate', false) and IsInGroup() and -spell(SB.Innervate) == 0 then
-        if innervateTarget == '' then
-            innervateTarget = (findHealer())
-        end
-        if UnitInRange(innervateTarget) and UnitExists(innervateTarget) and tank.health.percent < 80 then
-            print("Innervate on " .. innervateTarget)
-            return cast(SB.Innervate, innervateTarget)
+        local iTarget = dark_addon.environment.conditions.unit(findHealer(innervateTarget))
+        if iTarget.unitID ~= "player" and iTarget.distance <= 45 and iTarget.power.mana.percent < 99 then
+            print("Innervate on " .. iTarget.name)
+            return cast(SB.Innervate, iTarget)
+        elseif iTarget.unitID == "player" then
+            print("INVALID INNOTARGET NAME")
         end
     end
 
-    -----------------------------
-    --- Racial active ability
-    -----------------------------
-    if autoRacial == true and castable(SB.Berserking) and not talent(5, 3) and (player.buff(SB.CelestialAlignment).up or -spell(SB.CelestialAlignment) > 30) then
-        cast(SB.Berserking)
-    end
-    if autoRacial == true and castable(SB.Berserking) and talent(5, 3) and (player.buff(SB.IncarnationBalance).up or -spell(SB.IncarnationBalance) > 30) then
-        cast(SB.Berserking)
-    end
+
 
 
     -----------------------------
@@ -276,6 +287,7 @@ local function combat()
     -----------------------------
     --- Opener   it is assumed that you start the fight with a solar wrath
     -----------------------------
+    --todo rewrite starlord opener ...its shit
     --starlord opener
     if toggle('opener', false) and y ~= 99 and arcanicPulsar == true and talent(5, 2) then
         if target.castable(SB.SolarWrath) and y == 0 then
@@ -428,7 +440,6 @@ local function combat()
         end
     end
 
-    --print(target.time_to_die)
     -----------------------------
     --- CoolDowns
     -----------------------------
@@ -437,16 +448,11 @@ local function combat()
     if toggle('cooldowns', false) and target.time_to_die > 20 then
         if talent(5, 3) and power.astral.actual > 40 and -spell(SB.IncarnationBalance) == 0 then
             return cast(SB.IncarnationBalance)
-        elseif talent(5, 2) and player.buff(SB.Starlord).count >= 2 and power.astral.actual > 40 and -spell(SB.CelestialAlignment) == 0 then
-            return cast(SB.CelestialAlignment)
-        elseif talent(5, 1) and power.astral.actual > 40 and -spell(SB.CelestialAlignment) == 0 then
-            return cast(SB.CelestialAlignment)
+        elseif castable(burst) and (not az_ls or player.buff(SB.LivelySpirit).up) and (player.buff(SB.Starlord).count >= 2 or not talent(5, 2) or not az_ss) then
+            return cast(burst)
         end
 
-        if talent(7, 2) and talent(5, 3) and -player.spell(SB.FuryofElune) == 0 and (player.buff(SB.IncarnationBalance).up or -spell(SB.IncarnationBalance) > 30) then
-            return cast(SB.FuryofElune, 'target')
-        end
-        if talent(7, 2) and not talent(5, 3) and -player.spell(SB.FuryofElune) == 0 and (player.buff(SB.CelestialAlignment).up or -spell(SB.CelestialAlignment) > 30) then
+        if talent(7, 2) and -player.spell(SB.FuryofElune) == 0 and power.astral.actual <= 87 and (player.buff(burst).up or -spell(burst) > 30) then
             return cast(SB.FuryofElune, 'target')
         end
     end
@@ -463,228 +469,121 @@ local function combat()
     --- StarSurge / Starlord
     -----------------------------
 
-
-    --print(target.time_to_die <= (1.5 / ((UnitSpellHaste("player") / 100) + 1)) * power.astral.actual / 40)
-    --<variable.sf_targets&buff.lunar_empowerment.stack+buff.solar_empowerment.stack<4&buff.solar_empowerment.stack<3&buff.lunar_empowerment.stack<3&(!variable.az_ss|
+    --new starsurge
 
 
-    if not modifier.shift and talent(5, 2) and enemyCount <= aoeTarget and target.castable(SB.Starsurge) then
-        if player.buff(SB.Starlord).down then
-            return cast(SB.Starsurge, target)
-        elseif player.buff(SB.Starlord).remains >= 8 and player.buff(SB.ArcanicPulsar).count < 8 then
-            return cast(SB.Starsurge, 'target')
-        elseif power.astral.actual >= 87 and player.buff(SB.Starlord).remains <= 7 then
-            macro('/cancelaura Starlord')
+    if power.astral.actual >= 87 and player.buff(SB.Starlord).up and player.buff(SB.Starlord).remains <= 7 then
+        print("canceling at: " .. player.buff(SB.Starlord).remains)
+        macro('/cancelaura Starlord')
+    end
+
+    if not modifier.shift and talent(5, 2) and target.castable(SB.Starsurge) then
+        if (player.buff(SB.Starlord).count < 3 or player.buff(SB.Starlord).remains >= 8 and player.buff(SB.ArcanicPulsar).count < 8)
+                and enemyCount <= aoeTarget
+                and (player.buff(SB.SolarEmpowerment).count + player.buff(SB.LunarEmpowerment).count) < 4
+                and player.buff(SB.SolarEmpowerment).count < 3
+                and player.buff(SB.LunarEmpowerment).count < 3
+                and (not az_ss or not player.buff(burst).up or not player.spell(SB.Starsurge).lastcast)
+                or target.time_to_die <= (1.5 / ((UnitSpellHaste("player") / 100) + 1)) * power.astral.actual % 40
+                or power.astral.actual >= 87 then
             return cast(SB.Starsurge, 'target')
         end
-    elseif not modifier.shift and not talent(5, 2) and enemyCount < aoeTarget and target.castable(SB.Starsurge) and player.buff(SB.LunarEmpowerment).count <= 2 and player.buff(SB.SolarEmpowerment).count <= 2 then
+    end
+
+    if not modifier.shift and not talent(5, 2) and enemyCount < aoeTarget and target.castable(SB.Starsurge) and player.buff(SB.LunarEmpowerment).count <= 2 and player.buff(SB.SolarEmpowerment).count <= 2 then
         return cast(SB.Starsurge, 'target')
     end
 
+    --sunfire
 
-    -- single target
-    if not modifier.shift and not talent(5, 2) and target.castable(SB.Starsurge) and player.buff(SB.ArcanicPulsar).count < 8 and (player.buff(SB.SolarEmpowerment).count + player.buff(SB.LunarEmpowerment).count) < 4 and player.buff(SB.SolarEmpowerment).count < 3 and player.buff(SB.LunarEmpowerment).count < 3 then
-        return cast(SB.Starsurge, 'target')
-    end
-    if not modifier.shift and not talent(5, 2) and target.castable(SB.Starsurge) and player.buff(SB.ArcanicPulsar).count == 8 and (player.buff(SB.SolarEmpowerment).count + player.buff(SB.LunarEmpowerment).count) < 2 and (player.buff(SB.SolarEmpowerment).count <= 1 or player.buff(SB.LunarEmpowerment).count <= 1) then
-        return cast(SB.Starsurge, 'target')
-    end
+    local floor = math.floor(target.time_to_die % (2 * UnitSpellHaste("player")) * enemyCount)
+    local ceiling = math.floor(2 % enemyCount) * 1.5
 
-    if not modifier.shift and not talent(5, 2) and target.castable(SB.Starsurge) and power.astral.actual == 100 then
-        return cast(SB.Starsurge, 'target')
-    end
-
-
-    --
-
-
-    -----------------------------
-    --- Standard Rotation
-    -----------------------------
-
-
-    --dots
-    if talent(6, 3) and target.castable(SB.StellarFlare) and not lastcast(SB.StellarFlare) and ((target.time_to_die / (1.5 / ((UnitSpellHaste("player") / 100) + 1))) * enemyCount) >= 5 and (not target.debuff(SB.StellarFlare).exists or target.debuff(SB.StellarFlare).remains < 7.2) then
-        return cast(SB.StellarFlare, 'target')
-    end
-
-    if target.castable(SB.Sunfire) and ((target.time_to_die * (enemyCount / (1.5 / ((UnitSpellHaste("player") / 100) + 1)))) >= (4 + enemyCount)) and (not target.debuff(SB.SunfireDebuff).exists or target.debuff(SB.SunfireDebuff).remains < 3.6) then
+    if target.castable(SB.Sunfire) and (not target.debuff(SB.SunfireDebuff).exists or target.debuff(SB.SunfireDebuff).remains < 3.6) and power.astral.actual < 87 and floor >= ceiling + 2 * enemyCount
+            and (enemyCount > 1 or target.debuff(SB.Moonfire).up)
+            and (not az_ss or not player.buff(burst).up or not player.spell(SB.Sunfire).lastcast) then
         return cast(SB.Sunfire, 'target')
     end
-    if target.castable(SB.Moonfire) and ((target.time_to_die / (1.5 / ((UnitSpellHaste("player") / 100) + 1))) * enemyCount) >= 6 and (not target.debuff(SB.MoonfireDebuff).exists or target.debuff(SB.MoonfireDebuff).remains < 4.8) then
+    --moonfire
+
+    if target.castable(SB.Moonfire) and (not target.debuff(SB.MoonfireDebuff).exists or target.debuff(SB.MoonfireDebuff).remains < 4.8)
+            and target.time_to_die % (2 * UnitSpellHaste("player")) * enemyCount >= 6
+            and (not az_ss or not player.buff(burst).up or not player.spell(SB.Moonfire).lastcast) then
         return cast(SB.Moonfire, 'target')
     end
 
-    --nukes
-    if target.castable(SB.LunarStrike) and player.buff(SB.SolarEmpowerment).count < 3 and player.buff(SB.LunarEmpowerment).count == 3 then
-        return cast(SB.LunarStrike, 'target')
-    elseif target.castable(SB.LunarStrike) and player.buff(SB.WarriorOfElune).up and player.buff(SB.LunarEmpowerment).up then
-        return cast(SB.LunarStrike, 'target')
-    elseif target.castable(SB.LunarStrike) and enemyCount >= 2 and player.buff(SB.SolarEmpowerment).down then
-        return cast(SB.LunarStrike, 'target')
-    end
-    --need to add code for that azerite trait ....if I ever get 200
-    --(!variable.az_ss|!buff.ca_inc.up|(!prev.lunar_strike&!talent.incarnation.enabled|prev.solar_wrath))|variable.az_ss&buff.ca_inc.up&prev.solar_wrath)
-
-    if player.buff(SB.SolarEmpowerment).count == 0 and player.buff(SB.LunarEmpowerment).count > 0 then
-        return cast(SB.LunarStrike, 'target')
+    -- stellar
+    if target.castable(SB.StellarFlare) and (not target.debuff(SB.StellarFlare).exists or target.debuff(SB.StellarFlare).remains < 7.2)
+            and target.time_to_die % (2 * UnitSpellHaste("player")) >= 5
+            and (not az_ss or not player.buff(burst).up or not player.spell(SB.StellarFlare).lastcast) then
+        return cast(SB.StellarFlare, 'target')
     end
 
-    if target.castable(SB.SolarWrath) then
+    --todo support for 7,3 - moon spells
+    -- lunar lunar_strike
+    if target.castable(SB.LunarStrike) and (player.buff(SB.SolarEmpowerment).count < 3 or player.buff(SB.SolarEmpowerment).down)
+            --ap_check
+            and player.buff(SB.LunarEmpowerment).count == 3
+            and ((player.buff(SB.WarriorOfElune).up or player.buff(SB.LunarEmpowerment).up or enemyCount >= 2 and player.buff(SB.SolarEmpowerment).down)
+            and (az_ss or player.buff(burst).down or (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player.spell(SB.SolarWrath).lastcast))
+            or az_ss and player.buff(burst).up and player.spell(SB.SolarWrath).lastcast) then
+        return cast(SB.LunarStrike, 'target')
+    elseif target.castable(SB.LunarStrike) and player.buff(SB.SolarEmpowerment).down and player.buff(SB.LunarEmpowerment).up then
+        return cast(SB.LunarStrike, 'target')
+    end
+
+    --solar_wrath,if=variable.az_ss<3|!buff.ca_inc.up|!prev.solar_wrath
+    if target.castable(SB.SolarWrath) and (player.buff(SB.StreakingStars).down or player.buff(SB.StreakingStars).count < 3)
+            or player.buff(burst).down or not player.spell(SB.SolarWrath).lastcast then
         return cast(SB.SolarWrath, 'target')
     end
 
     if target.castable(SB.Sunfire) then
         return cast(SB.Sunfire)
     end
-
-
 end
-
-
-
-
-
-
---[[/rel
-    --TANK SECTION - EMERGENCY BEAR
-    if toggle('TANK', false) and talent(3, 2) then
-
-        if toggle('interrupts', false) and target.interrupt() and player.talent(4, 1) and -spell(SB.MightyBash) == 0 then
-            return cast(SB.MightyBash)
-        end
-
-        --going bear
-        if castable(SB.BearForm, 'player') and not -buff(SB.BearForm) then
-            return cast(SB.BearForm, 'player')
-        end
-
-        auto_attack()
-
-        --- Frenzied Regeneration
-        if castable(SB.FrenziedRegeneration, 'player') and not -buff(SB.FrenziedRegeneration) and player.health.percent < 50 then
-            return cast(SB.FrenziedRegeneration, 'player')
-        end
-
-        if castable(SB.Ironfur, 'player') and not -buff(SB.Ironfur) then
-            return cast(SB.Ironfur, 'player')
-        end
-
-        if not target.debuff(SB.MoonfireDebuff) or target.debuff(SB.MoonfireDebuff).remains <= 3 then
-            return cast(SB.Moonfire, 'target')
-        end
-
-        if -spell(SB.Mangle) == 0 and target.distance <= 10 then
-            return cast(SB.Mangle, 'target')
-        end
-
-        if castable(SB.Thrash, 'target') and target.distance <= 10 then
-            return cast(SB.Thrash, 'target')
-        end
-        return
-    end
-]]--
-
-
-
-
-
+--todo add support for off-specs
 --[[
---Cooldowns
-if toggle('cooldowns', false) then
-    if talent(5, 3) and -spell(SB.IncarnationBalance) == 0 and power.astral.actual >= 40 and target.health.percent > 80 then
-        return cast(SB.IncarnationBalance)
-    end
+--TANK SECTION - EMERGENCY BEAR
+if toggle('TANK', false) and talent(3, 2) then
 
-    if not talent(5, 3) and -spell(SB.CelestialAlignment) == 0 and power.astral.actual >= 40 and target.health.percent > 80 then
-        return cast(SB.CelestialAlignment)
-    end
+if toggle('interrupts', false) and target.interrupt() and player.talent(4, 1) and -spell(SB.MightyBash) == 0 then
+return cast(SB.MightyBash)
 end
 
-if talent(1, 3) and toggle('FON', false) and -spell(SB.ForceofNature) == 0 then
-    if (player.buff(SB.CelestialAlignment).up or player.buff(SB.IncarnationBalance).up) then
-        return cast(SB.ForceofNature, 'ground')
-    end
-    if (-spell(SB.IncarnationBalance) > 60 or -spell(SB.CelestialAlignment) > 60) then
-        return cast(SB.ForceofNature, 'ground')
-    end
-
+--going bear
+if castable(SB.BearForm, 'player') and not -buff(SB.BearForm) then
+return cast(SB.BearForm, 'player')
 end
 
+auto_attack()
 
---Racial
-
-if toggle('racial', false) then
-    if race == 'Troll' and -spell(SB.Berserking) == 0 and (player.buff(SB.CelestialAlignment).up or player.buff(SB.IncarnationBalance).up) then
-        cast(SB.Berserking, player)
-    end
+--- Frenzied Regeneration
+if castable(SB.FrenziedRegeneration, 'player') and not -buff(SB.FrenziedRegeneration) and player.health.percent < 50 then
+return cast(SB.FrenziedRegeneration, 'player')
 end
 
-
---maintain dots on target  - sun/moon/astral
-if target.castable(SB.Sunfire) and (not target.debuff(SB.SunfireDebuff).exists or target.debuff(SB.SunfireDebuff).remains < 3.6) then
-    return cast(SB.Sunfire, 'target')
+if castable(SB.Ironfur, 'player') and not -buff(SB.Ironfur) then
+return cast(SB.Ironfur, 'player')
 end
 
-if target.castable(SB.Moonfire) and (not target.debuff(SB.MoonfireDebuff).exists or target.debuff(SB.MoonfireDebuff).remains < 4.8) then
-    return cast(SB.Moonfire, 'target')
+if not target.debuff(SB.MoonfireDebuff) or target.debuff(SB.MoonfireDebuff).remains <= 3 then
+return cast(SB.Moonfire, 'target')
 end
 
-if talent(6, 3) and target.castable(SB.StellarFlare) and not target.debuff(SB.StellarFlare).exists then
-    return cast(SB.StellarFlare, 'target')
-end
-if talent(7, 2) and target.castable(SB.FuryofElune) then
-    return cast(SB.FuryofElune, 'target')
+if -spell(SB.Mangle) == 0 and target.distance <= 10 then
+return cast(SB.Mangle, 'target')
 end
 
-
-
---nukes
-
-if talent(1, 2) then
-    --    if player.buff(SB.WarriorOfElune).up and target.castable(SB.LunarStrike) and player.buff(SB.LunarEmpowerment).up then
-    --      return cast(SB.LunarStrike, 'target')
-    --    end
-    if player.buff(SB.WarriorOfElune).down and -spell(SB.WarriorOfElune) == 0 then
-        return cast(SB.WarriorOfElune, player)
-    end
+if castable(SB.Thrash, 'target') and target.distance <= 10 then
+return cast(SB.Thrash, 'target')
 end
-
---if toggle('multitarget', true) then
-if mobsinRange <= 1 then
-    --print("solo target")
-    if target.castable(SB.SolarWrath) and player.buff(SB.SolarEmpowerment).count >= 1 then
-        return cast(SB.SolarWrath, 'target')
-    end
-    if target.castable(SB.LunarStrike) and player.buff(SB.LunarEmpowerment).count >= 1 then
-        return cast(SB.LunarStrike, 'target')
-    end
-    if target.castable(SB.SolarWrath) then
-        return cast(SB.SolarWrath, 'target')
-    end
-    if target.castable(SB.LunarStrike) then
-        return cast(SB.LunarStrike, 'target')
-    end
-
+return
 end
+]]-- end auto bear
 
---if toggle('multitarget', false) then
-if mobsinRange > 1 then
-    --print("multi target")
-    if target.castable(SB.LunarStrike) and player.buff(SB.LunarEmpowerment).count >= 1 then
-        return cast(SB.LunarStrike, 'target')
-    end
-    if target.castable(SB.SolarWrath) and player.buff(SB.SolarEmpowerment).count >= 1 then
-        return cast(SB.SolarWrath, 'target')
-    end
-    if target.castable(SB.LunarStrike) then
-        return cast(SB.LunarStrike, 'target')
-    end
-    if target.castable(SB.SolarWrath) then
-        return cast(SB.SolarWrath, 'target')
-    end
-end
-]]
+
+
 local function resting()
 
 
@@ -707,9 +606,6 @@ local function resting()
         if castable(SB.Barkskin) and not -buff(SB.Barkskin) then
             return cast(SB.Barkskin)
         end
-        --  if -buff(SB.Bearform) and talent(3, 2) and castable(SB.FrenziedRegeneration) then
-        --    return cast(SB.FrenziedRegeneration)
-        --  end
         if -buff(SB.Barkskin) and -buff(SB.BearForm) then
             return
         end
@@ -717,7 +613,7 @@ local function resting()
 
     if GetShapeshiftForm() == 3 and player.moving then
         return
-    elseif toggle('Forms', false) and not player.moving and player.buff(SB.Prowl).down and player.buff(SB.MoonkinForm).down and player.buff(SB.TigerDashBuff).down and player.buff(SB.Dash).down and player.alive then
+    elseif toggle('Forms', false) and not player.moving and player.buff(SB.Prowl).down and player.buff(SB.MoonkinForm).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
         x = x + 1
         if x >= 14 then
             x = 0
@@ -726,8 +622,7 @@ local function resting()
     end
 
     if player.alive then
-        -- local autoPotion = dark_addon.settings.fetch('balpal_settings_autoPotion')
-        --    print(autoPotion)
+
 
         if toggle('Heal', false) then
             -- Swiftmend
@@ -748,7 +643,7 @@ local function resting()
             end
         end
         local outdoor = IsOutdoors()
-        if toggle('Forms', false) and player.moving then
+        if toggle('Forms', false) and player.moving and player.buff(SB.Prowl).down and player.buff(SB.MoonkinForm).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
             x = x + 1
 
             if outdoor and x >= 8 then
@@ -786,9 +681,9 @@ local function interface()
             { type = 'rule' },
             { type = 'text', text = 'Utility' },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Troll only)' },
-            { key = 'arcanicPulsar', type = 'checkbox', text = 'Arcanic Pulsar', desc = 'Arcanic Pulsar - this changes the rotation, do you have it?' },
-
-
+            { key = 'arcanicPulsar', type = 'checkbox', text = 'Arcanic Pulsar', desc = 'this changes the rotation, do you have it?' },
+            { key = 'az_ss', type = 'checkbox', text = 'Streaking Stars', desc = 'this changes the rotation, do you have it?' },
+            { key = 'az_ls', type = 'checkbox', text = 'Living Spirit', desc = 'this changes the rotation, do you have it?' },
             { key = 'innervateTarget', type = 'input', default = '', text = 'Inno Target (blank for auto)', desc = '' },
             { type = 'rule' },
             { key = 'autoPotion', type = 'dropdown',
@@ -946,7 +841,7 @@ dark_addon.rotation.register({
     name = 'balpal',
     label = 'PAL: Balance Druide',
     combat = combat,
-    gcd = GCD,
+    gcd = gcd,
     resting = resting,
     interface = interface
 })
