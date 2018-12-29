@@ -7,7 +7,7 @@
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.hunter
 
---Local Spells not in default spellbook
+
 SB.Bite = 17253
 SB.Smack = 49962
 SB.PetFrenzy = 272790
