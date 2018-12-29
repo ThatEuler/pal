@@ -11,6 +11,11 @@ local SB = dark_addon.rotation.spellbooks.hunter
 SB.Bite = 17253
 SB.Smack = 49962
 SB.PetFrenzy = 272790
+SB.AncestralCall = 274738
+SB.Fireblood = 265221
+SB.SpittingCobra = 194407
+
+local barbedChargeTime
 
 local function GroupType()
    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
@@ -21,39 +26,63 @@ local function combat()
     local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect')
     local race = UnitRace('player')
     local group_type = GroupType()
-    
+
+    if spell(SB.BarbedShot).charges > 1 then
+        barbedChargeTime = spell(SB.BarbedShot).remains
+    end
+    if spell(SB.BarbedShot).charges < 1 then
+        barbedChargeTime = spell(SB.BarbedShot).remains + 12
+    end
+
     if target.alive and target.enemy and not player.channeling() then
         auto_shot()
         
-        -- Traps
         if usetraps and modifier.shift and not modifier.alt and castable(SB.FreezingTrap) then
             return cast(SB.FreezingTrap, 'ground')
         end
         if usetraps and modifier.alt and not modifier.shift and castable(SB.TarTrap) then
             return cast(SB.TarTrap, 'ground')
         end
-
-        -- Interrupts
         if toggle('interrupts') and castable(SB.CounterShot) and target.interrupt(50) then
             return cast(SB.CounterShot)
-        end
-
-        -- AOE
-        if toggle('multitarget', false) and modifier.rshift and -power.focus >= 70 then
-            return cast(SB.MultiShot, 'target')
-        end
-
-        -- Cooldowns
-        if toggle('cooldowns', false) and castable(SB.BeastialWrath) then
-            return cast(SB.BeastialWrath)
         end
         if toggle('cooldowns', false) and castable(SB.AspectOfTheWild) then
             return cast(SB.AspectOfTheWild)
         end
-
-        -- Standard Abilities
-        if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
+        if toggle('cooldowns', false) and (spell(SB.AspectOfTheWild).remains > 20 or target.time_to_die < 15) and castable(SB.BeastialWrath) then
+            return cast(SB.BeastialWrath)
+        end
+        if toggle('racial', false) and spell(SB.BeastialWrath).remains > 30 then
+            if castable(SB.BloodFury) then
+                cast(SB.BloodFury)
+            end
+            if castabe(SB.Berserking) then
+                cast(SB.Berserking)
+            end
+            if castable(SB.AncestralCall) then
+                cast(SB.AncestralCall)
+            end
+        end
+        if pet.buff(SB.PetFrenzy).up and pet.buff(SB.PetFrenzy).remains <= 1.5 or barbedChargeTime < 1.5 and barbedChargeTime < spell(SB.BeastialWrath).remains and target.castable(SB.BarbedShot) then
             return cast(SB.BarbedShot, 'target')
+        end
+        if talen(7,3) and castable(SB.SpittingCobra) then
+            return cast(SB.SpittingCobra)
+        end
+        if talent(4,3) and castable(SB.AMurderOfCrows) then
+            return cast(SB.AMurderOfCrows, 'target')
+        end
+        if talen(6,3) and castable(SB.Stampede) and buff(SB.AspectOfTheWild).up and buff(SB.BeastialWrath).up or target.time_to_die < 15 then
+            return cast(SB.Stampede)
+        end
+        if toggle('multitarget', false) and enemies.around(40) > 2 and target.castable(SB.MultiShot) then
+            return cast(SB.MultiShot)
+        end
+        if toggle('multitarget', false) and talent(6,2) and enemies.around(40) > 2 and castable(SB.Barrage) then
+            return cast(SB.Barrage)
+        end
+        if talent(2,3) and -power.focus < 90 and castable(SB.ChimaeraShot) then
+            return cast(SB.ChimaeraShot, 'target')
         end
         if -power.focus >= 30 and castable(SB.KillCommand) then
             return cast(SB.KillCommand, 'target')
@@ -61,16 +90,9 @@ local function combat()
         if talent(1,3) and castable(SB.DireBeast) then
             return cast(SB.DireBeast, 'target')
         end
-        if talent(2,3) and -power.focus < 90 and castable(SB.ChimaeraShot) then
-            return cast(SB.ChimaeraShot, 'target')
-        end
-        if talent(4,3) and castable(SB.AMurderOfCrows) then
-            return cast(SB.AMurderOfCrows, 'target')
-        end
         if -power.focus >=80 and castable(SB.CobraShot) and -spell(SB.KillCommand) >= 2.5 then
             return cast(SB.CobraShot, 'target')
         end
-
         -- Pet Management
         if pet.exists and not pet.alive then
             return cast (SB.RevivePet)
