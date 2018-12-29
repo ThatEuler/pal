@@ -14,16 +14,18 @@ SB.PetFrenzy = 272790
 SB.AncestralCall = 274738
 SB.Fireblood = 265221
 SB.SpittingCobra = 194407
+SB.LightsJudgement = 255647
 
 local function GroupType()
    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
 
 local function combat()
-    local usetraps = dark_addon.settings.fetch('bmpal_settings_traps')
-    local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect')
+    local usetraps = dark_addon.settings.fetch('bmpal_settings_traps', false)
+    local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect', false)
     local race = UnitRace('player')
     local group_type = GroupType()
+    local opener = 0
 
     if target.alive and target.enemy and not player.channeling() then
         auto_shot()
@@ -40,18 +42,21 @@ local function combat()
         if toggle('cooldowns', false) and castable(SB.AspectOfTheWild) then
             return cast(SB.AspectOfTheWild)
         end
-        if toggle('cooldowns', false) and (spell(SB.AspectOfTheWild).remains > 20 or target.time_to_die < 15) and castable(SB.BeastialWrath) then
+        if toggle('cooldowns', false) and castable(SB.BeastialWrath) and (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15) then
             return cast(SB.BeastialWrath)
         end
-        if toggle('racial', false) and spell(SB.BeastialWrath).remains > 30 then
-            if castable(SB.BloodFury) then
+        if toggle('racial', false) and -spell(SB.BeastialWrath) > 30 then
+            if race == "Orc" and castable(SB.BloodFury) then
                 cast(SB.BloodFury)
             end
-            if castabe(SB.Berserking) then
+            if race == "Troll" and castabe(SB.Berserking) then
                 cast(SB.Berserking)
             end
-            if castable(SB.AncestralCall) then
+            if race == "MagharOrc" and castable(SB.AncestralCall) then
                 cast(SB.AncestralCall)
+            end
+            if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+                cast(SB.LightsJudgement)
             end
         end
         if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
