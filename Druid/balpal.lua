@@ -32,6 +32,7 @@ SB.StreakingStars = 272871
 SB.Fullmoon = 274283
 SB.Halfmoon = 202768
 SB.Newmoon = 274281
+SB.LivelySpirit = 279646
 
 local x = 0 -- counting seconds in resting
 local y = 0 -- counter for opener
