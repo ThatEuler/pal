@@ -467,12 +467,7 @@ local function combat()
     --- Treants
     -----------------------------
 
-    if talent(1, 3) and toggle('FON', false)
-            and -spell(SB.ForceofNature) == 0
-            and mouseover.alive
-            and UnitAffectingCombat
-            and mouseover.enemy
-            and player.buff(burst).remains > 10 or -spell(burst) > 30 then
+    if talent(1, 3) and toggle('FON', false) and -spell(205636) == 0 and mouseover.alive and UnitAffectingCombat and mouseover.enemy and (player.buff(burst).remains > 10 or -spell(burst) > 30) then
         return cast(SB.ForceofNature, 'ground')
     end
 
@@ -615,11 +610,9 @@ local function resting()
     y = 0
     z = 0
 
-
     -----------------------------
     --- Modifiers
     -----------------------------
-    --rez
     if modifier.control and not mouseover.alive and -spell(SB.Revive) == 0 then
         return cast(SB.Revive, 'mouseover')
     end
@@ -647,8 +640,6 @@ local function resting()
     end
 
     if player.alive then
-
-
         if toggle('Heal', false) then
             -- Swiftmend
             if player.castable(SB.Swiftmend) and player.health.percent < 50 and (not player.buff(SB.MoonkinForm).exists or player.health.percent < 30) then
@@ -670,13 +661,15 @@ local function resting()
         local outdoor = IsOutdoors()
         if toggle('Forms', false) and player.moving and player.buff(SB.Prowl).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
             x = x + 1
-
+            if player.moving and player.buff(SB.CatForm).up and -spell(SB.Dash) == 0 then
+                return cast(SB.Dash)
+            end
             if outdoor and x >= 8 then
                 x = 0
                 return cast(SB.TravelForm)
             end
 
-            if not outdoor and x >= 8 and not player.buff(SB.CatForm).up then
+            if not outdoor and x >= 8 and player.buff(SB.CatForm).down then
                 x = 0
                 return cast(SB.CatForm)
             end
@@ -684,7 +677,6 @@ local function resting()
 
     end
 end
-
 local function interface()
 
     local settings = {
