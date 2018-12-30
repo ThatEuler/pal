@@ -467,9 +467,16 @@ local function combat()
     --- Treants
     -----------------------------
 
-    if talent(1, 3) and toggle('FON', false) and -spell(SB.ForceofNature) == 0 and mouseover.alive and UnitAffectingCombat and mouseover.enemy then
+    if talent(1, 3) and toggle('FON', false)
+            and -spell(SB.ForceofNature) == 0
+            and mouseover.alive
+            and UnitAffectingCombat
+            and mouseover.enemy
+            and player.buff(burst).remains > 10 or -spell(burst) > 30 then
         return cast(SB.ForceofNature, 'ground')
     end
+
+
 
     -----------------------------
     --- StarSurge / Starlord
@@ -479,7 +486,7 @@ local function combat()
 
 
     if power.astral.actual >= 87 and player.buff(SB.Starlord).up and player.buff(SB.Starlord).remains <= 7 then
-       -- print("canceling at: " .. player.buff(SB.Starlord).remains)
+        -- print("canceling at: " .. player.buff(SB.Starlord).remains)
         macro('/cancelaura Starlord')
     end
 
@@ -524,8 +531,6 @@ local function combat()
             and (not az_ss or not player.buff(burst).up or not player.spell(SB.StellarFlare).lastcast) then
         return cast(SB.StellarFlare, 'target')
     end
-
-
 
     if talent(7, 3) then
         if target.castable(SB.Fullmoon) and power.astral.actual <= 55 then
@@ -671,7 +676,7 @@ local function resting()
                 return cast(SB.TravelForm)
             end
 
-            if not outdoor and x >= 8 then
+            if not outdoor and x >= 8 and not player.buff(SB.CatForm).up then
                 x = 0
                 return cast(SB.CatForm)
             end
