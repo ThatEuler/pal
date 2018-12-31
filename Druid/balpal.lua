@@ -528,7 +528,7 @@ local function combat()
         return cast(SB.StellarFlare, 'target')
     end
 
-    if talent(7, 3) then
+    if talent(7, 3) then -- fullmoon talent rotation
         if target.castable(SB.Fullmoon) and power.astral.actual <= 55 then
             return cast(SB.Fullmoon, target)
         elseif target.castable(SB.Halfmoon) and power.astal.actual <= 78 then
@@ -538,21 +538,18 @@ local function combat()
         end
     end
 
-
-
-
-    -- lunar lunar_strike
     if target.castable(SB.LunarStrike) and (player.buff(SB.SolarEmpowerment).count < 3 or player.buff(SB.SolarEmpowerment).down)
-            --ap_check
-            and player.buff(SB.LunarEmpowerment).count == 3
-            and ((player.buff(SB.WarriorOfElune).up or player.buff(SB.LunarEmpowerment).up or enemyCount >= 2 and player.buff(SB.SolarEmpowerment).down)
-            and (az_ss or player.buff(burst).down or (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player.spell(SB.SolarWrath).lastcast))
+            and (power.astral.actual <= 86 or player.buff(SB.LunarEmpowerment).count == 3)
+            and ((player.buff(SB.WarriorOfElune).up or player.buff(SB.LunarEmpowerment).up or enemyCount >= 2
+            and player.buff(SB.SolarEmpowerment).down)
+            and (not az_ss or player.buff(burst).down
+            or (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player(SB.SolarWrath).lastcast))
             or az_ss and player.buff(burst).up and player.spell(SB.SolarWrath).lastcast) then
-        return cast(SB.LunarStrike, 'target')
-    elseif target.castable(SB.LunarStrike) and player.buff(SB.SolarEmpowerment).down and player.buff(SB.LunarEmpowerment).up then
         return cast(SB.LunarStrike, 'target')
     end
 
+
+    --[[
     --solar_wrath,if=variable.az_ss<3|!buff.ca_inc.up|!prev.solar_wrath
     if target.castable(SB.SolarWrath) and (player.buff(SB.StreakingStars).down or player.buff(SB.StreakingStars).count < 3)
             or player.buff(burst).down or not player.spell(SB.SolarWrath).lastcast then
