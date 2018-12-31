@@ -140,7 +140,7 @@ local function combat()
         if castable(SB.Barkskin) and not -buff(SB.Barkskin) then
             return cast(SB.Barkskin)
         end
-        if player.buff(SB.Bearform).up and talent(3, 2) and castable(SB.FrenziedRegeneration) and player.health.percent < 50 then
+        if talent(3, 2) and player.buff(SB.Bearform).up and player.castable(SB.FrenziedRegeneration) and player.health.percent < 50 then
             return cast(SB.FrenziedRegeneration)
         end
         if -buff(SB.Barkskin) and -buff(SB.BearForm) then
