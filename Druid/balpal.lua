@@ -486,7 +486,7 @@ local function combat()
         macro('/cancelaura Starlord')
     end
 
-    if not modifier.shift and talent(5, 2) and target.castable(SB.Starsurge) then
+    if not modifier.shift and talent(5, 2) and target.castable(SB.Starsurge) and power.astral.actual >= 40 then
         if (player.buff(SB.Starlord).count < 3 or player.buff(SB.Starlord).remains >= 8 and player.buff(SB.ArcanicPulsar).count < 8)
                 and enemyCount <= aoeTarget
                 and (player.buff(SB.SolarEmpowerment).count + player.buff(SB.LunarEmpowerment).count) < 4
@@ -539,31 +539,31 @@ local function combat()
         end
     end
 
-    if target.castable(SB.LunarStrike) and (player.buff(SB.SolarEmpowerment).count < 3 or player.buff(SB.SolarEmpowerment).down)
-            and (power.astral.actual <= 86 or player.buff(SB.LunarEmpowerment).count == 3)
-            and ((player.buff(SB.WarriorOfElune).up or player.buff(SB.LunarEmpowerment).up or enemyCount >= 2
-            and player.buff(SB.SolarEmpowerment).down)
-            and (not az_ss or player.buff(burst).down
-            or (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player(SB.SolarWrath).lastcast))
-            or az_ss and player.buff(burst).up and player.spell(SB.SolarWrath).lastcast) then
-        return cast(SB.LunarStrike, 'target')
+    if target.castable(SB.LunarStrike) then
+        if (player.buff(SB.SolarEmpowerment).count < 3 or player.buff(SB.SolarEmpowerment).down)
+                and (power.astral.actual <= 86 or player.buff(SB.LunarEmpowerment).count == 3)
+                and ((player.buff(SB.WarriorOfElune).up or player.buff(SB.LunarEmpowerment).up or enemyCount >= 2
+                and player.buff(SB.SolarEmpowerment).down)
+                and (not az_ss or player.buff(burst).down
+                or (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player(SB.SolarWrath).lastcast))
+                or az_ss and player.buff(burst).up and player.spell(SB.SolarWrath).lastcast) then
+            return cast(SB.LunarStrike, 'target')
+        end
     end
 
-end
---[[
---solar_wrath,if=variable.az_ss<3|!buff.ca_inc.up|!prev.solar_wrath
-if target.castable(SB.SolarWrath) and (player.buff(SB.StreakingStars).down or player.buff(SB.StreakingStars).count < 3)
-        or player.buff(burst).down or not player.spell(SB.SolarWrath).lastcast then
-    return cast(SB.SolarWrath, 'target')
-end
 
-if target.castable(SB.Sunfire) then
-    return cast(SB.Sunfire)
-end
-end
---todo add support for off-specs
+    --solar_wrath,if=variable.az_ss<3|!buff.ca_inc.up|!prev.solar_wrath
+    if target.castable(SB.SolarWrath) and (player.buff(SB.StreakingStars).down or player.buff(SB.StreakingStars).count < 3)
+            or player.buff(burst).down or not player.spell(SB.SolarWrath).lastcast then
+        return cast(SB.SolarWrath, 'target')
+    end
 
-]]
+    if target.castable(SB.Sunfire) then
+        return cast(SB.Sunfire)
+    end
+    --todo add support for off-specs
+
+end
 --[[
 --TANK SECTION - EMERGENCY BEAR
 if toggle('TANK', false) and talent(3, 2) then
@@ -602,7 +602,6 @@ end
 return
 end
 ]]-- end auto bear
-
 
 
 local function resting()
