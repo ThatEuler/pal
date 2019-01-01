@@ -528,7 +528,8 @@ local function combat()
         return cast(SB.StellarFlare, 'target')
     end
 
-    if talent(7, 3) then -- fullmoon talent rotation
+    if talent(7, 3) then
+        -- fullmoon talent rotation
         if target.castable(SB.Fullmoon) and power.astral.actual <= 55 then
             return cast(SB.Fullmoon, target)
         elseif target.castable(SB.Halfmoon) and power.astal.actual <= 78 then
@@ -548,19 +549,21 @@ local function combat()
         return cast(SB.LunarStrike, 'target')
     end
 
+end
+--[[
+--solar_wrath,if=variable.az_ss<3|!buff.ca_inc.up|!prev.solar_wrath
+if target.castable(SB.SolarWrath) and (player.buff(SB.StreakingStars).down or player.buff(SB.StreakingStars).count < 3)
+        or player.buff(burst).down or not player.spell(SB.SolarWrath).lastcast then
+    return cast(SB.SolarWrath, 'target')
+end
 
-    --[[
-    --solar_wrath,if=variable.az_ss<3|!buff.ca_inc.up|!prev.solar_wrath
-    if target.castable(SB.SolarWrath) and (player.buff(SB.StreakingStars).down or player.buff(SB.StreakingStars).count < 3)
-            or player.buff(burst).down or not player.spell(SB.SolarWrath).lastcast then
-        return cast(SB.SolarWrath, 'target')
-    end
-
-    if target.castable(SB.Sunfire) then
-        return cast(SB.Sunfire)
-    end
+if target.castable(SB.Sunfire) then
+    return cast(SB.Sunfire)
+end
 end
 --todo add support for off-specs
+
+]]
 --[[
 --TANK SECTION - EMERGENCY BEAR
 if toggle('TANK', false) and talent(3, 2) then
