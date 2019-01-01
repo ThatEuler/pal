@@ -227,7 +227,7 @@ local function combat()
     -----------------------------
     --- Racial active ability
     -----------------------------
-    if autoRacial == true and castable(SB.Berserking) and player.buff(burst).remains > 10 or -spell(burst) > 30 then
+    if autoRacial == true and -spell(SB.Berserking) == 0 and (player.buff(burst).remains > 10 or -spell(burst) > 30) then
         cast(SB.Berserking)
     end
     --todo add other races
@@ -455,7 +455,7 @@ local function combat()
     if toggle('cooldowns', false) and target.time_to_die > 20 then
         if talent(5, 3) and power.astral.actual > 40 and -spell(SB.IncarnationBalance) == 0 then
             return cast(SB.IncarnationBalance)
-        elseif castable(burst) and (not az_ls or player.buff(SB.LivelySpirit).up) and (player.buff(SB.Starlord).count >= 2 or not talent(5, 2) or not az_ss) then
+        elseif player.castable(burst) and (not az_ls or player.buff(SB.LivelySpirit).up) and (player.buff(SB.Starlord).count >= 2 or not talent(5, 2) or not az_ss) then
             return cast(burst)
         end
 
