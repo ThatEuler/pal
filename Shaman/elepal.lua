@@ -31,7 +31,7 @@ SB. AzeriteEchooftheElementals = 275381
 local function combat()
     local current_gcd = (1.5 / ((UnitSpellHaste("player") / 100) + 1))
     if talent(2, 2) then
-         maelstrom_pool = 120
+        maelstrom_pool = 120
     end
 
     if toggle('multitarget', false) then
@@ -92,6 +92,17 @@ local function combat()
             return cast(SB.TotemMastery)
         end
 
+        --moving
+        if player.moving then
+            if player.buff(SB.Ascendance).up and target.castable(SB.Lavaburst) then
+                return cast(SB.Lavaburst, target)
+            elseif target.castable(SB.Flameshock) and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) then
+                return cast(SB.Flameshock, target)
+            elseif target.castable(SB.FrostShock) then
+                return cast(SB.FrostShock)
+            end
+        end
+
         --single target rotation
         if enemyCount <= 2 then
             print(enemyCount)
@@ -127,9 +138,8 @@ local function combat()
                 end
             end
 
-            print("3")
-            --elemental blast
 
+            --elemental blast
             if talent(1, 3) and target.castable(SB.ElementalBlast)
                     and (talent(4, 1) and player.buff(SB.MasteroftheElements).up and -power.maelstrom < 60 or not talent(4, 1))
                     and (not (-spell(SB.Stormelemental) > 120 and talent(4, 2))
@@ -137,7 +147,6 @@ local function combat()
                 return cast(SB.ElementalBlast, target)
             end
 
-            print("4")
             --stormkeepoer
             if talent(7, 2) and -spell(SB.StormKeeper) == 0 and not talent(6, 1) then
                 return cast(SB.StormKeeper, player)
@@ -158,7 +167,7 @@ local function combat()
                     return cast(SB.FrostShock, target)
                 end
             end
-            print("5")
+
             --lightning bolt
             if target.castable(SB.Lightningbolt) then
                 if player.buff(SB.StormKeeper).up
@@ -168,7 +177,7 @@ local function combat()
                 end
             end
 
-            print("6")
+
             --earth shock 1
             --[[if target.castable(SB.Earthshock) then
                 if player.buff(SB.Surgeofpower).down and talent(4, 1)
@@ -186,79 +195,101 @@ local function combat()
             end
 ]]
             if target.castable(SB.EarthShock) then
-                print((maelstrom_pool - 8))
-                if talent(4, 1) and player.buff(SB.Surgeofpower).down then
-                    if player.buff(SB.MasteroftheElements).up or -power.maelstrom >= (maelstrom_pool - 8) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
-                        print("6.1")
-                    end
-
+                if talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up or -power.maelstrom >= (maelstrom_pool - 8) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
                     return cast(SB.Earthshock, target)
                 elseif not talent(4, 1) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= (maelstrom_pool - 8)) then
-                    print("6.2")
                     return cast(SB.Earthshock, target)
                 elseif not (talent(4, 2) or -spell(SB.Stormelemental) > 120) and target.time_to_die - -spell(SB.Stormelemental) - 150 * math.floor((target.time_to_die - -spell(SB.Stormelemental)) % 150) >= 30 * (1 + (player.buff(SB.AzeriteEchooftheElementals).count)) >= 2 then
-                    print("6.3")
                     return cast(SB.Earthshock, target)
                 end
+
             end
-        end
-    end
-    --[[
-                 !(cooldown.storm_elemental.remains>120&talent.storm_elemental.enabled)&expected_combat_length-time-cooldown.storm_elemental.remains-150*floor((expected_combat_length-time-cooldown.storm_elemental.remains)%150)>=30*(1+(azerite.echo_of_the_elementals.rank>=2)))
-                    Boy...what a condition. With Master of the Elements pool Maelstrom up to 8 Maelstrom below the cap to ensure it's used with Earth Shock. Without Master of the Elements, use Earth Shock either if Stormkeeper is up, Maelstrom is 10 Maelstrom below the cap or less, or either Storm Elemental isn't talented or it's not active and your last Storm Elemental of the fight will have only a partial duration.
 
-    ]]
-    print("7")
-    --lightningbolt - round2
-    if talent(4, 2) and target.castable(SB.Lightningbolt) then
-        print("foo")
-        if -spell(SB.Stormelemental) > 120 then
-            return cast(SB.Lightningbolt, target)
-        end
-    end
-    print("8")
-    --frost shock
-    if talent(6, 3) and talent(4, 1) and player.buff(SB.Icefury).up and player.buff(SB.MasteroftheElements).up then
-        return cast(SB.FrostShock, target)
-    end
-    print("9")
-    --lavaburst
-    if player.buff(SB.Ascendance).up and target.castable(SB.LavaBurst) then
-        return cast(SB.LavaBurst, target)
-    end
-    print("10")
-    --re-dot
-    if target.castable(SB.Flameshock) and enemyCount > 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).up then
-        return cast(SB.Flameshock, target)
-    elseif target.castable(SB.Flameshock) and enemyCount == 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).down then
-        return cast(SB.Flameshock, target)
-    end
-    print("11")
-    --lightningbolt - round3
-    if target.castable(SB.Lightningbolt) and player.buff(SB.Surgeofpower).up then
-        return cast(SB.Lightningbolt, target)
-    end
-    --lava burst
-    if target.castable(SB.LavaBurst) then
-        return cast(SB.LavaBurst, target)
-    end
-    print("12")
+            --lightningbolt - round2
+            if talent(4, 2) and target.castable(SB.Lightningbolt) and -spell(SB.Stormelemental) > 120 then
+                return cast(SB.Lightningbolt, target)
+            end
 
-    print("14")
-    if talent(6, 3) and target.castable(SB.Icefury) then
-        return cast(SB.Icefury, target)
-    end
-    print("15")
-    --lightningbolt - round4
-    if target.castable(SB.Lightningbolt) then
-        return cast(SB.Lightningbolt, target)
-    end
-    print("16")
-    if target.castable(SB.FrostShock) then
-        return cast(SB.FrostShock, target)
-    end
-end
+            --frost shock
+            if talent(6, 3) and talent(4, 1) and player.buff(SB.Icefury).up and player.buff(SB.MasteroftheElements).up then
+                return cast(SB.FrostShock, target)
+            end
 
+            --lavaburst
+            if player.buff(SB.Ascendance).up and target.castable(SB.LavaBurst) then
+                return cast(SB.LavaBurst, target)
+            end
+
+            --re-dot
+            if target.castable(SB.Flameshock) and enemyCount > 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).up then
+                return cast(SB.Flameshock, target)
+            elseif target.castable(SB.Flameshock) and enemyCount == 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).down then
+                return cast(SB.Flameshock, target)
+            end
+
+            --lightningbolt - round3
+            if target.castable(SB.Lightningbolt) and player.buff(SB.Surgeofpower).up then
+                return cast(SB.Lightningbolt, target)
+            end
+            --lava burst
+            if target.castable(SB.LavaBurst) then
+                return cast(SB.LavaBurst, target)
+            end
+
+            if talent(6, 3) and target.castable(SB.Icefury) then
+                return cast(SB.Icefury, target)
+            end
+
+            --lightningbolt - round4
+            if target.castable(SB.Lightningbolt) then
+                return cast(SB.Lightningbolt, target)
+            end
+
+            if target.castable(SB.FrostShock) then
+                return cast(SB.FrostShock, target)
+            end
+        end --end single rotation
+
+        --AOE rotation
+        if enemyCount >= 3 then
+
+            --stormkeeper
+            if talent(7, 2) and -spell(SB.StormKeeper) == 0 then
+                return cast(SB.StormKeeper, player)
+            end
+            --Ascendance
+            if talent(7, 3) and -spell(SB.Ascendance) == 0 then
+                if (talent(4, 2) and -spell(SB.Stormelemental) < 120 and -spell(SB.Stormelemental) > 15 or not talent(4, 2)) then
+                    return cast(SB.Ascendance)
+                end
+            end
+            -- flame shock
+            if target.castable(SB.Flameshock) and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6)
+                    and enemyCount < 5 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120) or enemyCount == 3 and (player.buff(SB.Windgust).down or player.buff(SB.Windgust).count < 14)) then
+                return cast(SB.Flameshock, target)
+            end
+            --lave burst
+            if target.castable(SB.Lavaburst) and (player.buff(SB.LavaSurge).up or player.buff(SB.Ascendance).up)
+                    and enemyCount < 4 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120)) then
+                return cast(SB.Lavaburst, target)
+            end
+            --elemental blast
+            if talent(1, 3) and target.castable(SB.ElementalBlast) and enemyCount < 4 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120)) then
+                return cast(SB.ElementalBlast, target)
+            end
+            --lava beam
+            if talent(7, 3) and player.buff(SB.Ascendance).up and target.castable(SB.LavaBeam) then
+                return cast(SB.LavaBeam, target)
+            end
+            if target.castable(SB.ChainLightning) then
+                return cast(SB.ChainLightning, target)
+
+            end
+
+
+        end -- end AOE
+    end --end target alive
+end -- end combat
 local function resting()
     if talent(2, 3) and modifier.alt then
         return cast(SB.TotemMastery)
