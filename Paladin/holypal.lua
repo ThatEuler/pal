@@ -383,7 +383,7 @@ local function combat()
         return cast(SB.ConsecrationProt, 'player')
     end
 
-    -- uncomment if not blood elf - using racial trait on CD for mana ... make sure to turn this off in Kings Rest if group depend on you for dispell
+--BE Racial
     if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
         return cast(SB.ArcaneTorrent)
     end
@@ -454,7 +454,7 @@ local function resting()
         if mouseover.alive and -spell(SB.Cleanse) == 0 then
             return cast(SB.Cleanse, 'mouseover')
 
-        elseif mouseover.isDead and -spell(SB.Absolution) == 0 then
+        elseif not mouseover.alive and -spell(SB.Absolution) == 0 then
             return cast(SB.Absolution)
         end
     end
@@ -481,7 +481,7 @@ local function interface()
             { type = 'rule' },
             { type = 'text', text = 'Utility' },
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
-            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)' },
+            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
             { type = 'rule' },
             { type = 'text', text = 'Automated CoolDowns' },
             { key = 'autoAura', type = 'checkbox', text = 'Aura Mastery', desc = '' },
