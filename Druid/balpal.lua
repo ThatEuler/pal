@@ -33,6 +33,7 @@ SB.Fullmoon = 274283
 SB.Halfmoon = 202768
 SB.Newmoon = 274281
 SB.LivelySpirit = 279646
+SB.FlaskofEndlessFathoms = 251837
 
 local x = 0 -- counting seconds in resting
 local y = 0 -- counter for opener
@@ -171,7 +172,7 @@ local function combat()
 
     --trinkets
 
-    local useTrinkets = "false"
+    local useTrinkets = "true"
 
     --Ancient knot of wisdom
     if useTrinkets == "true" and GetItemCount(166793) == 1 and GetItemCooldown(166793) == 0 and ((player.buff(SB.CelestialAlignment).up or player.buff(SB.IncarnationBalance).up) or (-spell(SB.CelestialAlignment) > 30 or -spell(SB.IncarnationBalance) > 30)) then
@@ -179,25 +180,30 @@ local function combat()
     end
 
     --potions
-    if autoPotion == "pot_b" and target.time_to_die > 20 and player.buff(burst).remains > 6 and GetItemCount(163222) >= 1 and GetItemCooldown(163222) == 0 then
+
+
+
+    if autoPotion == "pot_b" and target.time_to_die > 10 and player.buff(burst).remains > 6 and GetItemCount(163222) >= 1 and GetItemCooldown(163222) == 0 then
         macro('/use Battle Potion of Intellect')
         print("glug - battle potion of intellect - glug")
     end
-    if autoPotion == "pot_c" and target.time_to_die > 20 and player.buff(burst).remains > 6 and GetItemCount(109218) >= 1 and GetItemCooldown(109218) == 0 then
+    if autoPotion == "pot_c" and target.time_to_die > 10 and player.buff(burst).remains > 6 and GetItemCount(109218) >= 1 and GetItemCooldown(109218) == 0 then
         print("glug - Draenic int - glug")
         macro('/use Draenic Intellect Potion')
     end
 
-    if autoPotion == "pot_d" and target.time_to_die > 20 and player.buff(burst).remains > 6 and GetItemCount(152559) >= 1 and GetItemCooldown(152559) == 0 then
+    if autoPotion == "pot_d" and target.time_to_die > 10 and player.buff(burst).remains > 6 and GetItemCount(152559) >= 1 and GetItemCooldown(152559) == 0 then
         macro('/use Potion of rising death')
         print("glug - deadly grace - glug")
     end
 
-    if autoRune == "rune_b" and (player.buff(SB.WhisperInsanityBuff).down or player.buff(SB.WhisperInsanityBuff).remains < 600) and GetItemCount(118922) == 1 and GetItemCooldown(118922) == 0 then
-        macro('/use item:118922')
-        print("Applying WhisperInsanityBuff")
+    --Flasks
+    if player.buff(SB.FlaskofEndlessFathoms).down and not autoRune == "rune_a" then
+        if autoRune == "rune_b" and (player.buff(SB.WhisperInsanityBuff).down or player.buff(SB.WhisperInsanityBuff).remains < 600) and GetItemCount(118922) == 1 and GetItemCooldown(118922) == 0 then
+            macro('/use item:118922')
+            print("Applying WhisperInsanityBuff")
+        end
     end
-
     -- Interupts
     if toggle('interrupts', false) and target.interrupt(intpercent) and target.distance <= 45 and -spell(SB.SolarBeam) == 0 then
         return cast(SB.SolarBeam, 'target')
@@ -452,10 +458,12 @@ local function combat()
     -----------------------------
     badguy = UnitClassification("target")
     -- and badguy ~= "normal" and badguy ~= "minus"
-    if toggle('cooldowns', false) and target.time_to_die > 20 then
+    if toggle('cooldowns', false) and target.time_to_die > 5 then
         if talent(5, 3) and power.astral.actual > 40 and -spell(SB.IncarnationBalance) == 0 then
             return cast(SB.IncarnationBalance)
-        elseif player.castable(burst) and (not az_ls or player.buff(SB.LivelySpirit).up) and (player.buff(SB.Starlord).count >= 2 or not talent(5, 2) or not az_ss) then
+        elseif player.castable(burst)
+                and (not az_ls or player.buff(SB.LivelySpirit).up)
+                and (player.buff(SB.Starlord).count >= 2 or not talent(5, 2)) then
             return cast(burst)
         end
 
