@@ -12,7 +12,9 @@ local x = 0
 local az_nh
 local maelstrom_pool = 100
 
-
+local function GroupType()
+    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
+end
 
 --Spells not in spellbook
 SB.Berserking = 26297
@@ -28,8 +30,10 @@ SB.ElementalBlast = 117014
 SB.Lightningbolt = 188196
 SB.Earthshock = 8042
 SB.Lavaburst = 51505
-SB. AzeriteEchooftheElementals = 275381
-SB. HealingSurgeEle = 8004
+SB.AzeriteEchooftheElementals = 275381
+SB.HealingSurgeEle = 8004
+SB.Sated = 57724
+SB.ThunderStorm = 51490
 
 local function combat()
     local current_gcd = (1.5 / ((UnitSpellHaste("player") / 100) + 1))
@@ -50,6 +54,8 @@ local function combat()
     if modifier.shift then
         if talent(4, 3) and toggle('cooldowns') and -spell(SB.LiquidMagmaTotem) == 0 and not player.spell(SB.LiquidMagmaTotem).lastcast then
             return cast(SB.LiquidMagmaTotem, 'ground')
+        elseif talent(2, 2) and -power.maelstrom >= 50 then
+            return cast(SB.Earthquake, 'ground')
         elseif -power.maelstrom >= 60 then
             return cast(SB.Earthquake, 'ground')
         end
@@ -76,18 +82,33 @@ local function combat()
                 return cast(SB.EarthElemental, player)
             end
         end
---[[ purge not working
-        --purgeables
-        if target.castable(SB.Purge) then
-            for i = 1, 40 do
-                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
-                if name and PB[spell_id] then
-                    print("Purging " .. name .. " off the target.")
-                    return cast(SB.Purge, target)
+        --[[ purge not working
+                --purgeables
+                if target.castable(SB.Purge) then
+                    for i = 1, 40 do
+                        local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+                        if name and PB[spell_id] then
+                            print("Purging " .. name .. " off the target.")
+                            return cast(SB.Purge, target)
+                        end
+                    end
                 end
+        ]]
+        ----
+        ---solo cool downs
+        -----
+
+        local group_type = GroupType()
+
+        if group_type == 'solo' then
+            if player.castable(SB.Bloodlust) and player.debuff(SB.Sated).down and target.time_to_die > 20 then
+                return cast(SB.Bloodlust)
+            end
+            if target.distance <= 5 and player.spell(SB.ThunderStorm) == 0 then
+                return cast(SB.ThunderStorm)
             end
         end
-]]
+
         --------------------
         --- racial
         --------------------
