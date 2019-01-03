@@ -17,6 +17,7 @@ dark_addon.rotation.spellbooks.purgeables = {
     [256957] = "Watertight Shell",
     [272659] = "electrified Scales",
     [269896] = "embryonic vigor",
-    [265912] = "accumualtedCharge"
+    [265912] = "accumualtedCharge",
+    [263224] = "Mark of the blood god"
 }
 
