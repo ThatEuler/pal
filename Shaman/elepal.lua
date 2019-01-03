@@ -131,14 +131,32 @@ local function combat()
 
         --moving
         if player.moving then
-            if player.buff(SB.Ascendance).up and target.castable(SB.Lavaburst) then
+            if (player.buff(SB.Ascendance).up or player.buff(SB.LavaSurge).up) and target.castable(SB.Lavaburst) then
                 return cast(SB.Lavaburst, target)
             elseif target.castable(SB.Flameshock) and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) then
                 return cast(SB.Flameshock, target)
+            elseif player.buff(SB.StormKeeper).up then
+                if enemyCount <= 2 and target.castable(SB.Lightningbolt) then
+                    return cast(SB.Lightningbolt, target)
+                end
+                if enemyCount >= 3 and target.castable(SB.ChainLightning) then
+                    return cast(SB.ChainLightning, target)
+                end
             elseif target.castable(SB.FrostShock) then
                 return cast(SB.FrostShock)
             end
         end
+
+        --nukes if we runnig out of time
+        if target.castable(SB.Lightningbolt) and player.buff(SB.StormKeeper).up and player.buff(SB.StormKeeper).remains < current_gcd * 4 * player.buff(SB.StormKeeper).count then
+            if enemyCount >= 2 then
+                return cast(SB.ChainLightning, target)
+            elseif enemyCount <= 1 then
+                return cast(SB.Lightningbolt, target)
+            end
+        end
+
+
 
         --single target rotation
         if enemyCount <= 2 then
@@ -184,6 +202,11 @@ local function combat()
                 return cast(SB.ElementalBlast, target)
             end
 
+            --lava surge procs
+            if target.castable(SB.Lavaburst) and player.buff(SB.LavaSurge).up then
+                return cast(SB.Lavaburst, target)
+            end
+
             --stormkeepoer
             if talent(7, 2) and -spell(SB.StormKeeper) == 0 and not talent(6, 1) then
                 return cast(SB.StormKeeper, player)
@@ -191,14 +214,6 @@ local function combat()
                 return cast(SB.StormKeeper, player)
             end
 
-            --nukes if we runnig out of time
-            if target.castable(SB.Lightningbolt) and player.buff(SB.StormKeeper).up and player.buff(SB.StormKeeper).remains < current_gcd * 4 * player.buff(SB.StormKeeper).count then
-                if enemyCount >= 2 then
-                    return cast(SB.ChainLightning, target)
-                elseif enemyCount <= 1 then
-                    return cast(SB.Lightningbolt, target)
-                end
-            end
 
             --frost shock
             if target.castable(SB.FrostShock) then
@@ -243,7 +258,7 @@ earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
 
 ]]
             if target.castable(SB.EarthShock) then
-                if talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up or -power.maelstrom >= (maelstrom_pool - 8) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
+                if (talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up) or (-power.maelstrom >= (maelstrom_pool - 8)) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
                     return cast(SB.Earthshock, target)
                 elseif not talent(4, 1) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= (maelstrom_pool - 8)) then
                     return cast(SB.Earthshock, target)
