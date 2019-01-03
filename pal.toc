@@ -17,3 +17,4 @@ Paladin\retpal.lua
 Shaman\ShamPalRest.lua
 Shaman\ShamPalEle.lua
 Shaman\Elepal.lua
+Shaman\purgeables.lua
