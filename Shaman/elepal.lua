@@ -5,6 +5,8 @@
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.shaman
+local PB = dark_addon.rotation.spellbooks.purgeables
+
 local race = UnitRace("player")
 local x = 0
 local az_nh
@@ -27,6 +29,7 @@ SB.Lightningbolt = 188196
 SB.Earthshock = 8042
 SB.Lavaburst = 51505
 SB. AzeriteEchooftheElementals = 275381
+SB. HealingSurgeEle = 8004
 
 local function combat()
     local current_gcd = (1.5 / ((UnitSpellHaste("player") / 100) + 1))
@@ -105,7 +108,7 @@ local function combat()
 
         --single target rotation
         if enemyCount <= 2 then
-            print(enemyCount)
+
             --flameshock
             if target.castable(SB.Flameshock) then
                 if target.debuff(SB.Flameshock).down
@@ -117,7 +120,7 @@ local function combat()
                     return cast(SB.Flameshock, target)
                 end
             end
-            print("2")
+
 
             --Cool Downs
 
@@ -155,8 +158,12 @@ local function combat()
             end
 
             --nukes if we runnig out of time
-            if target.castable(SB.Lightningbolt) and (player.buff(SB.StormKeeper).remains < current_gcd * 4 * player.buff(SB.StormKeeper).count) then
-                return cast(SB.Lightningbolt, target)
+            if target.castable(SB.Lightningbolt) and player.buff(SB.StormKeeper).up and player.buff(SB.StormKeeper).remains < current_gcd * 4 * player.buff(SB.StormKeeper).count then
+                if enemyCount >= 2 then
+                    return cast(SB.ChainLightning, target)
+                elseif enemyCount <= 1 then
+                    return cast(SB.Lightningbolt, target)
+                end
             end
 
             --frost shock
@@ -193,6 +200,13 @@ local function combat()
                     return cast(SB.Earthshock, target)
                 end
             end
+earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
+&(buff.master_of_the_elements.up|maelstrom>=92+30*talent.call_the_thunder.enabled|buff.stormkeeper.up&active_enemies<2)|!talent.master_of_the_elements.enabled
+&(buff.stormkeeper.up|maelstrom>=90+30*talent.call_the_thunder.enabled|!(cooldown.storm_elemental.remains>120&talent.storm_elemental.enabled)
+&expected_combat_length-time-cooldown.storm_elemental.remains-150*floor((expected_combat_length-time-cooldown.storm_elemental.remains)%150)>=30*(1+(azerite.echo_of_the_elementals.rank>=2)))
+
+
+
 ]]
             if target.castable(SB.EarthShock) then
                 if talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up or -power.maelstrom >= (maelstrom_pool - 8) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
