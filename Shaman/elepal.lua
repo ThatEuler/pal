@@ -258,9 +258,11 @@ earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
 
 ]]
             if target.castable(SB.EarthShock) then
-                if (talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up) or (-power.maelstrom >= (maelstrom_pool - 8)) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
+                if (talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up) or (-power.maelstrom >= (maelstrom_pool - 10)) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
                     return cast(SB.Earthshock, target)
-                elseif not talent(4, 1) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= (maelstrom_pool - 8)) then
+                elseif not talent(4, 1) and not talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 60) then
+                    return cast(SB.Earthshock, target)
+                elseif not talent(4, 1) and talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 50) then
                     return cast(SB.Earthshock, target)
                 elseif not (talent(4, 2) or -spell(SB.Stormelemental) > 120) and target.time_to_die - -spell(SB.Stormelemental) - 150 * math.floor((target.time_to_die - -spell(SB.Stormelemental)) % 150) >= 30 * (1 + (player.buff(SB.AzeriteEchooftheElementals).count)) >= 2 then
                     return cast(SB.Earthshock, target)
