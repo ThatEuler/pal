@@ -76,6 +76,18 @@ local function combat()
                 return cast(SB.EarthElemental, player)
             end
         end
+--[[ purge not working
+        --purgeables
+        if target.castable(SB.Purge) then
+            for i = 1, 40 do
+                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+                if name and PB[spell_id] then
+                    print("Purging " .. name .. " off the target.")
+                    return cast(SB.Purge, target)
+                end
+            end
+        end
+]]
         --------------------
         --- racial
         --------------------
