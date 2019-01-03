@@ -104,14 +104,14 @@ local function combat()
         return cast(SB.ShieldofVengeance)
     end
 
-    if talent(7, 3) and player.buff(SB.Inquisition).up and castable(SB.AvengingWrath) then
+    if talent(7, 3) and toggle('cooldowns', false) and player.buff(SB.Inquisition).up and castable(SB.AvengingWrath) then
         return cast(SB.AvengingWrath)
-    elseif talent(7, 1) and castable(SB.AvengingWrath) then
+    elseif talent(7, 1) and toggle('cooldowns', false) and castable(SB.AvengingWrath) then
         return cast(SB.AvengingWrath)
     end
 
     --crusade talent
-    if talent(7, 2) and -power.holypower >= 4 and castable(SB.Crusade) then
+    if talent(7, 2) and toggle('cooldowns', false) and-power.holypower >= 4 and castable(SB.Crusade) then
         return cast(SB.Crusade)
     end
     --end cool downs
