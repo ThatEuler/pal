@@ -2,7 +2,7 @@
 
 --[[ Talents supported:
 
- 15: 1 2
+ 15: 1 2 3
  30: 1 2 3
  45: 1 2 3 (earthgrab totem must be placed manually)
  60: 1 2 3 (Ancestral totem must be placed manually)
@@ -40,11 +40,12 @@ SB.ChainHeal = 1064
 SB.AscendanceResto = 114052
 SB.HealingWave = 77472
 SB.Berserking = 26297
+SB.UnleashLife = 73685
+SB.HighTide = 288675
 
 local function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
-
 
 local function combat()
     if not player.alive then
@@ -94,11 +95,9 @@ local function combat()
     ---  Modifiers
     --------------------
     -- Modifiers
-    if modifier.lshift and castable(SB.HealingRain) then
+    if modifier.shift and castable(SB.HealingRain) then
         return cast(SB.HealingRain, 'ground')
-    end
-
-    if modifier.rshift and talent(4, 2) and castable(SB.EarthenWallTotem) then
+    elseif modifier.shift and talent(4, 2) and -spell(SB.HealingRain) > 0 and -spell(SB.EarthenWallTotem) == 0 and not player.spell(SB.EarthenWallTotem).lastcast then
         return cast(SB.EarthenWallTotem, 'ground')
     end
 
@@ -143,7 +142,7 @@ local function combat()
         return cast(SB.HealingStreamTotem)
     end
 
-    if tank.buff(SB.EarthShield).down and castable(SB.EarthShield, tank) then
+    if tank.buff(SB.EarthShield).down and castable(SB.EarthShield, tank) and tank.distance <= 40 then
         return cast(SB.EarthShield, tank)
     end
 
@@ -190,6 +189,15 @@ local function combat()
     end
 
 
+    --- Healing - unleash life
+
+    if lowest.castable(SB.UnleashLife) and lowest.health.percent <= 70 and lowest.distance < 40 then
+        return cast(SB.UnleashLife, lowest)
+    end
+
+    if tank.castable(SB.UnleashLife) and tank.health.percent < 80 and tank.distance <= 40 then
+        return cast(SB.UnleashLife, tank)
+    end
     --- Healing - Riptide
 
     if lowest.castable(SB.Riptide) and lowest.health.percent <= 70 and lowest.distance < 40 then
@@ -202,7 +210,11 @@ local function combat()
 
     --- chain heal
 
-    if tank.health.percent > 30 and group_health_percent <= 80 then
+    if (tank.health.percent > 30 and group_health_percent <= 80) or player.buff(SB.HighTide).up and group_health_percent <= 90 then
+        return cast(SB.ChainHeal, lowest)
+    elseif player.buff(SB.HighTide).up and tank.health.percent <= 80 then
+        return cast(SB.ChainHeal, tank)
+    elseif player.buff(SB.HighTide).up and lowest.health.percent <= 80 then
         return cast(SB.ChainHeal, lowest)
     end
 
@@ -271,27 +283,25 @@ local function resting()
         --------------------
 
         -- Modifiers
-        if modifier.lshift and -spell(SB.HealingRain) == 0 then
+        if modifier.shift and castable(SB.HealingRain) then
             return cast(SB.HealingRain, 'ground')
-        end
-
-        if modifier.rshift and talent(4, 2) and castable(SB.EarthenWallTotem) then
+        elseif modifier.shift and talent(4, 2) and -spell(SB.HealingRain) > 0 and -spell(SB.EarthenWallTotem) == 0 then
             return cast(SB.EarthenWallTotem, 'ground')
         end
 
-        if modifier.lalt and -spell(SB.CapacitorTotem) == 0 then
+        if modifier.lalt and castable(SB.CapacitorTotem) then
             return cast(SB.CapacitorTotem, 'ground')
         end
 
-        if modifier.ralt and -spell(SB.SpiritLink) == 0 then
+        if modifier.alt and modifier.shift and castable(SB.SpiritLink) then
             return cast(SB.SpiritLink, 'ground')
         end
 
         if modifier.control then
-            if mouseover.alive and -spell(SB.PurifySpirit) == 0 then
+            if mouseover.alive and castable(SB.PurifySpirit) then
                 return cast(SB.PurifySpirit, 'mouseover')
 
-            elseif not mouseover.alive and -spell(SB.AncestralVision) == 0 then
+            elseif not mouseover.alive and castable(SB.AncestralVision) then
                 return cast(SB.AncestralVision)
             end
         end
@@ -327,20 +337,7 @@ local function interface()
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         }
-    })
-    dark_addon.interface.buttons.add_toggle({
-        name = 'BoP',
-        label = 'BoP',
-        on = {
-            label = 'BoP',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-        },
-        off = {
-            label = 'BoP',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        }
+
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'Racial',
@@ -355,20 +352,7 @@ local function interface()
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         }
-    })
-    dark_addon.interface.buttons.add_toggle({
-        name = 'LoD',
-        label = 'LightOfDawn',
-        on = {
-            label = 'LoD',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-        },
-        off = {
-            label = 'LoD',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        }
+
     })
 end
 
