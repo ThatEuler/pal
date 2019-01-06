@@ -2,7 +2,7 @@
 
 -- Talents supported: everything EXCEPT Light's Hammer.
 
---Holding Shift = Hammer of Justice in combat / CC out of combat (if repentance talent is selected)
+--Holding Shift = Hammer of Justice in combat / CC out of combat (if repentance talent is selected) - will CC in combat if stun on cc
 --Holding CTRL = decurse (at mouseover target - works with raidframes)
 --Holding LEFT ALT = Dawn of Light
 
@@ -17,16 +17,17 @@ local TB = dark_addon.rotation.spellbooks.paladin
 local DB = dark_addon.rotation.spellbooks.paladin
 local race = UnitRace("player")
 
+
 SB.Quake = 240447
 
 -- enable to treat tank like everyone else - all 'tank' statements will be ignored
 --dark_addon.environment.virtual.exclude_tanks = false
 
+
 local function GCD()
 
-    if player.debuff(SB.Quake).up and player.debuff(SB.Quake).remains < 0.5 then
+    if player.debuff(SB.Quake).up then
         print(player.debuff(SB.Quake).remains)
-        macro('/stopcasting')
     end
 end
 local function combat()
@@ -116,8 +117,10 @@ local function combat()
 
 
     -- Modifiers
-    if modifier.lshift and target.enemy and -spell(SB.HammerofJustice) == 0 then
+    if modifier.shift and target.enemy and -spell(SB.HammerofJustice) == 0 then
         return cast(SB.HammerofJustice, 'target')
+    elseif modifier.shift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
+        return cast(SB.Repentance, 'target')
     end
 
     if modifier.lalt and -spell(SB.LightofDawn) == 0 then
@@ -279,8 +282,7 @@ local function combat()
     end
 
     -- judgement is high priority due to overall dps but also influences 2 talents and goto azerite trait
-    if -spell(SB.Judgment) == 0 and target.enemy and target.distance < 30 then
-        --print(tank.name)
+    if -spell(SB.Judgment) == 0 and target.enemy and target.distance < 30 and not isCC(target) then
         return cast(SB.Judgment, 'target')
     end
 
@@ -296,9 +298,7 @@ local function combat()
         return cast(SB.HolyShock, tank)
     end
 
-    if -spell(SB.HolyShock) == 0 and toggle('DPS', false) and lowest.health.percent > 80 and target.distance < 40 then
-        return cast(SB.HolyShock, target)
-    end
+
 
     -- check range and use RuleofLaw if needed
     if talent(2, 3) and -spell(SB.RuleofLaw) == 0 and lowest.distance > 10 and lowest.distance < 20 and player.buff(SB.RuleofLaw).down then
@@ -375,15 +375,23 @@ local function combat()
     end
 
     --dps
-    if -spell(SB.CrusaderStrike) == 0 and lowest.health.percent > 50 and tank.health.percent > 50 and target.enemy and target.distance < 8 then
-        return cast(SB.CrusaderStrike, 'target')
-    end
-    --Consecration
-    if toggle('DPS', false) and -spell(SB.ConsecrationProt) == 0 and inRange >= 3 and target.debuff(SB.ConsecrationProt).down and lowest.health.percent > 50 and target.distance < 4 then
-        return cast(SB.ConsecrationProt, 'player')
+
+    if not isCC(target) then
+
+        if -spell(SB.HolyShock) == 0 and toggle('DPS', false) and lowest.health.percent > 80 and target.distance < 40 then
+            return cast(SB.HolyShock, target)
+        end
+
+        if -spell(SB.CrusaderStrike) == 0 and lowest.health.percent > 50 and tank.health.percent > 50 and target.enemy and target.distance < 8 then
+            return cast(SB.CrusaderStrike, 'target')
+        end
+        --Consecration
+        if toggle('DPS', false) and -spell(SB.ConsecrationProt) == 0 and inRange >= 3 and target.debuff(SB.ConsecrationProt).down and lowest.health.percent > 50 and target.distance < 4 then
+            return cast(SB.ConsecrationProt, 'player')
+        end
     end
 
---BE Racial
+    --BE Racial
     if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
         return cast(SB.ArcaneTorrent)
     end
@@ -398,22 +406,23 @@ local function resting()
         if talent(7, 1) and tank.buff(SB.BeaconofLight).down then
             return cast(SB.BeaconofLight, tank)
         end
-        if talent(7, 2) and IsInRaid() then
-            if tank.buff(SB.BeaconofLight).down then
-                return cast(SB.BeaconofLight, tank)
-            end
-            if offtank.buff(SB.BeaconofFaith).down then
-                return cast(SB.BeaconofFaith, offtank)
-            end
-            --elseif talent(7, 2) and IsInGroup() then
-            --  if tank.buff(SB.BeaconofLight).down then
-            --    return cast(SB.BeaconofLight, tank)
-            --  end
-            --  if player.buff(SB.BeaconofFaith).down then
-            --    return cast(SB.BeaconofFaith, player)
-            --  end
-        end
-
+        --[[
+                if talent(7, 2) and IsInRaid() then
+                    if tank.buff(SB.BeaconofLight).down then
+                        return cast(SB.BeaconofLight, tank)
+                    end
+                    if offtank.buff(SB.BeaconofFaith).down then
+                        return cast(SB.BeaconofFaith, offtank)
+                    end
+                    --elseif talent(7, 2) and IsInGroup() then
+                    --  if tank.buff(SB.BeaconofLight).down then
+                    --    return cast(SB.BeaconofLight, tank)
+                    --  end
+                    --  if player.buff(SB.BeaconofFaith).down then
+                    --    return cast(SB.BeaconofFaith, player)
+                    --  end
+                end
+        ]]
         -- - Decurse
         local dispellable_unit = group.removable('disease', 'magic', 'poison')
         if toggle('DISPELL', false) and dispellable_unit and spell(SB.Cleanse).cooldown == 0 then
