@@ -5,6 +5,7 @@
 ## DefaultState: enabled
 ## Dependencies: dark_addon
 
+Support\Support.lua
 Druid\balpal.lua
 Druid\respal.lua
 Druid\balanceEXP.lua
