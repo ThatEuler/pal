@@ -83,11 +83,14 @@ local function combat()
             end
         end
 
-        --purge not working
+        --purge
 
         if target.castable(SB.Purge) then
             for i = 1, 40 do
                 local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+                if spell_id == nil then
+                    break
+                end
                 if name and PB[spell_id] then
                     print("Purging " .. name .. " off the target.")
                     return cast(SB.Purge, target)
