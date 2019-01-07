@@ -14,11 +14,11 @@ local function combat()
 --Modifiers--
 -------------
     if modifier.alt and castable(SB.MassDispell) then
-      return cast(SB.MassDispell, ground)
+      return cast(SB.MassDispell, 'ground')
     end
 
     if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
-      return cast(SB.AngelicFeather, player)
+      return cast(SB.AngelicFeather, 'player')
     end
 
     if modifier.control and castable(SB.DivineHymn) then
@@ -29,7 +29,7 @@ local function combat()
 ---Dispel----
 -------------
     if toggle('dispel', false) and castable(SB.Purify) and player.dispellable(SB.Purify) then
-        return cast(SB.Purify, "player")
+        return cast(SB.Purify, 'player')
     end
     local unit = group.dispellable(SB.Purify)
     if unit and unit.distance < 40 then
@@ -45,11 +45,11 @@ local function resting()
 --Modifiers--
 -------------
     if modifier.alt and castable(SB.MassDispell) then
-      return cast(SB.MassDispell, ground)
+      return cast(SB.MassDispell, 'ground')
     end
 
     if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
-      return cast(SB.AngelicFeather, player)
+      return cast(SB.AngelicFeather, 'player')
     end
 -------------
 ----Buff-----
