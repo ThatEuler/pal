@@ -10,6 +10,7 @@ local SB = dark_addon.rotation.spellbooks.druid
 local TB = dark_addon.rotation.talentbooks.druid
 local DB = dark_addon.rotation.dispellbooks.druid
 local DS = dark_addon.rotation.dispellbooks.soothe
+
 local outdoor = IsOutdoors()
 local indoor = IsIndoors()
 local realmName = GetRealmName()
@@ -136,17 +137,16 @@ local function combat()
             end
         end
 
-        --[[ Soothe
+        --soothe
         if target.castable(SB.Soothe) then
-          for i = 1, 40 do
-            local name, _, _, count, debuff_type, _, _, _, _, _, spell_id = UnitAura("target", i)
-            if name and DS[spell_id] then
-              print("Soothing " .. name .. " off the target.")
-              return cast(SB.Soothe, target)
+            for i = 1, 40 do
+                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+                if name and DS[spell_id] then
+                    print("Soothing " .. name .. " off the target.")
+                    return cast(SB.Soothe, target)
+                end
             end
-          end
         end
-    ]]
 
 
         --- Decurse
@@ -169,11 +169,11 @@ local function combat()
             return cast(SB.Regrowth, lowest)
         end
         -- Use Cenarion Ward on cooldown.
-        if talent(1, 3) and tank.castable(SB.CenarionWard) then
+        if talent(1, 3) and tank.castable(SB.CenarionWard) and tank.buff(SB.CenarionWard).down then
             return cast(SB.CenarionWard, tank)
         end
 
-        if race == Troll and -spell(SB.Berserking) == 0 and tank.health.percent <= 50 then
+        if race == Troll and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
             return cast(SB.Berserking)
         end
 
