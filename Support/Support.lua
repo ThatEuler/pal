@@ -33,7 +33,7 @@ dark_addon.rotation.CC = {
     [277778] = "Hex Zandalari Tendonripper",
     [20066] = "Rependance",
     [277784] = "Hex White Mongrel",
-    [2094] = "blind",
+    [2094] = "Blind",
     [6770] = "Sap"
 }
 
