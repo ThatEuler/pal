@@ -120,7 +120,7 @@ local function combat()
     if modifier.shift and target.enemy and -spell(SB.HammerofJustice) == 0 then
         return cast(SB.HammerofJustice, 'target')
     elseif modifier.shift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
-        return cast(SB.Repentance, 'target')
+        return cast(SB.Repentance, 'mouseover')
     end
 
     if modifier.lalt and -spell(SB.LightofDawn) == 0 then
@@ -193,8 +193,12 @@ local function combat()
     end
 
     -- BoP bad players
-    if toggle('BoP', false) and lowest.castable(SB.BlessingofProtection) and lowest.debuff(SB.Forbearance).down and lowest ~= tank and lowest ~= player and lowest.health.percent <= 20 then
-        return cast(SB.BlessingofProtection, lowest)
+    if toggle('BoP', false) and lowest.castable(SB.BlessingofProtection) and lowest.debuff(SB.Forbearance).down and lowest ~= tank and lowest ~= player then
+        if lowest.health.percent <= 20 then
+            return cast(SB.BlessingofProtection, lowest)
+        elseif lowest.health.percent <= 50 and lowest.debuff(SB.GrievousWound).count > 3 then
+            return cast(SB.BlessingofProtection, lowest)
+        end
     end
 
     --BlessingofSacrifice	on semi bad players
@@ -445,7 +449,6 @@ local function resting()
 
         if not player.moving then
 
-
             if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and tank.health.percent < 70 then
             end
 
@@ -472,7 +475,7 @@ local function resting()
     end
 
     if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
-        return cast(SB.Repentance, 'target')
+        return cast(SB.Repentance, 'mouseover')
     end
 
     if modifier.lalt and -spell(SB.LightofDawn) == 0 then
