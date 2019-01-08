@@ -17,8 +17,8 @@ local TB = dark_addon.rotation.spellbooks.paladin
 local DB = dark_addon.rotation.spellbooks.paladin
 local race = UnitRace("player")
 
-
 SB.Quake = 240447
+SB.GrievousWound = 240559
 
 -- enable to treat tank like everyone else - all 'tank' statements will be ignored
 --dark_addon.environment.virtual.exclude_tanks = false
@@ -229,7 +229,7 @@ local function combat()
     if talent(6, 2) and toggle('cooldowns', false) and AutoAvengingCrusader == true and -spell(SB.AvengingCrusader) == 0 and player.buff(SB.BeaconofVirtue).down and target.distance < 8 and (lowest.health.percent <= 60 or tank.health.percent <= 75 or group_health_percent < 60) and player.buff(SB.HolyAvenger).down then
         --print 'CD - Avenging Crusader'
         return cast(SB.AvengingCrusader, 'player')
-    elseif autoWrath == true and (talent(6, 1) or talent(6, 3)) and toggle('cooldowns', false) and -spell(SB.AvengingWrath) == 0 and player.buff(SB.BeaconofVirtue).down and (lowest.health.percent <= 60 or tank.health.percent <= 75 or group_health_percent < 60) and player.buff(SB.HolyAvenger).down then
+    elseif autoWrath == true and (talent(6, 1) or talent(6, 3)) and toggle('cooldowns', false) and -spell(SB.AvengingWrath) == 0 and target.time_to_die > 10 and player.buff(SB.BeaconofVirtue).down and (lowest.health.percent <= 60 or tank.health.percent <= 75 or group_health_percent < 60) and player.buff(SB.HolyAvenger).down then
         --print 'CD - Avenging Crusader'
         return cast(SB.AvengingWrath, 'player')
     end
@@ -286,15 +286,18 @@ local function combat()
         return cast(SB.Judgment, 'target')
     end
 
-
+    --BE Racial
+    if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 60 and -spell(SB.ArcaneTorrent) == 0 then
+        return cast(SB.ArcaneTorrent)
+    end
 
     -- holy shock on CD
 
-    if lowest.castable(SB.HolyShock) and lowest.health.percent <= 70 and lowest.distance < 40 then
+    if lowest.castable(SB.HolyShock) and lowest.distance < 40 and (lowest.health.percent <= 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
         return cast(SB.HolyShock, lowest)
     end
 
-    if tank.castable(SB.HolyShock) and tank.health.percent < 80 and tank.distance <= 40 then
+    if tank.castable(SB.HolyShock) and tank.distance <= 40 and (tank.health.percent < 80 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
         return cast(SB.HolyShock, tank)
     end
 
@@ -334,35 +337,35 @@ local function combat()
 
     -- Use any Infusion of Light procs on Flash of Light on low health targets.
     --InfusionofLight
+    if not player.moving then
+        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and (tank.health.percent < 70 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+            return cast(SB.FlashofLight, tank)
+        end
 
-    if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.health.percent < 70 and tank.distance < 40 then
-        return cast(SB.FlashofLight, tank)
+        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.distance < 40 and (lowest.health.percent < 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+            return cast(SB.FlashofLight, lowest)
+        end
+
+        if lowest.castable(SB.FlashofLight) and (lowest.health.percent < 50 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+            return cast(SB.FlashofLight, lowest)
+        end
+
+        if tank.castable(SB.FlashofLight) and (tank.health.percent < 60 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+            return cast(SB.FlashofLight, tank)
+        end
     end
-
-    if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.health.percent < 80 and lowest.distance < 40 then
-        return cast(SB.FlashofLight, lowest)
-    end
-
-    if lowest.castable(SB.FlashofLight) and lowest.health.percent < 50 then
-        return cast(SB.FlashofLight, lowest)
-    end
-
-    if tank.castable(SB.FlashofLight) and tank.health.percent < 50 then
-        return cast(SB.FlashofLight, tank)
-    end
-
 
 
     --Use Holy Light for low or moderate damage, prioritizing low health targets,
+    if not player.moving then
+        if lowest.castable(SB.HolyLight) and lowest.health.percent < 80 then
+            return cast(SB.HolyLight, lowest)
+        end
 
-    if lowest.castable(SB.HolyLight) and lowest.health.percent < 80 then
-        return cast(SB.HolyLight, lowest)
+        if tank.castable(SB.HolyLight) and tank.health.percent < 80 then
+            return cast(SB.HolyLight, tank)
+        end
     end
-
-    if tank.castable(SB.HolyLight) and tank.health.percent < 80 then
-        return cast(SB.HolyLight, tank)
-    end
-
 
 
     --martyr - we all love to hate it!
@@ -382,19 +385,15 @@ local function combat()
             return cast(SB.HolyShock, target)
         end
 
-        if -spell(SB.CrusaderStrike) == 0 and lowest.health.percent > 50 and tank.health.percent > 50 and target.enemy and target.distance < 8 then
+        if -spell(SB.CrusaderStrike) == 0 and lowest.health.percent > 50 and tank.health.percent > 50 and target.enemy and target.distance < 8 and not isCC("target") then
             return cast(SB.CrusaderStrike, 'target')
         end
         --Consecration
-        if toggle('DPS', false) and -spell(SB.ConsecrationProt) == 0 and inRange >= 3 and target.debuff(SB.ConsecrationProt).down and lowest.health.percent > 50 and target.distance < 4 then
-            return cast(SB.ConsecrationProt, 'player')
+        if toggle('DPS', false) and castable(SB.ConsecrationProt) and inRange >= 3 and target.debuff(SB.ConsecrationProt).down and lowest.health.percent > 50 and target.distance < 4 then
+            return cast(SB.ConsecrationProt)
         end
     end
 
-    --BE Racial
-    if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
-        return cast(SB.ArcaneTorrent)
-    end
 
 end
 
@@ -435,22 +434,43 @@ local function resting()
             return cast(SB.Cleanse, dispellable_unit)
         end
 
-        if lowest.castable(SB.HolyShock) and lowest.health.percent <= 80 then
-            return cast(SB.HolyShock, lowest)
-        end
-
-        if lowest.castable(SB.HolyLight) and lowest.health.percent < 85 then
-            return cast(SB.HolyLight, lowest)
-        end
+        --out of combat healing
 
         if tank.castable(SB.HolyShock) and tank.health.percent <= 80 then
             return cast(SB.HolyShock, tank)
         end
+        if lowest.castable(SB.HolyShock) and lowest.health.percent <= 80 then
+            return cast(SB.HolyShock, lowest)
+        end
 
-        if tank.castable(SB.HolyLight) and tank.health.percent < 85 then
-            return cast(SB.HolyLight, tank)
+        if not player.moving then
+
+
+            if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and tank.health.percent < 70 then
+            end
+
+            if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.distance < 40 and (lowest.health.percent < 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+                return cast(SB.FlashofLight, lowest)
+            end
+
+            if lowest.castable(SB.FlashofLight) and (lowest.health.percent < 50 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+                return cast(SB.FlashofLight, lowest)
+            end
+
+            if tank.castable(SB.FlashofLight) and (tank.health.percent < 60 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+                return cast(SB.FlashofLight, tank)
+            end
+
+            if lowest.castable(SB.HolyLight) and lowest.health.percent < 70 or (lowest.health.percent < 90 and lowest.debuff(SB.GrievousWound)) then
+                return cast(SB.HolyLight, lowest)
+            end
+
+            if tank.castable(SB.HolyLight) and (tank.health.percent < 85 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+                return cast(SB.HolyLight, tank)
+            end
         end
     end
+
     if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
         return cast(SB.Repentance, 'target')
     end
@@ -466,6 +486,11 @@ local function resting()
         elseif not mouseover.alive and -spell(SB.Absolution) == 0 then
             return cast(SB.Absolution)
         end
+    end
+    --BE Racial
+    local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial')
+    if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
+        return cast(SB.ArcaneTorrent)
     end
 
 
