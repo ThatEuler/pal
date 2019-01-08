@@ -1,5 +1,6 @@
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.priest
+local lftime = 0
 
 -------------
 ---Spells---
@@ -40,6 +41,40 @@ local function combat()
 
 end
 local function resting()
+-------------
+----Fetch----
+-------------
+local lfg = GetLFGProposal();
+local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+local bgstatus = GetBattlefieldStatus(1);
+local autojoin = dark_addon.settings.fetch('holypal_utility_autojoin', true)
+
+-------------
+--Auto Join--
+-------------
+if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+ SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
+elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+ SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+end
+
+if autojoin ==true and lfg == true or bgstatus == "confirm" then
+  PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog", false);
+  lftime = lftime + 1
+end
+
+if lftime >=math.random(20,35) then
+  SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+  macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+  lftime = 0
+end    
+
+
 
 -------------
 --Modifiers--
@@ -78,7 +113,8 @@ function interface()
     show = false,
     template = {
       { type = 'header', text = 'Holy Pal - Settings', align= 'center' },
-   
+      { type = 'rule' },
+
     }
   }
 
@@ -93,7 +129,11 @@ function interface()
     show = false,
     template = {
       { type = 'header', text = 'Holy Pal - Utility', align= 'center' },
-    
+      { type = 'rule' },
+      { type = 'text', text = 'Dungeon Settings' },
+      { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
+      { type = 'rule' },
+
     }
   }
 
