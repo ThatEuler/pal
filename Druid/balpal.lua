@@ -124,11 +124,12 @@ local function combat()
     -----------------------------
     --battle rez
     if modifier.control and not mouseover.alive and -spell(SB.Rebirth) == 0 then
-        return cast(SB.Rebirth, 'mouseover')
+        if modifier.control and not mouseover.alive and mouseover.castable(SB.Rebirth) then
+            return cast(SB.Rebirth, 'mouseover')
+        end
     end
-
     --Starfall
-    if modifier.lshift and talent(5, 1) and enemyCount >= aoeTarget and -spell(SB.Starfall) == 0 and power.astral.actual > 40 then
+    if modifier.lshift and talent(5, 1) and enemyCount >= aoeTarget and -spell(SB.Starfall) == 0 and castable(SB.Starfall) and power.astral.actual > 40 then
         return cast(SB.Starfall, 'ground')
     elseif modifier.lshift and enemyCount >= aoeTarget and -spell(SB.Starfall) == 0 and power.astral.actual > 50 then
         return cast(SB.Starfall, 'ground')
@@ -172,7 +173,7 @@ local function combat()
 
     --trinkets
 
-    local useTrinkets = "true"
+    local useTrinkets = "false"
 
     --Ancient knot of wisdom
     if useTrinkets == "true" and GetItemCount(166793) == 1 and GetItemCooldown(166793) == 0 and ((player.buff(SB.CelestialAlignment).up or player.buff(SB.IncarnationBalance).up) or (-spell(SB.CelestialAlignment) > 30 or -spell(SB.IncarnationBalance) > 30)) then
@@ -270,7 +271,7 @@ local function combat()
     --- Moving!
     -----------------------------
     -- Moonkin Form
-    if not modifier.lalt and not player.spell(SB.MoonkinForm).lastcast and player.buff(SB.TigerDashBuff).down and GetShapeshiftForm() ~= 4 then
+    if not modifier.lalt and UnitLevel("player") >= 20 and not player.spell(SB.MoonkinForm).lastcast and player.buff(SB.TigerDashBuff).down and GetShapeshiftForm() ~= 4 then
         return cast(SB.MoonkinForm, player)
     end
 
@@ -569,9 +570,11 @@ local function combat()
     if target.castable(SB.Sunfire) then
         return cast(SB.Sunfire)
     end
-    --todo add support for off-specs
-
 end
+
+--todo add support for off-specs
+
+
 --[[
 --TANK SECTION - EMERGENCY BEAR
 if toggle('TANK', false) and talent(3, 2) then
@@ -639,7 +642,7 @@ local function resting()
 
     if GetShapeshiftForm() == 3 and player.moving then
         return
-    elseif toggle('Forms', false) and not player.moving and player.buff(SB.Prowl).down and player.buff(SB.MoonkinForm).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
+    elseif toggle('Forms', false) and not player.moving and UnitLevel("player") >= 20 and player.buff(SB.Prowl).down and player.buff(SB.MoonkinForm).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
         x = x + 1
         if x >= 14 then
             x = 0
