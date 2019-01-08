@@ -2,7 +2,6 @@
 
 local dark_addon = dark_interface
 
-
 dark_addon.support = {};
 
 dark_addon.rotation.CC = {
@@ -34,12 +33,51 @@ dark_addon.rotation.CC = {
     [20066] = "Rependance",
     [277784] = "Hex White Mongrel",
     [2094] = "Blind",
-    [6770] = "Sap"
+    [6770] = "Sap",
+    [1776] = "Gouge"
+}
+dark_addon.rotation.specs = {
+    [62] = {name = "Arcane", role = "dps"},
+    [63] = {name = "Fire", role ="dps"},
+    [64] = {name = "Frost", role ="dps"},
+    [65] = {name = "Holy", role ="heal"},
+    [66] = {name = "Protection", role ="dps"},
+    [70] = {name = "Retribution", role ="dps"},
+    [71] = {name = "Arms", role ="dps"},
+    [72] = {name = "Fury", role ="dps"},
+    [73] = {name = "Protection", role ="dps"},
+    [102] = {name = "Balance", role ="dps"},
+    [103] = {name = "Feral", role ="dps"},
+    [104] = {name = "Guardian", role ="dps"},
+    [105] = {name = "Restoration", role ="heal"},
+    [250] = {name = "Blood", role ="dps"},
+    [251] = {name = "Frost", role ="dps"},
+    [252] = {name = "Unholy", role ="dps"},
+    [253] = {name = "Beast Mastery", role ="dps"},
+    [254] = {name = "Marksmanship", role ="dps"},
+    [255] = {name = "Survival", role ="dps"},
+    [256] = {name = "Discipline", role ="heal"},
+    [257] = {name = "Holy", role ="heal"},
+    [258] = {name = "Shadow", role ="dps"},
+    [259] = {name = "Assassination", role ="dps"},
+    [260] = {name = "Outlaw", role ="dps"},
+    [261] = {name = "Subtlety", role ="dps"},
+    [262] = {name = "Elemental", role ="dps"},
+    [263] = {name = "Enhancement", role ="dps"},
+    [264] = {name = "Restoration", role ="heal"},
+    [265] = {name = "Affliction", role ="dps"},
+    [266] = {name = "Demonology", role ="dps"},
+    [267] = {name = "Destruction", role ="dps"},
+    [268] = {name = "Brewmaster", role ="dps"},
+    [269] = {name = "Windwalker", role ="dps"},
+    [270] = {name = "Mistweaver", role ="heal"},
+    [577] = {name = "Havoc", role ="dps"},
+    [581] = {name = "Vengeance", role ="dps"}
 }
 
 function isCC(target)
     for i = 1, 40 do
-        local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitDebuff("target", i)
+        local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitDebuff(target, i)
         if spell_id == nil then
             break
         end

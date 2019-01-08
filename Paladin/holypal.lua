@@ -282,7 +282,7 @@ local function combat()
     end
 
     -- judgement is high priority due to overall dps but also influences 2 talents and goto azerite trait
-    if -spell(SB.Judgment) == 0 and target.enemy and target.distance < 30 and not isCC(target) then
+    if -spell(SB.Judgment) == 0 and target.enemy and target.distance < 30 and not isCC("target") then
         return cast(SB.Judgment, 'target')
     end
 
@@ -376,7 +376,7 @@ local function combat()
 
     --dps
 
-    if not isCC(target) then
+    if not isCC("target") then
 
         if -spell(SB.HolyShock) == 0 and toggle('DPS', false) and lowest.health.percent > 80 and target.distance < 40 then
             return cast(SB.HolyShock, target)
