@@ -69,8 +69,66 @@ local function resting()
 end
 
 function interface()
-end
+  local settings = {
+    key = 'holypal_settings',
+    title = 'Holy Pal - Settings',
+    width = 250,
+    height = 320,
+    resize = true,
+    show = false,
+    template = {
+      { type = 'header', text = 'Holy Pal - Settings', align= 'center' },
+   
+    }
+  }
 
+  configWindowtwo = dark_addon.interface.builder.buildGUI(settings)
+
+  local utility = {
+    key = 'holypal_utility',
+    title = 'Holy Pal - Utility',
+    width = 250,
+    height = 320,
+    resize = true,
+    show = false,
+    template = {
+      { type = 'header', text = 'Holy Pal - Utility', align= 'center' },
+    
+    }
+  }
+
+  configWindow = dark_addon.interface.builder.buildGUI(utility)
+
+  dark_addon.interface.buttons.add_toggle({
+    name = 'settings',
+    label = 'Rotation Settings',
+    font = 'dark_addon_icon',
+    on = {
+      label = dark_addon.interface.icon('cog'),
+      color = dark_addon.interface.color.blue,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.blue, 0.7)
+    },
+    off = {
+      label = dark_addon.interface.icon('cog'),
+      color = dark_addon.interface.color.grey,
+      color2 = dark_addon.interface.color.dark_grey
+    },
+    callback = function(self)
+      if configWindow.parent:IsShown() then
+        configWindow.parent:Hide()
+      else
+        --logwindows.parent:Show()
+        configWindow.parent:Show()
+      end
+            if configWindowtwo.parent:IsShown() then
+        configWindowtwo.parent:Hide()
+      else
+        --logwindows.parent:Show()
+        configWindowtwo.parent:Show()
+      end
+    end
+  })
+end
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.priest.holy,
     name = 'holypal',
