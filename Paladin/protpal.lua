@@ -36,14 +36,29 @@ local function combat()
     end
 
 
-    --doomsfury trinket whenever using wings
-    if player.buff(SB.AvengingWrath).up and GetItemCooldown(161463) == 0 then
+
+    --Trinkets
+
+    local Trinket13 = GetInventoryItemID("player", 13)
+    local Trinket14 = GetInventoryItemID("player", 14)
+
+--print(Trinket13)
+
+    --doomsfury trinket
+    if Trinket14 == 161463 and player.buff(SB.AvengingWrath).up and GetItemCooldown(161463) == 0 then
         macro('/use 14')
     end
-
-    if target.enemy and target.distance < 8 and target.health.percent > 50 and GetItemCooldown(159627) == 0 and -spell(SB.AvengingWrath) > 10 and player.buff(SB.AvengingWrath).down then
+--Jes Howler (159622)
+    if Trinket13 == 159622 and target.enemy and target.distance < 8 and target.health.percent > 50 and GetItemCooldown(159627) == 0 and -spell(SB.AvengingWrath) > 10 and player.buff(SB.AvengingWrath).down then
         macro('/use 13')
     end
+
+
+--Razdunk big red button  (159611)
+        if Trinket13 == 159611 and target.enemy and target.distance < 8 and target.health.percent > 50 and GetItemCooldown(159611) == 0 and -spell(SB.AvengingWrath) > 10 and player.buff(SB.AvengingWrath).down then
+        macro('/use [@player] 13 ')
+    end
+
 
     --use healthstone at 40% health and we are in combat
     if GetItemCooldown(5512) == 0 and player.health.percent < 40 then
@@ -148,6 +163,8 @@ local function resting()
     if dispellable_unit then
         return cast(SB.CleanseToxins, dispellable_unit)
     end
+
+
 
 
 end
