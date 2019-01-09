@@ -19,15 +19,18 @@ end)
 local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
 local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
 local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80)
+local flashheallowest = dark_addon.settings.fetch('holypal_settings__flashheallowest', 60)
+local flashhealsurge = dark_addon.settings.fetch('holypal_settings__flashhealsurge', 80)
+local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__flashhealsurgeemergency', 90)
 
 -------------
 --Modifiers--
 -------------
   if modifier.alt and castable(SB.MassDispell) then
-    return cast(SB.MassDispell, 'ground')
+    return cast(SB.MassDispell, ground)
   end
   if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
-    return cast(SB.AngelicFeather, 'player')
+    return cast(SB.AngelicFeather, player)
   end
   if modifier.control and castable(SB.DivineHymn) then
     return cast(SB.DivineHymn)
@@ -36,11 +39,11 @@ local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80
 ---Dispel----
 -------------
   if toggle('dispel', false) and castable(SB.Purify) and player.dispellable(SB.Purify) then
-    return cast(SB.Purify, 'player')
+    return cast(SB.Purify, player)
   end
   local unit = group.dispellable(SB.Purify)
   if unit and unit.distance < 40 then
-    return cast(SB.Purify, 'unit')
+    return cast(SB.Purify, unit)
   end
 
 -------------
@@ -49,23 +52,46 @@ local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80
 
 --Renew
   if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down and not player.moving then
-    return cast(SB.Renew, 'lowest')
+    return cast(SB.Renew, lowest)
   end
   if tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down and not player.moving then
-    return cast(SB.Renew, 'tank')
+    return cast(SB.Renew, tank)
   end
   if lowest.castable(SB.Renew) and lowest.health.effective <= renewmoving and max_renews <= simultaneousrenews  and lowest.buff(SB.Renew).down and player.moving then
-    return cast(SB.Renew, 'lowest')
+    return cast(SB.Renew, lowest)
   end
   if tank.castable(SB.Renew) and tank.health.effective <= renewmoving and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down and player.moving  then
-    return cast(SB.Renew, 'tank')
+    return cast(SB.Renew, tank)
   end
+
+  --Flash Heal
+  if lowest.castable(SB.FlashHeal) and lowest.health.effective <= flashheallowest then
+    print 'on lowest'
+    return cast(SB.FlashHeal, lowest)
+  end
+  if castable(SB.FlashHeal) and tank.health.effective <= flashheallowest then
+    print 'on tank'
+    return cast(SB.FlashHeal, tank)  
+  end
+ --[[ if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and lowest.health.effective <= flashhealsurge then
+    return cast(SB.FlashHeal, lowest)
+  end
+   if tank.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and tank.health.effective <= flashhealsurge then
+    return cast(SB.FlashHeal, tank)
+  end
+  if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).remains <= 3 and lowest.health.effective <= flashhealsurgeemergency then
+    return cast(SB.FlashHeal, lowest)
+  end
+  if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).remains <= 3 and tank.health.effective <= flashhealsurgeemergency then
+    return cast(SB.FlashHeal, tank)
+  end 
+  ]]--
 
 -------------
 ---Utility---
 -------------
   if player.health.percent <= fade and castable(SB.Fade) then
-    return cast(SB.Fade, 'player')
+    return cast(SB.Fade, player)
   end
 
 
@@ -159,6 +185,11 @@ function interface()
       { key = 'renewlowest', type = 'spinner', text = 'Renew', desc = 'Health % of lowest to cast at', default =85, min = 5, max = 100, step = 5 },
       { key = 'renewtank', type = 'spinner', text = 'Renew', desc = 'Health % of tank to cast at', default =90, min = 5, max = 100, step = 5 },
       { key = 'renewmoving', type = 'spinner', text = 'Renew', desc = 'Health % to cast Renew while moving', default =80, min = 5, max = 100, step = 5 },
+      { type = 'text', text = 'Flash Heal Settings' },
+      { key = 'flashheallowest', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest to cast at', default =60, min = 5, max = 100, step = 5 },
+      { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest to cast at under Surge of Light', default =80, min = 5, max = 100, step = 5 },
+      { key = 'flashhealsurgeemergency', type = 'spinner', text = 'Flash Heal', desc = 'Health % to not Waste SurgeofLight', default =90, min = 5, max = 100, step = 5 },
+
 
     }
   }
