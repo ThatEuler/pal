@@ -19,9 +19,9 @@ end)
 local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
 local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
 local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80)
-local flashheallowest = dark_addon.settings.fetch('holypal_settings__flashheallowest', 60)
-local flashhealsurge = dark_addon.settings.fetch('holypal_settings__flashhealsurge', 80)
-local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__flashhealsurgeemergency', 90)
+local flashheallowest = dark_addon.settings.fetch('holypal_settings_flashheallowest', 60)
+local flashhealsurge = dark_addon.settings.fetch('holypal_settings_flashhealsurge', 80)
+local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flashhealsurgeemergency', 90)
 
 -------------
 --Modifiers--
@@ -66,11 +66,9 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__fla
 
   --Flash Heal
   if lowest.castable(SB.FlashHeal) and lowest.health.effective <= flashheallowest then
-    print 'on lowest'
     return cast(SB.FlashHeal, lowest)
   end
   if castable(SB.FlashHeal) and tank.health.effective <= flashheallowest then
-    print 'on tank'
     return cast(SB.FlashHeal, tank)  
   end
   if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and lowest.health.effective <= flashhealsurge then
@@ -95,18 +93,18 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__fla
     return cast(SB.Fade, player)
   end
 
-
+end
 -------------
 -----DPS-----
 -------------
   if player.alive and not player.channeling() and toggle('dps', false) then
 
-    if castable(SB.HolyWordChastise) and target.enemy and target.alive then
-      return cast(SB.HolyWordChastise, target)
-    end
-    if target.enemy and target.alive then
-      return cast(SB.Smite, target)
-    end
+  if castable(SB.HolyWordChastise) and target.enemy and target.alive then
+    return cast(SB.HolyWordChastise, target)
+  end
+  if target.enemy and target.alive then
+    return cast(SB.Smite, target)
+  end
 
   end
 
