@@ -97,7 +97,8 @@ end
 -------------
 -----DPS-----
 -------------
-  if player.alive and not player.channeling() and toggle('dps', false) then
+--[[ commenting it out, its breaking
+if not player.dead and not player.channeling() and toggle('dps', false) then
 
   if castable(SB.HolyWordChastise) and target.enemy and target.alive then
     return cast(SB.HolyWordChastise, target)
@@ -107,6 +108,7 @@ end
   end
 
   end
+  ]]
 
 local function resting()
 -------------
