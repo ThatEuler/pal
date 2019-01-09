@@ -20,7 +20,7 @@ local function combat()
     for i = 1, 3 do
         if UnitExists('arena' .. i) then
             local spec = specLookup[GetInspectSpecialization('arena' .. i)]
-print("arena "  .. i "is an " .. spec.name .. " role: " ..spec.role)
+            print("arena " .. i "is an " .. spec.name .. " role: " .. spec.role)
 
         end
     end
@@ -44,7 +44,7 @@ print("arena "  .. i "is an " .. spec.name .. " role: " ..spec.role)
         return cast(SB.Conflagrate, target)
     end
 
-    if target.castable(SB.Incinerate) return
+    if target.castable(SB.Incinerate) then
         return cast(SB.Incinerate, target)
     end
 
