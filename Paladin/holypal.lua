@@ -17,12 +17,18 @@ local TB = dark_addon.rotation.spellbooks.paladin
 local DB = dark_addon.rotation.spellbooks.paladin
 local race = UnitRace("player")
 
+local tank1 = nil
+local tank2 = nil
+
 SB.Quake = 240447
 SB.GrievousWound = 240559
 
 -- enable to treat tank like everyone else - all 'tank' statements will be ignored
 --dark_addon.environment.virtual.exclude_tanks = false
 
+local function GroupType()
+    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
+end
 
 local function GCD()
 
@@ -405,27 +411,76 @@ local function resting()
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
 
 
+        if IsFalling() == true then
+            z = z + 1
+            if z >= 10 and -spell(SB.DivineShield) == 0 then
+                return cast(SB.DivineShield, player)
+            end
+        end
+
+        if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
+            return cast(SB.Repentance, 'mouseover')
+        end
+
+        if modifier.lalt and -spell(SB.LightofDawn) == 0 then
+            return cast(SB.LightofDawn)
+        end
+
+        if modifier.control then
+            if mouseover.alive and -spell(SB.Cleanse) == 0 then
+                return cast(SB.Cleanse, 'mouseover')
+
+            elseif not mouseover.alive and -spell(SB.Absolution) == 0 then
+                return cast(SB.Absolution)
+            end
+        end
+        --BE Racial
+        local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial')
+        if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
+            return cast(SB.ArcaneTorrent)
+        end
+
+
+        --find the two tank
+
+        local members = GetNumGroupMembers()
+        local group_type = GroupType()
+        if IsInRaid then
+            for i = 1, (members - 1) do
+                local unit = group_type .. i
+                local unitName, _ = UnitName(unit)
+                if tank1 == nil and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                    tank1 = group_type .. i
+                elseif tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                    tank2 = group_type .. i
+                end
+                if tank1 == nil then
+                    tank1 = 'player'
+                end
+                if tank2 == nil then
+                    tank2 = group_type .. i
+                end
+            end
+            if talent(7, 2) then
+                local tank1 = dark_addon.environment.conditions.unit(tank1)
+                local tank2 = dark_addon.environment.conditions.unit(tank2)
+                if tank1 ~= nil and tank1.buff(SB.BeaconofLight).down then
+                    return cast(SB.BeaconofLight, tank1)
+                end
+                if tank2 ~= nil and tank2.buff(SB.BeaconofFaith).down then
+                    return cast(SB.BeaconofFaith, tank2)
+                end
+
+            end
+        end
+
+
+
         --Beacons
         if talent(7, 1) and tank.buff(SB.BeaconofLight).down then
             return cast(SB.BeaconofLight, tank)
         end
-        --[[
-                if talent(7, 2) and IsInRaid() then
-                    if tank.buff(SB.BeaconofLight).down then
-                        return cast(SB.BeaconofLight, tank)
-                    end
-                    if offtank.buff(SB.BeaconofFaith).down then
-                        return cast(SB.BeaconofFaith, offtank)
-                    end
-                    --elseif talent(7, 2) and IsInGroup() then
-                    --  if tank.buff(SB.BeaconofLight).down then
-                    --    return cast(SB.BeaconofLight, tank)
-                    --  end
-                    --  if player.buff(SB.BeaconofFaith).down then
-                    --    return cast(SB.BeaconofFaith, player)
-                    --  end
-                end
-        ]]
+
         -- - Decurse
         local dispellable_unit = group.removable('disease', 'magic', 'poison')
         if toggle('DISPELL', false) and dispellable_unit and spell(SB.Cleanse).cooldown == 0 then
@@ -473,30 +528,6 @@ local function resting()
             end
         end
     end
-
-    if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
-        return cast(SB.Repentance, 'mouseover')
-    end
-
-    if modifier.lalt and -spell(SB.LightofDawn) == 0 then
-        return cast(SB.LightofDawn)
-    end
-
-    if modifier.control then
-        if mouseover.alive and -spell(SB.Cleanse) == 0 then
-            return cast(SB.Cleanse, 'mouseover')
-
-        elseif not mouseover.alive and -spell(SB.Absolution) == 0 then
-            return cast(SB.Absolution)
-        end
-    end
-    --BE Racial
-    local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial')
-    if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
-        return cast(SB.ArcaneTorrent)
-    end
-
-
 end
 
 local function interface()
