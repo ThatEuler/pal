@@ -12,6 +12,11 @@ SB.MendingBuff = 41635
 local function combat()
 
 -------------
+----Fetch----
+-------------
+local fade = dark_addon.settings.fetch('holypal_settings_fade', 95)
+
+-------------
 --Modifiers--
 -------------
     if modifier.alt and castable(SB.MassDispell) then
@@ -39,8 +44,11 @@ local function combat()
 
 
 
+
+
 end
 local function resting()
+
 -------------
 ----Fetch----
 -------------
@@ -114,6 +122,9 @@ function interface()
     template = {
       { type = 'header', text = 'Holy Pal - Settings', align= 'center' },
       { type = 'rule' },
+      { type = 'text', text = 'Class Settings' },
+      { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', default =95, min = 1, max = 100, step = 5 },
+
 
     }
   }
