@@ -83,6 +83,20 @@ local function combat()
             end
         end
 
+            --CleanseSpirit
+    -- - Decurse
+    if toggle('DISPELL', false) then
+        local dispellable_unit = player.removable('curse')
+        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+            return cast(SB.CleanseSpirit, dispellable_unit)
+        end
+
+        local dispellable_unit = group.removable('curse')
+        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+            return cast(SB.CleanseSpirit, dispellable_unit)
+        end
+    end
+
         --purge
 
         if target.castable(SB.Purge) then
@@ -358,7 +372,24 @@ earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
         end -- end AOE
     end --end target alive
 end -- end combat
+
+
 local function resting()
+
+    --CleanseSpirit
+    -- - Decurse
+    if toggle('DISPELL', false) then
+        local dispellable_unit = player.removable('curse')
+        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+            return cast(SB.CleanseSpirit, dispellable_unit)
+        end
+
+        local dispellable_unit = group.removable('curse')
+        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+            return cast(SB.CleanseSpirit, dispellable_unit)
+        end
+    end
+
     if talent(2, 3) and modifier.alt then
         return cast(SB.TotemMastery)
     end
@@ -367,8 +398,8 @@ local function resting()
         return cast(SB.Earthquake, 'ground')
     end
 
-    if modifier.control and -spell(SB.CapacitorTotem) == 0 then
-        return cast(SB.CapacitorTotem, 'ground')
+    if modifier.control and mouseover.alive and -spell(SB.AncestralSpirit) == 0 then
+        return cast(SB.AncestralSpirit, 'mouseover')
     end
 
     if player.moving and not player.buff(SB.GhostWolf).up then
@@ -391,6 +422,20 @@ function interface()
         },
         off = {
             label = 'DEF',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        }
+    })
+    dark_addon.interface.buttons.add_toggle({
+        name = 'DISPELL',
+        label = 'DISP',
+        on = {
+            label = 'DISP',
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'DISP',
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         }
