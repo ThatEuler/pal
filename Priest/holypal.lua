@@ -51,7 +51,7 @@ local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80
   if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= renewmax and lowest.buff(SB.Renew).down and not player.moving then
     return cast(SB.Renew, 'lowest')
   end
-  if tank.castable(SB.Renew) and tank.health.effective <= renewt and max_renews <= renewmax and tank.buff(SB.Renew).down and not player.moving then
+  if tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= renewmax and tank.buff(SB.Renew).down and not player.moving then
     return cast(SB.Renew, 'tank')
   end
   if lowest.castable(SB.Renew) and lowest.health.effective <= renewmoving and max_renews <= renewmax  and lowest.buff(SB.Renew).down and player.moving then
