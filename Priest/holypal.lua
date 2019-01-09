@@ -11,8 +11,8 @@ local function combat()
 -------------
 ----Fetch----
 -------------
-local fade = dark_addon.settings.fetch('holy_settings_fade', 95)
-local simultaneousrenews = dark_addon.settings.fetch('holy_settings_simultaneousrenews', 6)
+local fade = dark_addon.settings.fetch('holypal_settings_fade', 95)
+local simultaneousrenews = dark_addon.settings.fetch('holypal_settings_simultaneousrenews', 6)
 local max_renews = group.count(function (unit)
   return unit.alive and unit.distance < 40 and unit.buff(SB.Renew).up
 end)
