@@ -286,7 +286,7 @@ local function combat()
     end
 
     -- judgement is high priority due to overall dps but also influences 2 talents and goto azerite trait
-    if -spell(SB.Judgment) == 0 and target.enemy and target.distance < 30 and not isCC("target") then
+    if -spell(SB.Judgment) == 0 and target.enemy and target.distance < 30 and not isCC("target") and UnitAffectingCombat("target") then
         return cast(SB.Judgment, 'target')
     end
 
