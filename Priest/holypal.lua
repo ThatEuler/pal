@@ -7,48 +7,70 @@ local lftime = 0
 -------------
 SB.GiftOftheNaaru = 59544
 SB.MendingBuff = 41635
-
-
 local function combat()
-
 -------------
 ----Fetch----
 -------------
-local fade = dark_addon.settings.fetch('holypal_settings_fade', 95)
+local fade = dark_addon.settings.fetch('holy_settings_fade', 95)
+local simultaneousrenews = dark_addon.settings.fetch('holy_settings_simultaneousrenews', 6)
+local max_renews = group.count(function (unit)
+  return unit.alive and unit.distance < 40 and unit.buff(SB.Renew).up
+end)
+local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
+local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
+local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80)
 
 -------------
 --Modifiers--
 -------------
-    if modifier.alt and castable(SB.MassDispell) then
-      return cast(SB.MassDispell, 'ground')
-    end
-
-    if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
-      return cast(SB.AngelicFeather, 'player')
-    end
-
-    if modifier.control and castable(SB.DivineHymn) then
-      return cast(SB.DivineHymn)
-    end
-
+  if modifier.alt and castable(SB.MassDispell) then
+    return cast(SB.MassDispell, 'ground')
+  end
+  if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
+    return cast(SB.AngelicFeather, 'player')
+  end
+  if modifier.control and castable(SB.DivineHymn) then
+    return cast(SB.DivineHymn)
+  end
 -------------
 ---Dispel----
 -------------
-    if toggle('dispel', false) and castable(SB.Purify) and player.dispellable(SB.Purify) then
-        return cast(SB.Purify, 'player')
-    end
-    local unit = group.dispellable(SB.Purify)
-    if unit and unit.distance < 40 then
-        return cast(SB.Purify, unit)
-    end
+  if toggle('dispel', false) and castable(SB.Purify) and player.dispellable(SB.Purify) then
+    return cast(SB.Purify, 'player')
+  end
+  local unit = group.dispellable(SB.Purify)
+  if unit and unit.distance < 40 then
+    return cast(SB.Purify, 'unit')
+  end
 
+-------------
+----Heal-----
+-------------
 
+--Renew
+  if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= renewmax and lowest.buff(SB.Renew).down and not player.moving then
+    return cast(SB.Renew, 'lowest')
+  end
+  if tank.castable(SB.Renew) and tank.health.effective <= renewt and max_renews <= renewmax and tank.buff(SB.Renew).down and not player.moving then
+    return cast(SB.Renew, 'tank')
+  end
+  if lowest.castable(SB.Renew) and lowest.health.effective <= renewmoving and max_renews <= renewmax  and lowest.buff(SB.Renew).down and player.moving then
+    return cast(SB.Renew, 'lowest')
+  end
+  if tank.castable(SB.Renew) and lowest.health.effective <= renewmoving and max_renews <= renewmax and tank.buff(SB.Renew).down and player.moving  then
+    return cast(SB.Renew, 'tank')
+  end
 
+-------------
+---Utility---
+-------------
+  if player.health.percent <= fade and castable(SB.Fade) then
+    return cast(SB.Fade, 'player')
+  end
 
 
 end
 local function resting()
-
 -------------
 ----Fetch----
 -------------
@@ -61,56 +83,63 @@ local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
 local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
 local bgstatus = GetBattlefieldStatus(1);
 local autojoin = dark_addon.settings.fetch('holypal_utility_autojoin', true)
+local fade = dark_addon.settings.fetch('holypal_settings_fade', 95)
+local simultaneousrenews = dark_addon.settings.fetch('holypal_settings_simultaneousrenews', 6)
+local max_renews = group.count(function (unit)
+  return unit.alive and unit.distance < 40 and unit.buff(SB.Renew).up
+end)
+local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
+local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
+local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80)
+
+
+
+
 
 -------------
 --Auto Join--
 -------------
-if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
- SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
-elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
- SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
-end
+  if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
+  elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+  end
 
-if autojoin ==true and lfg == true or bgstatus == "confirm" then
-  PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog", false);
-  lftime = lftime + 1
-end
+  if autojoin ==true and lfg == true or bgstatus == "confirm" then
+    PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog", false);
+    lftime = lftime + 1
+  end
 
-if lftime >=math.random(20,35) then
-  SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
-  macro('/click LFGDungeonReadyDialogEnterDungeonButton')
-  lftime = 0
-end    
-
+  if lftime >=math.random(20,35) then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+    macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+    lftime = 0
+  end    
 
 
 -------------
 --Modifiers--
 -------------
-    if modifier.alt and castable(SB.MassDispell) then
-      return cast(SB.MassDispell, 'ground')
-    end
-
-    if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
-      return cast(SB.AngelicFeather, 'player')
-    end
+  if modifier.alt and castable(SB.MassDispell) then
+    return cast(SB.MassDispell, 'ground')
+  end
+  if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
+    return cast(SB.AngelicFeather, 'player')
+  end
 -------------
 ----Buff-----
 -------------
-    local allies_without_my_buff = group.count(function (unit)
-        return unit.alive and unit.distance < 40 and unit.buff(SB.PowerWordFortitude).down
-    end)
-    if allies_without_my_buff > 2 and castable(SB.PowerWordFortitude) then
-        return cast(SB.PowerWordFortitude, 'player')
+  local allies_without_my_buff = group.count(function (unit)
+    return unit.alive and unit.distance < 40 and unit.buff(SB.PowerWordFortitude).down
+  end)
+  if allies_without_my_buff > 2 and castable(SB.PowerWordFortitude) then
+    return cast(SB.PowerWordFortitude, 'player')
     end
-
     if player.buff(SB.PowerWordFortitude).down and castable(SB.PowerWordFortitude) then
         return cast(SB.PowerWordFortitude, 'player')
     end
-
     
 end
-
 function interface()
   local settings = {
     key = 'holypal_settings',
@@ -123,14 +152,18 @@ function interface()
       { type = 'header', text = 'Holy Pal - Settings', align= 'center' },
       { type = 'rule' },
       { type = 'text', text = 'Class Settings' },
-      { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', default =95, min = 1, max = 100, step = 5 },
-
+      { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', min = 1, max = 100, step = 5 },
+      { type = 'rule' },
+      { type = 'text', text = 'Renew Settings' },
+      { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 5 },
+      { key = 'renewlowest', type = 'spinner', text = 'Renew', desc = 'Health % of lowest to cast at', default =85, min = 5, max = 100, step = 5 },
+      { key = 'renewtank', type = 'spinner', text = 'Renew', desc = 'Health % of tank to cast at', default =90, min = 5, max = 100, step = 5 },
+      { key = 'renewmoving', type = 'spinner', text = 'Renew', desc = 'Health % to cast Renew while moving', default =80, min = 5, max = 100, step = 5 },
 
     }
   }
 
   configWindowtwo = dark_addon.interface.builder.buildGUI(settings)
-
   local utility = {
     key = 'holypal_utility',
     title = 'Holy Pal - Utility',
@@ -144,12 +177,11 @@ function interface()
       { type = 'text', text = 'Dungeon Settings' },
       { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
       { type = 'rule' },
-
     }
   }
 
   configWindow = dark_addon.interface.builder.buildGUI(utility)
-  dark_addon.interface.buttons.add_toggle({
+     dark_addon.interface.buttons.add_toggle({
     name = 'dispel',
     label = 'Auto Dispel',
     on = {
@@ -163,7 +195,7 @@ function interface()
       color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
     }
     })
-  dark_addon.interface.buttons.add_toggle({
+    dark_addon.interface.buttons.add_toggle({
     name = 'settings',
     label = 'Rotation Settings',
     font = 'dark_addon_icon',
