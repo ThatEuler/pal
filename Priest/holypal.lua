@@ -73,7 +73,7 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__fla
     print 'on tank'
     return cast(SB.FlashHeal, tank)  
   end
- --[[ if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and lowest.health.effective <= flashhealsurge then
+  if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and lowest.health.effective <= flashhealsurge then
     return cast(SB.FlashHeal, lowest)
   end
    if tank.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and tank.health.effective <= flashhealsurge then
@@ -85,7 +85,8 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__fla
   if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).remains <= 3 and tank.health.effective <= flashhealsurgeemergency then
     return cast(SB.FlashHeal, tank)
   end 
-  ]]--
+ 
+
 
 -------------
 ---Utility---
@@ -94,6 +95,20 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings__fla
     return cast(SB.Fade, player)
   end
 
+
+-------------
+-----DPS-----
+-------------
+  if player.alive and not player.channeling() and toggle('dps', false) then
+
+    if castable(SB.HolyWordChastise) and target.enemy and target.alive then
+      return cast(SB.HolyWordChastise, target)
+    end
+    if target.enemy and target.alive then
+      return cast(SB.Smite, target)
+    end
+
+  end
 
 end
 local function resting()
@@ -212,7 +227,7 @@ function interface()
   }
 
   configWindow = dark_addon.interface.builder.buildGUI(utility)
-     dark_addon.interface.buttons.add_toggle({
+    dark_addon.interface.buttons.add_toggle({
     name = 'dispel',
     label = 'Auto Dispel',
     on = {
@@ -226,6 +241,20 @@ function interface()
       color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
     }
     })
+    dark_addon.interface.buttons.add_toggle({
+    name = 'dps',
+    label = 'Use Damage Spells',
+    on = {
+      label = 'DPS ON',
+      color = dark_addon.interface.color.blue,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.blue, 0.5)
+    },
+    off = {
+      label = 'DPS OFF',
+      color = dark_addon.interface.color.red,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+    }
+  })
     dark_addon.interface.buttons.add_toggle({
     name = 'settings',
     label = 'Rotation Settings',
