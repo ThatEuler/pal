@@ -22,7 +22,9 @@ local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80
 local flashheallowest = dark_addon.settings.fetch('holypal_settings_flashheallowest', 60)
 local flashhealsurge = dark_addon.settings.fetch('holypal_settings_flashhealsurge',75)
 local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flashhealsurgeemergency', 80)
-local healpercent = dark_addon.settings.fetch('holypal_settings_heal.spin', 70)
+local healpercent = dark_addon.settings.fetch('holypal_settings_healpercent', 70)
+local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_desperateprayerpercent', 35)
+
 -------------
 --Modifiers--
 -------------
@@ -90,7 +92,11 @@ local healpercent = dark_addon.settings.fetch('holypal_settings_heal.spin', 70)
    if tank.castable(SB.Heal) and tank.health.effective <= healpercent then
     return cast(SB.Heal, tank)
   end
- 
+
+--Desperate Prayer
+  if player.health.effective < desperateprayerpercent and castable(SB.DesperatePrayer) then
+    return cast(SB.DesperatePrayer, player)
+  end
 
 
 -------------
@@ -191,6 +197,7 @@ function interface()
       { type = 'text', text = 'Class Settings' },
       { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', min = 1, max = 100, step = 5 },
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
+      { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Renew Settings' },
       { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 5 },
