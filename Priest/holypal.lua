@@ -149,7 +149,20 @@ function interface()
   }
 
   configWindow = dark_addon.interface.builder.buildGUI(utility)
-
+  dark_addon.interface.buttons.add_toggle({
+    name = 'dispel',
+    label = 'Auto Dispel',
+    on = {
+      label = 'Dispel',
+      color = dark_addon.interface.color.blue,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.blue, 0.5)
+    },
+    off = {
+      label = 'Dispel',
+      color = dark_addon.interface.color.red,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+    }
+    })
   dark_addon.interface.buttons.add_toggle({
     name = 'settings',
     label = 'Rotation Settings',
@@ -157,7 +170,7 @@ function interface()
     on = {
       label = dark_addon.interface.icon('cog'),
       color = dark_addon.interface.color.blue,
-      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.blue, 0.7)
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.blue, 0.5)
     },
     off = {
       label = dark_addon.interface.icon('cog'),
