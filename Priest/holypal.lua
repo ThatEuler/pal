@@ -24,11 +24,13 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flas
 local healpercent = dark_addon.settings.fetch('holypal_settings_healpercent', 70)
 local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_desperateprayerpercent', 35)
 local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenitypercent', 50)
-local guardianspirit = dark_addon.settings.fetch('holypal_settings_guardianspirit', 30 )
+local guardianspirit = dark_addon.settings.fetch('holypal_settings_guardianspirit', 30)
 local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardianspirittarget', "gs_tank")
-local prayerofhealingpercent = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 70 )
-local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_settings_prayerofhealingnumberofplayer', 3 )
-local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercent', 85 )
+local prayerofhealingpercent = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 70)
+local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_settings_prayerofhealingnumberofplayer', 3)
+local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercent', 85)
+local flashhealonme = dark_addon.settings.fetch('holypal_settings_flashhealonme', 25)
+local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 25)
 
 -------------
 --Modifiers--
@@ -52,15 +54,23 @@ local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercen
   if unit and unit.distance < 40 then
     return cast(SB.Purify, unit)
   end
-
+-------------
+--Self Heal--
+-------------
+  if player.castable(SB.FlashHeal) and player.health.effective <= flashhealonme then
+    return cast(SB.FlashHeal, player)
+  end
+  if player.castable(SB.HolyWordSerenity) and player.health.effective <= serenetionme then
+    return cast(SB.HolyWordSerenity, player)
+  end
 -------------
 ----Heal-----
 -------------
 --Prayer of Mending
-  if castable(SB.PrayerofMending) and lowest.health.effective <= mendingpercent then return 
-    cast(SB.PrayerofMending, lowest)
-  elseif castable(SB.PrayerofMending) and tank.health.effective <= mendingpercent then return 
-    cast(SB.PrayerofMending, tank)
+  if castable(SB.PrayerofMending) and lowest.health.effective <= mendingpercent then 
+    return cast(SB.PrayerofMending, lowest)
+  elseif castable(SB.PrayerofMending) and tank.health.effective <= mendingpercent then
+   return cast(SB.PrayerofMending, tank)
   end
 
 --Prayer of Healing 
@@ -248,7 +258,6 @@ function interface()
       { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', min = 1, max = 100, step = 5 },
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of lowest in Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Serenity', desc = 'Health % of lowest in Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
-      { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
       { key = 'prayerofhealingpercent', type = 'spinner', text = 'Prayer of Healing', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing', desc = 'Number of damaged players near you',default = 3, min = 1, max = 100, step = 1 },
       { key = 'mendingpercent', type = 'spinner', text = 'Prayer of Mending', desc = 'Health % of lowest in Group to cast at',default = 85, min = 5, max = 100, step = 5 },
@@ -273,6 +282,10 @@ function interface()
       { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest in Group to cast at under Surge of Light', default =75, min = 5, max = 100, step = 5 },
       { key = 'flashhealsurgeemergency', type = 'spinner', text = 'Flash Heal', desc = 'Health % to not Waste SurgeofLight', default =80, min = 5, max = 100, step = 5 },
       { type = 'rule' },
+      { type = 'text', text = 'Emergency Self Heals' },
+      { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
+      { key = 'flashhealonme', type = 'spinner', text = 'Self Flash Heal', desc = 'Health % of Player to Cast at',default = 25, min = 5, max = 100, step = 5 },
+      { key = 'serenetyonme', type = 'spinner', text = 'Self Serenity', desc = 'Health % of Player to Cast at',default = 25, min = 5, max = 100, step = 5 },
     }
   }
 
