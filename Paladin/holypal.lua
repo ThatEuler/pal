@@ -15,6 +15,7 @@ local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.paladin
 local TB = dark_addon.rotation.spellbooks.paladin
 local DB = dark_addon.rotation.spellbooks.paladin
+local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
 
 local tank1 = nil
@@ -312,8 +313,22 @@ local function combat()
     end
 
     --BE Racial
-    if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 60 and -spell(SB.ArcaneTorrent) == 0 then
-        return cast(SB.ArcaneTorrent)
+    if autoRacial == true and race == "Blood Elf" and -spell(SB.ArcaneTorrent) == 0 then
+        if player.power.mana.percent < 60 then
+            return cast(SB.ArcaneTorrent)
+        end
+        if target.distance <= 8 and -spell(SB.ArcaneTorrent) == 0 then
+            for i = 1, 40 do
+                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+                if spell_id == nil then
+                    break
+                end
+                if name and PB[spell_id] then
+                    print("Purging " .. name .. " off the target.")
+                    return cast(SB.ArcaneTorrent)
+                end
+            end
+        end
     end
 
     -- holy shock on CD
@@ -421,7 +436,6 @@ local function combat()
 
 
 end
-
 local function resting()
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
 
@@ -458,6 +472,7 @@ local function resting()
         if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
             return cast(SB.ArcaneTorrent)
         end
+
 
 
         --find the two tank
