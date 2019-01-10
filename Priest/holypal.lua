@@ -31,6 +31,7 @@ local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_setting
 local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercent', 85)
 local flashhealonme = dark_addon.settings.fetch('holypal_settings_flashhealonme', 25)
 local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 25)
+local apotheosisflash = dark_addon.settings.fetch('holypal_settings_apotheosisflash', 85)
 
 -------------
 --Modifiers--
@@ -65,6 +66,23 @@ if target.alive and target.enemy and not player.channeling() then
   if player.castable(SB.HolyWordSerenity) and player.health.effective <= serenetionme then
     return cast(SB.HolyWordSerenity, player)
   end
+
+--------------
+--Apotheosis--
+--------------
+if player.buff(SB.Apotheosis).up then
+  if lowest.castable(SB.FlashHeal) and lowest.health.effective <= apotheosisflash then
+    return cast(SB.FlashHeal, lowest)
+  elseif tank.castable(SB.FlashHeal) and tank.health.effective <= apotheosisflash then
+    return cast(SB.FlashHeal, tank)
+  end
+
+
+
+
+
+
+end
 -------------
 ----Heal-----
 -------------
@@ -315,6 +333,10 @@ function interface()
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
       { key = 'flashhealonme', type = 'spinner', text = 'Self Flash Heal', desc = 'Health % of Player to Cast at',default = 25, min = 5, max = 100, step = 5 },
       { key = 'serenetyonme', type = 'spinner', text = 'Self Serenity', desc = 'Health % of Player to Cast at',default = 25, min = 5, max = 100, step = 5 },
+      { type = 'rule' },
+      { type = 'text', text = 'Apotheosis Settings' },
+      { key = 'apotheosisflash', type = 'spinner', text = 'Apo Flash Heal', desc = 'Use Flash Heal while Apotheosis is active',default = 85, min = 5, max = 100, step = 5 },
+
     }
   }
 
