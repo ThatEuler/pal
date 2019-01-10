@@ -32,6 +32,10 @@ local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercen
 local flashhealonme = dark_addon.settings.fetch('holypal_settings_flashhealonme', 25)
 local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 25)
 local apotheosisflash = dark_addon.settings.fetch('holypal_settings_apotheosisflash', 85)
+local apotheosisserenetiycd = dark_addon.settings.fetch('holypal_settings_apotheosisserenetiycd', 30)
+local apotheosispoh = dark_addon.settings.fetch('holypal_settings_apotheosispoh', 90)
+local apotheosispohplayers = dark_addon.settings.fetch('holypal_settings_apotheosispohplayers', 6)
+
 
 -------------
 --Modifiers--
@@ -71,13 +75,14 @@ if target.alive and target.enemy and not player.channeling() then
 --Apotheosis--
 --------------
 if player.buff(SB.Apotheosis).up then
-  if lowest.castable(SB.FlashHeal) and lowest.health.effective <= apotheosisflash then
+  if lowest.castable(SB.FlashHeal) and lowest.health.effective <= apotheosisflash and spell(SB.HolyWordSerenity).cooldown >= apotheosisserenetiycd then
     return cast(SB.FlashHeal, lowest)
-  elseif tank.castable(SB.FlashHeal) and tank.health.effective <= apotheosisflash then
+  elseif tank.castable(SB.FlashHeal) and tank.health.effective <= apotheosisflash and spell(SB.HolyWordSerenity).cooldown >= apotheosisserenetiycd then
     return cast(SB.FlashHeal, tank)
   end
-
-
+  if castable(SB.PrayerofHealing) and group.under(apotheosispoh, 40, true) >= apotheosispohplayers then
+    return cast(SB.PrayerofHealing, player)
+  end
 
 
 
@@ -306,7 +311,7 @@ function interface()
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of lowest in Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Serenity', desc = 'Health % of lowest in Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
       { key = 'prayerofhealingpercent', type = 'spinner', text = 'Prayer of Healing', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
-      { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing', desc = 'Number of damaged players near you',default = 3, min = 1, max = 100, step = 1 },
+      { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing', desc = 'Number of damaged players near you',default = 3, min = 1, max = 6, step = 1 },
       { key = 'mendingpercent', type = 'spinner', text = 'Prayer of Mending', desc = 'Health % of lowest in Group to cast at',default = 85, min = 5, max = 100, step = 5 },
       { key = 'guardianspirit', type = 'spinner', text = 'Guardian Spirit', desc = 'Health % to Cast at',default = 30, min = 5, max = 100, step = 5 },
       { key = 'guardianspirittarget', type = 'dropdown',
@@ -335,7 +340,11 @@ function interface()
       { key = 'serenetyonme', type = 'spinner', text = 'Self Serenity', desc = 'Health % of Player to Cast at',default = 25, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Apotheosis Settings' },
-      { key = 'apotheosisflash', type = 'spinner', text = 'Apo Flash Heal', desc = 'Use Flash Heal while Apotheosis is active',default = 85, min = 5, max = 100, step = 5 },
+      { key = 'apotheosisflash', type = 'spinner', text = 'Apotheosis Flash Heal', desc = 'Use Flash Heal while Apotheosis is active',default = 85, min = 5, max = 100, step = 5 },
+      { key = 'apotheosisserenetiycd', type = 'spinner', text = 'Apotheosis Serenity CD', desc = 'Use Flash Heal only if Serenity CD is above this',default = 30, min = 5, max = 60, step = 5 },
+      { key = 'apotheosispoh', type = 'spinner', text = 'Apotheosis Prayer of Healing', desc = 'Use PoH while Apotheosis is active',default = 90, min = 5, max = 100, step = 5 },
+      { key = 'apotheosispohplayers', type = 'spinner', text = 'Apotheosis PoH Targets', desc = 'Number of damaged players near you',default = 3, min = 1, max = 6, step = 1 },
+
 
     }
   }
