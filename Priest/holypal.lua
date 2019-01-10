@@ -24,7 +24,8 @@ local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flas
 local healpercent = dark_addon.settings.fetch('holypal_settings_healpercent', 70)
 local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_desperateprayerpercent', 35)
 local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenitypercent', 50)
-
+local guardianspirit = dark_addon.settings.fetch('holypal_settings_guardianspirit', 30 )
+local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardianspirittarget', "gs_tank")
 -------------
 --Modifiers--
 -------------
@@ -51,7 +52,14 @@ local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenityperc
 -------------
 ----Heal-----
 -------------
---serenitypercent
+--Guardian Spirit
+  if guardianspirittarget == 'gs_tank' and tank.castable(SB.GuardianSpirit) and tank.health.percent <= guardianspirit then
+    return cast(SB.GuardianSpirit, tank)
+    elseif guardianspirittarget == 'gs_all' and lowest.castable(SB.GuardianSpirit) and lowest.health.percent <= guardianspirit then
+      return cast (SB.GuardianSpirit, lowest)
+    end
+
+--Serenity
   if castable(SB.HolyWordSerenity) and lowest.health.effective <= serenitypercent then
     return cast(SB.HolyWordSerenity, lowest)
   elseif castable(SB.HolyWordSerenity) and tank.health.effective <= serenitypercent then
@@ -223,8 +231,17 @@ function interface()
       { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', min = 1, max = 100, step = 5 },
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of lowest in Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Serenity', desc = 'Health % of lowest in Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
-
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
+      { key = 'guardianspirit', type = 'spinner', text = 'Guardian Spirit', desc = 'Health % to Cast at',default = 30, min = 5, max = 100, step = 5 },
+      { key = 'guardianspirittarget', type = 'dropdown',
+      text = 'Target',
+      desc = 'Use Guardian Spirit on...',
+      default = 'gs_tank',
+      list = {
+      { key = 'gs_all', text = 'ALL' },
+      { key = 'gs_tank', text = 'Only Tanks' },
+      }
+      },
       { type = 'rule' },
       { type = 'text', text = 'Renew Settings' },
       { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 5 },
