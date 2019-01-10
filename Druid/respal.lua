@@ -227,54 +227,65 @@ end -- end combat()
 
 local function resting()
 
-
+    --print(x)
+    local outdoor = IsOutdoors()
     if player.alive then
-        if player.buff(SB.TravelForm).exists or player.buff(SB.Refreshment).up or player.buff(SB.Drink).up then
-            return
-        end
-        if modifier.lalt and -spell(SB.Efflorescence) == 0 then
-            return cast(SB.Efflorescence, 'ground')
-        end
 
-        -- Keep Lifebloom, on an active tank.
-        if IsInGroup() and tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
-            return cast(SB.Lifebloom, tank)
-        end
-        -- Swiftmend
-        if player.castable(SB.Swiftmend) and player.health.percent < 50 then
-            return cast(SB.Swiftmend, player)
-        end
-        -- Rejuvenation
-        if player.castable(SB.Rejuvenation) and not player.buff(SB.Rejuvenation).up and player.health.percent < 75 then
-            return cast(SB.Rejuvenation, player)
-        end
-        -- Regrowth
-        if player.castable(SB.Regrowth) and ((player.health.percent < 75 and not player.buff(SB.Regrowth).up) or player.health.percent < 30) then
-            return cast(SB.Regrowth, player)
-        end
-        -- Barkskin
-        if player.castable(SB.Barkskin) and player.health.percent < 50 then
-            return cast(SB.Barkskin, player)
-        end
-        if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent <= 95)
-                or (talent(7, 2) and lowest.buff(SB.RejuvenationGermination).down and lowest.health.percent <= 75) then
-            return cast(SB.Rejuvenation, lowest)
-        end
-
-        y = 0
-        z = 0
-        if GetShapeshiftForm() == 3 then
+        if (player.buff(SB.TravelForm).exists and player.moving) or player.buff(SB.Refreshment).up or player.buff(SB.Drink).up then
             return
         end
 
-        if toggle('Forms', false) and player.moving then
+        if toggle('Forms', false) and player.moving and player.buff(SB.Prowl).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down then
             x = x + 1
-            local outdoor = IsOutdoors()
-            if outdoor and x >= 6 then
+            if player.moving and player.buff(SB.CatForm).up and -spell(SB.Dash) == 0 then
+                return cast(SB.Dash)
+            end
+            if outdoor and x >= 20 then
                 x = 0
                 return cast(SB.TravelForm)
             end
+
+            if not outdoor and x >= 8 and player.buff(SB.CatForm).down then
+                x = 0
+                return cast(SB.CatForm)
+            end
+        elseif toggle('Forms', false) and not player.moving and player.buff(SB.Prowl).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
+            y = y + 1
+            if y >= 20 then
+                y = 0
+                macro('/cancelform')
+            end
         end
+
+    end
+
+    if modifier.lalt and -spell(SB.Efflorescence) == 0 then
+        return cast(SB.Efflorescence, 'ground')
+    end
+
+    -- Keep Lifebloom, on an active tank.
+    if IsInGroup() and tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
+        return cast(SB.Lifebloom, tank)
+    end
+    -- Swiftmend
+    if player.castable(SB.Swiftmend) and player.health.percent < 50 then
+        return cast(SB.Swiftmend, player)
+    end
+    -- Rejuvenation
+    if player.castable(SB.Rejuvenation) and not player.buff(SB.Rejuvenation).up and player.health.percent < 75 then
+        return cast(SB.Rejuvenation, player)
+    end
+    -- Regrowth
+    if player.castable(SB.Regrowth) and ((player.health.percent < 75 and not player.buff(SB.Regrowth).up) or player.health.percent < 30) then
+        return cast(SB.Regrowth, player)
+    end
+    -- Barkskin
+    if player.castable(SB.Barkskin) and player.health.percent < 50 then
+        return cast(SB.Barkskin, player)
+    end
+    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent <= 95)
+            or (talent(7, 2) and lowest.buff(SB.RejuvenationGermination).down and lowest.health.percent <= 75) then
+        return cast(SB.Rejuvenation, lowest)
     end
 
 
