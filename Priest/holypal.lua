@@ -1,3 +1,8 @@
+-- Holy Priest for 8.1 by Rebecca Pal Project 01/2019
+-- Talents: 2323132
+-- Alt = Mass Dispell
+-- Shift = Angelic Feather
+-- Control = Holy Word Serenity
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.priest
 local lftime = 0
@@ -7,6 +12,9 @@ local falltime = 0
 -------------
 SB.GiftOftheNaaru = 59544
 SB.MendingBuff = 41635
+SB.AncestralCall = 274738
+SB.LightsJudgement = 255647
+
 local function combat()
 -------------
 ----Fetch----
@@ -33,15 +41,15 @@ local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercen
 local flashhealonme = dark_addon.settings.fetch('holypal_settings_flashhealonme', 25)
 local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 25)
 local apotheosisflash = dark_addon.settings.fetch('holypal_settings_apotheosisflash', 85)
-local apotheosisserenetiycd = dark_addon.settings.fetch('holypal_settings_apotheosisserenetiycd', 30)
+local apotheosisserenetiycd = dark_addon.settings.fetch('holypal_settings_apotheosisserenetiycd', 15)
 local apotheosispoh = dark_addon.settings.fetch('holypal_settings_apotheosispoh', 90)
-local apotheosispohplayers = dark_addon.settings.fetch('holypal_settings_apotheosispohplayers', 6)
+local apotheosispohplayers = dark_addon.settings.fetch('holypal_settings_apotheosispohplayers', 3)
 
 
 -------------
 --Modifiers--
 -------------
-if target.alive and target.enemy and not player.channeling() then
+if not player.channeling() then
 
   if modifier.alt and castable(SB.MassDispell) then
     return cast(SB.MassDispell, ground)
@@ -106,6 +114,11 @@ if player.buff(SB.Apotheosis).up then
   if castable(SB.PrayerofHealing) and group.under(apotheosispoh, 40, true) >= apotheosispohplayers then
     return cast(SB.PrayerofHealing, player)
   end
+   if castable(SB.HolyWordSerenity) and lowest.health.effective <= serenitypercent then
+    return cast(SB.HolyWordSerenity, lowest)
+  elseif castable(SB.HolyWordSerenity) and tank.health.effective <= serenitypercent then
+    return cast(SB.HolyWordSerenity, tank)
+  end
 
 end
 -------------
@@ -143,13 +156,11 @@ end
   end
 
 --Renew
-  if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down and not player.moving then
+  if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down then
     return cast(SB.Renew, lowest)
-  end
-  if tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down and not player.moving then
+  elseif tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down then
     return cast(SB.Renew, tank)
   end
-
 
 --Flash Heal
   if lowest.castable(SB.FlashHeal) and lowest.health.effective <= flashheallowest then
@@ -361,7 +372,7 @@ function interface()
       { type = 'rule' },
       { type = 'text', text = 'Apotheosis Settings' },
       { key = 'apotheosisflash', type = 'spinner', text = 'Apotheosis Flash Heal', desc = 'Use Flash Heal while Apotheosis is active',default = 85, min = 5, max = 100, step = 5 },
-      { key = 'apotheosisserenetiycd', type = 'spinner', text = 'Apotheosis Serenity CD', desc = 'Use Flash Heal only if Serenity CD is above this',default = 30, min = 5, max = 60, step = 5 },
+      { key = 'apotheosisserenetiycd', type = 'spinner', text = 'Apotheosis Serenity CD', desc = 'Use Flash Heal only if Serenity CD is above this',default = 15, min = 5, max = 60, step = 5 },
       { key = 'apotheosispoh', type = 'spinner', text = 'Apotheosis Prayer of Healing', desc = 'Use PoH while Apotheosis is active',default = 90, min = 5, max = 100, step = 5 },
       { key = 'apotheosispohplayers', type = 'spinner', text = 'Apotheosis PoH Targets', desc = 'Number of damaged players near you',default = 3, min = 1, max = 6, step = 1 },
 
