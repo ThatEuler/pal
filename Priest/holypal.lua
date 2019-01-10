@@ -35,6 +35,8 @@ local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 
 -------------
 --Modifiers--
 -------------
+if target.alive and target.enemy and not player.channeling() then
+
   if modifier.alt and castable(SB.MassDispell) then
     return cast(SB.MassDispell, ground)
   end
@@ -109,8 +111,7 @@ local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 
 --Flash Heal
   if lowest.castable(SB.FlashHeal) and lowest.health.effective <= flashheallowest then
     return cast(SB.FlashHeal, lowest)
-  end
-  if castable(SB.FlashHeal) and tank.health.effective <= flashheallowest then
+  elseif castable(SB.FlashHeal) and tank.health.effective <= flashheallowest then
     return cast(SB.FlashHeal, tank)  
   end
   if lowest.castable(SB.FlashHeal) and player.buff(SB.SurgeofLight).up and player.buff(SB.SurgeofLight).remains > 3 and lowest.health.effective <= flashhealsurge then
@@ -128,8 +129,7 @@ local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 
 --Heal
   if lowest.castable(SB.Heal) and lowest.health.effective <= healpercent then
     return cast(SB.Heal, lowest)
-  end
-   if tank.castable(SB.Heal) and tank.health.effective <= healpercent then
+  elseif tank.castable(SB.Heal) and tank.health.effective <= healpercent then
     return cast(SB.Heal, tank)
   end
 
@@ -146,7 +146,7 @@ local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 
   if player.health.percent <= fade and castable(SB.Fade) then
     return cast(SB.Fade, player)
   end
-
+end
 -------------
 -----DPS-----
 -------------
@@ -181,8 +181,37 @@ local max_renews = group.count(function (unit)
 end)
 local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
 local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
-local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80)
+local flashheallowest = dark_addon.settings.fetch('holypal_settings_flashheallowest', 60)
+local flashhealsurge = dark_addon.settings.fetch('holypal_settings_flashhealsurge',75)
+local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flashhealsurgeemergency', 80)
+local healpercent = dark_addon.settings.fetch('holypal_settings_healpercent', 70)
+local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_desperateprayerpercent', 35)
+local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenitypercent', 50)
+local guardianspirit = dark_addon.settings.fetch('holypal_settings_guardianspirit', 30)
+local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardianspirittarget', "gs_tank")
+local prayerofhealingpercent = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 70)
+local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_settings_prayerofhealingnumberofplayer', 3)
+local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercent', 85)
+local flashhealonme = dark_addon.settings.fetch('holypal_settings_flashhealonme', 25)
+local serenetionme = dark_addon.settings.fetch('holypal_settings_serenetionme', 25)
 local levitate = dark_addon.settings.fetch('holypal_utility_levitate', true)
+
+-------------
+----Heal-----
+-------------
+--Renew
+  if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down and not player.moving then
+    return cast(SB.Renew, lowest)
+  end
+  if tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down and not player.moving then
+    return cast(SB.Renew, tank)
+  end
+--Heal
+  if lowest.castable(SB.Heal) and lowest.health.effective <= healpercent then
+    return cast(SB.Heal, lowest)
+  elseif tank.castable(SB.Heal) and tank.health.effective <= healpercent then
+    return cast(SB.Heal, tank)
+  end
 -------------
 --Levitate---
 -------------
@@ -248,7 +277,7 @@ function interface()
     key = 'holypal_settings',
     title = 'Holy Pal - Settings',
     width = 250,
-    height = 650,
+    height = 750,
     resize = true,
     show = false,
     template = {
