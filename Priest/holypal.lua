@@ -1,7 +1,7 @@
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.priest
 local lftime = 0
-
+local falltime = 0
 -------------
 ---Spells---
 -------------
@@ -134,10 +134,21 @@ end)
 local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
 local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
 local renewmoving = dark_addon.settings.fetch('holypal_settings_renewmoving', 80)
+local levitate = dark_addon.settings.fetch('holypal_utility_levitate', true)
+-------------
+--Levitate---
+-------------
+local falling = IsFalling()
 
+  if falling == true and levitate == true then
+    falltime = falltime + 1
+  elseif falling == false then
+    falltime = 0
+  end
 
-
-
+  if falltime == 15 and levitate == true then
+    return cast(SB.Levitate, player)
+  end
 
 -------------
 --Auto Join--
@@ -229,6 +240,8 @@ function interface()
       { type = 'text', text = 'Dungeon Settings' },
       { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
       { type = 'rule' },
+      { type = 'text', text = 'Priest Utility' },
+      { key = 'levitate', type = 'checkbox', text = 'Levitate', desc = 'Use Levitate during long falls', default = true },
     }
   }
 
