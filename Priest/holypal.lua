@@ -23,6 +23,7 @@ local flashhealsurge = dark_addon.settings.fetch('holypal_settings_flashhealsurg
 local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flashhealsurgeemergency', 80)
 local healpercent = dark_addon.settings.fetch('holypal_settings_healpercent', 70)
 local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_desperateprayerpercent', 35)
+local sanctifypercent = dark_addon.settings.fetch('holypal_settings_sanctifypercent', 50)
 
 -------------
 --Modifiers--
@@ -50,7 +51,13 @@ local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_despe
 -------------
 ----Heal-----
 -------------
---Halo
+--Sanctify
+  if castable(SB.HolyWordSanctify) and lowest.health.effective <= sanctifypercent then
+    return cast(SB.HolyWordSanctify, lowest)
+  elseif castable(SB.HolyWordSanctify) and tank.health.effective <= sanctifypercent then
+    return cast(SB.HolyWordSanctify, tank)
+  end
+
 --Halo
   if talent(6, 3) and group.under(90, 40, true) >= 2 and castable(SB.Halo) then
     return cast(SB.Halo)
@@ -106,13 +113,20 @@ local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_despe
     return cast(SB.Fade, player)
   end
 
-end
 -------------
 -----DPS-----
 -------------
+  if toggle('dps', false) then
+    if castable(SB.HolyWordChastise) and target.enemy and target.alive then
+      return cast(SB.HolyWordChastise, target)
+    end
+    if target.enemy and target.alive then
+      return cast(SB.Smite, target)
+    end
 
-  
+  end
 
+end
 local function resting()
 -------------
 ----Fetch----
@@ -208,6 +222,8 @@ function interface()
       { type = 'text', text = 'Class Settings' },
       { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', min = 1, max = 100, step = 5 },
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
+      { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Sanctify', desc = 'Health % of Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
+
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Renew Settings' },
