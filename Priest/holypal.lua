@@ -26,8 +26,9 @@ local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_despe
 local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenitypercent', 50)
 local guardianspirit = dark_addon.settings.fetch('holypal_settings_guardianspirit', 30 )
 local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardianspirittarget', "gs_tank")
---local prayerofhealingpercent = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 70 )
---local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 3 )
+local prayerofhealingpercent = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 70 )
+local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_settings_prayerofhealingnumberofplayer', 3 )
+local mendingpercent = dark_addon.settings.fetch('holypal_settings_mendingpercent', 85 )
 
 -------------
 --Modifiers--
@@ -38,8 +39,8 @@ local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardia
   if modifier.shift and castable(SB.AngelicFeather) and player.buff(SB.AngelicFeather).down then
     return cast(SB.AngelicFeather, player)
   end
-  if modifier.control and castable(SB.DivineHymn) then
-    return cast(SB.DivineHymn)
+  if modifier.control and castable(SB.HolyWordSanctify) then
+    return cast(SB.HolyWordSanctify, ground)
   end
 -------------
 ---Dispel----
@@ -55,8 +56,15 @@ local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardia
 -------------
 ----Heal-----
 -------------
---Prayer of Healing need to add settings but how?
-  if castable(SB.PrayerofHealing) and group.under(70, 40, true) >= 3 then
+--Prayer of Mending
+  if castable(SB.PrayerofMending) and lowest.health.effective <= mendingpercent then return 
+    cast(SB.PrayerofMending, lowest)
+  elseif castable(SB.PrayerofMending) and tank.health.effective <= mendingpercent then return 
+    cast(SB.PrayerofMending, tank)
+  end
+
+--Prayer of Healing 
+  if castable(SB.PrayerofHealing) and group.under(prayerofhealingpercent, 40, true) >= prayerofhealingnumberofplayer then
     return cast(SB.PrayerofHealing, player)
   end
 
@@ -176,9 +184,10 @@ local falling = IsFalling()
     falltime = 0
   end
 
-  if falltime == 15 and levitate == true then
+  if falltime >= 20 and levitate == true then
     return cast(SB.Levitate, player)
   end
+
 
 -------------
 --Auto Join--
@@ -242,7 +251,7 @@ function interface()
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
       { key = 'prayerofhealingpercent', type = 'spinner', text = 'Prayer of Healing', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing', desc = 'Number of damaged players near you',default = 3, min = 1, max = 100, step = 1 },
-
+      { key = 'mendingpercent', type = 'spinner', text = 'Prayer of Mending', desc = 'Health % of lowest in Group to cast at',default = 85, min = 5, max = 100, step = 5 },
       { key = 'guardianspirit', type = 'spinner', text = 'Guardian Spirit', desc = 'Health % to Cast at',default = 30, min = 5, max = 100, step = 5 },
       { key = 'guardianspirittarget', type = 'dropdown',
       text = 'GS Target',
@@ -264,8 +273,6 @@ function interface()
       { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest in Group to cast at under Surge of Light', default =75, min = 5, max = 100, step = 5 },
       { key = 'flashhealsurgeemergency', type = 'spinner', text = 'Flash Heal', desc = 'Health % to not Waste SurgeofLight', default =80, min = 5, max = 100, step = 5 },
       { type = 'rule' },
-
-
     }
   }
 
