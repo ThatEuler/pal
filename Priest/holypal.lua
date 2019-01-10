@@ -26,6 +26,9 @@ local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_despe
 local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenitypercent', 50)
 local guardianspirit = dark_addon.settings.fetch('holypal_settings_guardianspirit', 30 )
 local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardianspirittarget', "gs_tank")
+--local prayerofhealingpercent = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 70 )
+--local prayerofhealingnumberofplayer = dark_addon.settings.fetch('holypal_settings_prayerofhealingpercent', 3 )
+
 -------------
 --Modifiers--
 -------------
@@ -52,6 +55,11 @@ local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardia
 -------------
 ----Heal-----
 -------------
+--Prayer of Healing need to add settings but how?
+  if castable(SB.PrayerofHealing) and group.under(70, 40, true) >= 3 then
+    return cast(SB.PrayerofHealing, player)
+  end
+
 --Guardian Spirit
   if guardianspirittarget == 'gs_tank' and tank.castable(SB.GuardianSpirit) and tank.health.percent <= guardianspirit then
     return cast(SB.GuardianSpirit, tank)
@@ -221,7 +229,7 @@ function interface()
     key = 'holypal_settings',
     title = 'Holy Pal - Settings',
     width = 250,
-    height = 320,
+    height = 650,
     resize = true,
     show = false,
     template = {
@@ -232,9 +240,12 @@ function interface()
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of lowest in Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Serenity', desc = 'Health % of lowest in Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
+      { key = 'prayerofhealingpercent', type = 'spinner', text = 'Prayer of Healing', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
+      { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing', desc = 'Number of damaged players near you',default = 3, min = 1, max = 100, step = 1 },
+
       { key = 'guardianspirit', type = 'spinner', text = 'Guardian Spirit', desc = 'Health % to Cast at',default = 30, min = 5, max = 100, step = 5 },
       { key = 'guardianspirittarget', type = 'dropdown',
-      text = 'Target',
+      text = 'GS Target',
       desc = 'Use Guardian Spirit on...',
       default = 'gs_tank',
       list = {
@@ -244,7 +255,7 @@ function interface()
       },
       { type = 'rule' },
       { type = 'text', text = 'Renew Settings' },
-      { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 5 },
+      { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 1 },
       { key = 'renewlowest', type = 'spinner', text = 'Renew', desc = 'Health % of lowest in Group to cast at', default =85, min = 5, max = 100, step = 5 },
       { key = 'renewtank', type = 'spinner', text = 'Renew', desc = 'Health % of Tank to cast at', default =90, min = 5, max = 100, step = 5 },
       { type = 'rule' },
