@@ -132,7 +132,7 @@ local guardianspirittarget = dark_addon.settings.fetch('holypal_settings_guardia
 -------------
 -----DPS-----
 -------------
-  if toggle('dps', false) then
+  if toggle('dps', false) and not isCC("target") then
     if castable(SB.HolyWordChastise) and target.enemy and target.alive then
       return cast(SB.HolyWordChastise, target)
     end
