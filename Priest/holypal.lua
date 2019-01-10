@@ -23,7 +23,7 @@ local flashhealsurge = dark_addon.settings.fetch('holypal_settings_flashhealsurg
 local flashhealsurgeemergency = dark_addon.settings.fetch('holypal_settings_flashhealsurgeemergency', 80)
 local healpercent = dark_addon.settings.fetch('holypal_settings_healpercent', 70)
 local desperateprayerpercent = dark_addon.settings.fetch('holypal_settings_desperateprayerpercent', 35)
-local sanctifypercent = dark_addon.settings.fetch('holypal_settings_sanctifypercent', 50)
+local serenitypercent = dark_addon.settings.fetch('holypal_settings_serenitypercent', 50)
 
 -------------
 --Modifiers--
@@ -51,11 +51,11 @@ local sanctifypercent = dark_addon.settings.fetch('holypal_settings_sanctifyperc
 -------------
 ----Heal-----
 -------------
---Sanctify
-  if castable(SB.HolyWordSanctify) and lowest.health.effective <= sanctifypercent then
-    return cast(SB.HolyWordSanctify, lowest)
-  elseif castable(SB.HolyWordSanctify) and tank.health.effective <= sanctifypercent then
-    return cast(SB.HolyWordSanctify, tank)
+--serenitypercent
+  if castable(SB.HolyWordSerenity) and lowest.health.effective <= serenitypercent then
+    return cast(SB.HolyWordSerenity, lowest)
+  elseif castable(SB.HolyWordSerenity) and tank.health.effective <= serenitypercent then
+    return cast(SB.HolyWordSerenity, tank)
   end
 
 --Halo
@@ -221,19 +221,19 @@ function interface()
       { type = 'rule' },
       { type = 'text', text = 'Class Settings' },
       { key = 'fade', type = 'spinner', text = 'Fade', desc = 'Health % to cast at', min = 1, max = 100, step = 5 },
-      { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
-      { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Sanctify', desc = 'Health % of Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
+      { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of lowest in Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
+      { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Serenity', desc = 'Health % of lowest in Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
 
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Renew Settings' },
       { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 5 },
-      { key = 'renewlowest', type = 'spinner', text = 'Renew', desc = 'Health % of lowest to cast at', default =85, min = 5, max = 100, step = 5 },
-      { key = 'renewtank', type = 'spinner', text = 'Renew', desc = 'Health % of tank to cast at', default =90, min = 5, max = 100, step = 5 },
+      { key = 'renewlowest', type = 'spinner', text = 'Renew', desc = 'Health % of lowest in Group to cast at', default =85, min = 5, max = 100, step = 5 },
+      { key = 'renewtank', type = 'spinner', text = 'Renew', desc = 'Health % of Tank to cast at', default =90, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Flash Heal Settings' },
-      { key = 'flashheallowest', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest to cast at', default =60, min = 5, max = 100, step = 5 },
-      { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest to cast at under Surge of Light', default =75, min = 5, max = 100, step = 5 },
+      { key = 'flashheallowest', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest in Group to cast at', default =60, min = 5, max = 100, step = 5 },
+      { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest in Group to cast at under Surge of Light', default =75, min = 5, max = 100, step = 5 },
       { key = 'flashhealsurgeemergency', type = 'spinner', text = 'Flash Heal', desc = 'Health % to not Waste SurgeofLight', default =80, min = 5, max = 100, step = 5 },
       { type = 'rule' },
 
