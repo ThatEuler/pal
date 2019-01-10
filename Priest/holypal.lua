@@ -16,6 +16,7 @@ local simultaneousrenews = dark_addon.settings.fetch('holypal_settings_simultane
 local max_renews = group.count(function (unit)
   return unit.alive and unit.distance < 40 and unit.buff(SB.Renew).up
 end)
+local race = UnitRace('player')
 local renewlowest = dark_addon.settings.fetch('holypal_settings_renewlowest', 85)
 local renewtank = dark_addon.settings.fetch('holypal_settings_renewtank', 90)
 local flashheallowest = dark_addon.settings.fetch('holypal_settings_flashheallowest', 60)
@@ -61,6 +62,28 @@ if target.alive and target.enemy and not player.channeling() then
   if unit and unit.distance < 40 then
     return cast(SB.Purify, unit)
   end
+
+
+
+if toggle('racial', false) then
+  if race == "Orc" and castable(SB.BloodFury) then
+    return cast(SB.BloodFury)
+  end
+  if race == "Troll" and castabe(SB.Berserking) then
+    return cast(SB.Berserking)
+  end
+  if race == "MagharOrc" and castable(SB.AncestralCall) then
+    return cast(SB.AncestralCall)
+  end
+  if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+    return cast(SB.LightsJudgement)
+  end
+  if race == "Draenei" and lowest.castable(SB.GiftOftheNaaru) and lowest.health.effective >= 50 then
+    return cast(SB.GiftOftheNaaru, lowest)
+  end
+end
+
+
 -------------
 --Self Heal--
 -------------
@@ -83,9 +106,6 @@ if player.buff(SB.Apotheosis).up then
   if castable(SB.PrayerofHealing) and group.under(apotheosispoh, 40, true) >= apotheosispohplayers then
     return cast(SB.PrayerofHealing, player)
   end
-
-
-
 
 end
 -------------
@@ -311,7 +331,7 @@ function interface()
       { key = 'heal', type = 'spinner', text = 'Heal', desc = 'Health % of lowest in Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
       { key = 'sanctifypercent', type = 'spinner', text = 'Holy Word Serenity', desc = 'Health % of lowest in Group to Cast at',default = 50, min = 5, max = 100, step = 5 },
       { key = 'prayerofhealingpercent', type = 'spinner', text = 'Prayer of Healing', desc = 'Health % of Group to Cast at',default = 70, min = 5, max = 100, step = 5 },
-      { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing', desc = 'Number of damaged players near you',default = 3, min = 1, max = 6, step = 1 },
+      { key = 'prayerofhealingnumberofplayer', type = 'spinner', text = 'Prayer of Healing Targets', desc = 'Number of damaged players near you',default = 3, min = 1, max = 6, step = 1 },
       { key = 'mendingpercent', type = 'spinner', text = 'Prayer of Mending', desc = 'Health % of lowest in Group to cast at',default = 85, min = 5, max = 100, step = 5 },
       { key = 'guardianspirit', type = 'spinner', text = 'Guardian Spirit', desc = 'Health % to Cast at',default = 30, min = 5, max = 100, step = 5 },
       { key = 'guardianspirittarget', type = 'dropdown',
@@ -326,13 +346,13 @@ function interface()
       { type = 'rule' },
       { type = 'text', text = 'Renew Settings' },
       { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 1 },
-      { key = 'renewlowest', type = 'spinner', text = 'Renew', desc = 'Health % of lowest in Group to cast at', default =85, min = 5, max = 100, step = 5 },
-      { key = 'renewtank', type = 'spinner', text = 'Renew', desc = 'Health % of Tank to cast at', default =90, min = 5, max = 100, step = 5 },
+      { key = 'renewlowest', type = 'spinner', text = 'Renew Lowest', desc = 'Health % of lowest in Group to cast at', default =85, min = 5, max = 100, step = 5 },
+      { key = 'renewtank', type = 'spinner', text = 'Renew Tank', desc = 'Health % of Tank to cast at', default =90, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Flash Heal Settings' },
-      { key = 'flashheallowest', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest in Group to cast at', default =60, min = 5, max = 100, step = 5 },
-      { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal', desc = 'Health % of lowest in Group to cast at under Surge of Light', default =75, min = 5, max = 100, step = 5 },
-      { key = 'flashhealsurgeemergency', type = 'spinner', text = 'Flash Heal', desc = 'Health % to not Waste SurgeofLight', default =80, min = 5, max = 100, step = 5 },
+      { key = 'flashheallowest', type = 'spinner', text = 'Flash Heal Lowest', desc = 'Health % of lowest in Group to cast at', default =60, min = 5, max = 100, step = 5 },
+      { key = 'flashhealsurge', type = 'spinner', text = 'Flash Heal Surge of Light', desc = 'Health % of lowest in Group to cast at under Surge of Light', default =75, min = 5, max = 100, step = 5 },
+      { key = 'flashhealsurgeemergency', type = 'spinner', text = 'Flash Heal Surge of Light Emergency', desc = 'Health % to not Waste SurgeofLight', default =80, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'text', text = 'Emergency Self Heals' },
       { key = 'desperateprayerpercent', type = 'spinner', text = 'Desperate Prayer', desc = 'Health % of Player to Cast at',default = 35, min = 5, max = 100, step = 5 },
@@ -393,6 +413,20 @@ function interface()
     },
     off = {
       label = 'DPS OFF',
+      color = dark_addon.interface.color.red,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+    }
+  })
+    dark_addon.interface.buttons.add_toggle({
+    name = 'racial',
+    label = 'Use Racials',
+    on = {
+      label = 'Racials ON',
+      color = dark_addon.interface.color.blue,
+      color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.blue, 0.5)
+    },
+    off = {
+      label = 'Racials OFF',
       color = dark_addon.interface.color.red,
       color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
     }

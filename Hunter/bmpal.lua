@@ -15,6 +15,9 @@ SB.AncestralCall = 274738
 SB.Fireblood = 265221
 SB.SpittingCobra = 194407
 SB.LightsJudgement = 255647
+SB.BloodFury = 20572
+SB.Berserking = 26297
+SB.LightsJudgement = 247427
 
 local function GroupType()
    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
