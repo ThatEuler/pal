@@ -72,7 +72,9 @@ if not player.channeling() then
   end
 
 
-
+-------------
+---Racials---
+-------------
 if toggle('racial', false) then
   if race == "Orc" and castable(SB.BloodFury) then
     return cast(SB.BloodFury)
