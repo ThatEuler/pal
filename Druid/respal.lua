@@ -152,12 +152,12 @@ local function combat()
         --- Decurse
         if toggle('dispell', false) then
             local dispellable_unit = group.removable('curse', 'magic', 'poison')
-            if dispellable_unit and -spell(SB.NaturesCure) == 0 then
+            if dispellable_unit and spell(SB.NaturesCure).cooldown == 0 then
                 return cast(SB.NaturesCure, dispellable_unit)
             end
             -- self-cleanse
             local dispellable_unit = player.removable('curse', 'magic', 'poison')
-            if dispellable_unit and -spell(SB.NaturesCure) == 0 then
+            if dispellable_unit and spell(SB.NaturesCure).cooldown == 0 then
                 return cast(SB.NaturesCure, dispellable_unit)
             end
         end
@@ -271,113 +271,65 @@ local function resting()
             return
         end
 
---------------
---TravelForm--
---------------
-
-
-         local outdoor = IsOutdoors()
-        if toggle('Forms', false) and player.moving and player.buff(SB.Prowl).down and player.buff(SB.TigerDashBuff).down and player.buff(1850).down and player.alive then
+        if toggle('Forms', false) and player.moving then
             x = x + 1
-            if player.moving and player.buff(SB.CatForm).up and -spell(SB.Dash) == 0 then
-                return cast(SB.Dash)
-            end
-            if outdoor and x >= 8 then
+            local outdoor = IsOutdoors()
+            if outdoor and x >= 6 then
                 x = 0
                 return cast(SB.TravelForm)
             end
-
-            if not outdoor and x >= 8 and player.buff(SB.CatForm).down then
-                x = 0
-                return cast(SB.CatForm)
-            end
+        end
     end
-end
+
 
 end
 
 local function interface()
-  local settings = {
-    key = 'respal_settings',
-    title = 'Restoration Pal - Settings',
-    width = 250,
-    height = 750,
-    resize = true,
-    show = false,
-    template = {
-      { type = 'header', text = 'Restoration Pal - Settings', align= 'center' },
-      { type = 'rule' },
-     
-    }
-  }  
-  configWindow = dark_addon.interface.builder.buildGUI(settings)
-
     dark_addon.interface.buttons.add_toggle({
         name = 'IronBark',
         label = 'IronBark',
         on = {
-            label = 'Bark ON',
+            label = 'Bark',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Bark OFF',
-            color = dark_addon.interface.color.red,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+            label = 'Bark',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'Forms',
         label = 'change forms',
         on = {
-            label = 'Forms ON',
+            label = 'Forms',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Forms OFF',
-            color = dark_addon.interface.color.red,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+            label = 'Forms',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'dispell',
         label = 'dispell',
         on = {
-            label = 'Dispell ON',
+            label = 'dispell',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Dispell OFF',
-             color = dark_addon.interface.color.red,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+            label = 'dispell',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
         }
-    })
-    dark_addon.interface.buttons.add_toggle({
-        name = 'settings',
-        label = 'Rotation Settings',
-        font = 'dark_addon_icon',
-        on = {
-            label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-        },
-        off = {
-            label = dark_addon.interface.icon('cog'),
-             color = dark_addon.interface.color.red,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
-        },
-        callback = function(self)
-            if configWindow.parent:IsShown() then
-                configWindow.parent:Hide()
-            else
-                configWindow.parent:Show()
-            end
-        end
     })
 end
 
+--dark_addon.environment.hook(your_func)
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.druid.restoration,
     name = 'respal',
