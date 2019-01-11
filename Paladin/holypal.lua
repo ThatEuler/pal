@@ -109,6 +109,21 @@ local function combat()
     end
 
   ]]
+
+
+    ----------------------------------------------------------
+    --- Health stone / Trinket  / Items / etc
+    ----------------------------------------------------------
+
+    --Health stone
+    if usehealthstone == true and player.health.percent < healthstonepercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
+        macro('/use Healthstone')
+    end
+    --health pot
+    if usehealpot == true and GetItemCount(152494) >= 1 and player.health.percent < healthstonepercent and GetItemCooldown(5512) > 0 then
+        macro('/use Coastal Healing Potion')
+    end
+
     --Trinket/item use
     if GetItemCooldown(160649) == 0 and tank.health.percent < 95 then
         macro('/use [help] 14; [@targettarget] 14')
@@ -410,13 +425,17 @@ end
 local function resting()
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
 
-
-        if IsFalling() == true then
-            z = z + 1
-            if z >= 10 and -spell(SB.DivineShield) == 0 then
-                return cast(SB.DivineShield, player)
-            end
-        end
+        --[[  local z
+          if IsFalling() then
+              z = z + 1
+              if z >= 30 and -spell(SB.DivineShield) == 0 then
+                  z = 0
+                  return cast(SB.DivineShield, player)
+              end
+          elseif not IsFalling() then
+              z = 0
+          end
+          ]]
 
         if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
             return cast(SB.Repentance, 'mouseover')
@@ -442,44 +461,42 @@ local function resting()
 
 
         --find the two tank
-
-        local members = GetNumGroupMembers()
-        local group_type = GroupType()
-        if IsInRaid then
-            for i = 1, (members - 1) do
-                local unit = group_type .. i
-                local unitName, _ = UnitName(unit)
-                if tank1 == nil and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                    tank1 = group_type .. i
-                elseif tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                    tank2 = group_type .. i
-                end
-                if tank1 == nil then
-                    tank1 = 'player'
-                end
-                if tank2 == nil then
-                    tank2 = group_type .. i
-                end
-            end
-            if talent(7, 2) then
-                local tank1 = dark_addon.environment.conditions.unit(tank1)
-                local tank2 = dark_addon.environment.conditions.unit(tank2)
-                if tank1 ~= nil and tank1.buff(SB.BeaconofLight).down then
-                    return cast(SB.BeaconofLight, tank1)
-                end
-                if tank2 ~= nil and tank2.buff(SB.BeaconofFaith).down then
-                    return cast(SB.BeaconofFaith, tank2)
-                end
-
-            end
-        end
-
-
-
         --Beacons
-        if talent(7, 1) and tank.buff(SB.BeaconofLight).down then
-            return cast(SB.BeaconofLight, tank)
-        end
+
+        --[[  local members = GetNumGroupMembers()
+          local group_type = GroupType()
+          if IsInRaid then
+              for i = 1, (members - 1) do
+                  local unit = group_type .. i
+                  local unitName, _ = UnitName(unit)
+                  if tank1 == nil and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                      tank1 = group_type .. i
+                  elseif tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                      tank2 = group_type .. i
+                  end
+                  if tank1 == nil then
+                      tank1 = 'player'
+                  end
+                  if tank2 == nil then
+                      tank2 = group_type .. i
+                  end
+
+          print(tank2)
+                  if talent(7, 2) then
+                      local tank1 = dark_addon.environment.conditions.unit(tank1)
+                      local tank2 = dark_addon.environment.conditions.unit(tank2)
+                      if tank1 ~= nil and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+                          return cast(SB.BeaconofLight, tank1)
+                      end
+                      if tank2 ~= nil and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+                          return cast(SB.BeaconofFaith, tank2)
+                      end
+
+                  end
+              end
+
+          end
+                  ]]--
 
         -- - Decurse
         local dispellable_unit = group.removable('disease', 'magic', 'poison')
