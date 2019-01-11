@@ -32,19 +32,21 @@ local function GroupType()
 end
 
 local function GCD()
-
-    if player.debuff(SB.Quake).up then
-        print(player.debuff(SB.Quake).remains)
-    end
+    --[[
+        if player.debuff(SB.Quake).up then
+            print(player.debuff(SB.Quake).remains)
+        end
+        if player.debuff(SB.Quake).remains < 0.5 then
+            macro('/stopcasting')
+        end
+    ]]
 end
 local function combat()
     if not player.alive or player.buff(SB.Refreshment).up or player.buff(SB.Drink).up then
         return
     end
 
-    if player.debuff(SB.Quake).remains < 0.5 then
-        macro('/stopcasting')
-    end
+
 
     -----------------------------
     --- Reading from settings
@@ -116,24 +118,24 @@ local function combat()
     --- Health stone / Trinket  / Items / etc
     ----------------------------------------------------------
 
-    --Health stone
+    --Health stone and player.castingpercent == 0 then
     if usehealthstone == true and player.health.percent < healthstonepercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
-        macro('/use Healthstone')
+        return macro('/use Healthstone')
     end
     --health pot
     if usehealpot == true and GetItemCount(152494) >= 1 and player.health.percent < healthstonepercent and GetItemCooldown(5512) > 0 then
-        macro('/use Coastal Healing Potion')
+        return macro('/use Coastal Healing Potion')
     end
 
     --Trinket/item use
-    if GetItemCooldown(160649) == 0 and tank.health.percent < 95 then
-        macro('/use [help] 14; [@targettarget] 14')
+    if GetItemCooldown(160649) == 0 and target.enemy and tank.health.percent < 95 then
+        return macro('/use [help] 14; [@targettarget] 14')
     end
 
 
     --healthstone
     if GetItemCooldown(5512) == 0 and player.health.percent < 30 then
-        macro('/use Healthstone')
+        return macro('/use Healthstone')
     end
 
 
@@ -433,24 +435,69 @@ local function combat()
             return cast(SB.ConsecrationProt)
         end
     end
-
-
 end
+
 local function resting()
+
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
+        local group_type = GroupType()
+        local members = GetNumGroupMembers()
+        --[[
+                if group_type == 'raid' then
+                    for i = 1, (members - 1) do
+                        local unit = group_type .. i
+                        if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                            tank1 = unit
+                        end
+                        if (UnitGroupRolesAssigned(unit) == 'TANK') and unit ~= tank1 and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                            tank2 = unit
+                        end
+                    end
+                    if tank1 == nil then
+                        tank1 = "zip"
+                    end
+                    if tank2 == nil then
+                        tank2 = "zilch"
+                    end
+                    --      print("The two tanks are: " .. tank1 .. ", " .. tank2)
+                end
 
-        --[[  local z
-          if IsFalling() then
-              z = z + 1
-              if z >= 30 and -spell(SB.DivineShield) == 0 then
-                  z = 0
-                  return cast(SB.DivineShield, player)
-              end
-          elseif not IsFalling() then
-              z = 0
-          end
-          ]]
+                --next attempt:
 
+                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+
+        if group_type == 'raid' then
+            for i = 1, (members - 1) do
+                local unit = group_type .. i
+                local name, _, _, _, _, _, _, _, _, role, _, combatRole = GetRaidRosterInfo(i);
+                if role == "maintank" then
+                    tank1 = unit
+                end
+                if role == "mainassist" then
+                    tank2 = unit
+                end
+                if tank1 == nil then
+                    tank1 = "zip"
+                end
+                if tank2 == nil then
+                    tank2 = "zilch"
+                end
+                --print("The two tanks are: " .. tank1 .. ", " .. tank2)
+            end
+        end     ]]
+        --[[local z
+        local falling = IsFalling();
+
+        if falling then
+            z = z + 1
+            if z >= 30 and -spell(SB.DivineShield) == 0 then
+                z = 0
+                return cast(SB.DivineShield, player)
+            end
+        elseif not falling then
+            z = 0
+        end
+]]
         if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
             return cast(SB.Repentance, 'mouseover')
         end
@@ -497,6 +544,8 @@ local function resting()
                   end
 
           print(tank2)
+
+
                   if talent(7, 2) then
                       local tank1 = dark_addon.environment.conditions.unit(tank1)
                       local tank2 = dark_addon.environment.conditions.unit(tank2)
@@ -511,7 +560,13 @@ local function resting()
               end
 
           end
-                  ]]--
+
+        local members = GetNumGroupMembers()
+        local group_type = GroupType()
+
+        --function getTanks()  not sure how to return more than one value from a function .... built a table?
+        ]]
+
 
         -- - Decurse
         local dispellable_unit = group.removable('disease', 'magic', 'poison')
