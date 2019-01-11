@@ -227,7 +227,6 @@ end -- end combat()
 
 local function resting()
 
-    --print(x)
     local outdoor = IsOutdoors()
     if player.alive then
 
@@ -292,51 +291,87 @@ local function resting()
 end
 
 local function interface()
+  local settings = {
+    key = 'respal_settings',
+    title = 'Restoration Pal - Settings',
+    width = 250,
+    height = 750,
+    resize = true,
+    show = false,
+    template = {
+      { type = 'header', text = 'Restoration Pal - Settings', align= 'center' },
+      { type = 'rule' },
+     
+    }
+  }  
+  configWindow = dark_addon.interface.builder.buildGUI(settings)
+
     dark_addon.interface.buttons.add_toggle({
         name = 'IronBark',
         label = 'IronBark',
         on = {
-            label = 'Bark',
+            label = 'Bark ON',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Bark',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Bark OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'Forms',
         label = 'change forms',
         on = {
-            label = 'Forms',
+            label = 'Forms ON',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Forms',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Forms OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'dispell',
         label = 'dispell',
         on = {
-            label = 'dispell',
+            label = 'Dispell ON',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'dispell',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Dispell OFF',
+             color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
+    })
+    dark_addon.interface.buttons.add_toggle({
+        name = 'settings',
+        label = 'Rotation Settings',
+        font = 'dark_addon_icon',
+        on = {
+            label = dark_addon.interface.icon('cog'),
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = dark_addon.interface.icon('cog'),
+             color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+        },
+        callback = function(self)
+            if configWindow.parent:IsShown() then
+                configWindow.parent:Hide()
+            else
+                configWindow.parent:Show()
+            end
+        end
     })
 end
 
---dark_addon.environment.hook(your_func)
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.druid.restoration,
     name = 'respal',
