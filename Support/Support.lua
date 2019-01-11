@@ -20,7 +20,17 @@ dark_addon.rotation.spellbooks.purgeables = {
     [272659] = "electrified Scales",
     [269896] = "embryonic vigor",
     [265912] = "accumualtedCharge",
-    [263224] = "Mark of the blood god"
+    [263224] = "Mark of the blood god",
+    [258133] = "DarkStep",
+    [258153] = "Watery Dome",
+    [256849] = "DinoBuff",
+    [268375] = "?",
+    [276767] = "?",
+    [256957] = "?",
+    [272659] = "?",
+    [262947] = "?",
+    [262540] = "?"
+
 }
 
 dark_addon.rotation.CC = {

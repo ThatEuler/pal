@@ -83,19 +83,19 @@ local function combat()
             end
         end
 
-            --CleanseSpirit
-    -- - Decurse
-    if toggle('DISPELL', false) then
-        local dispellable_unit = player.removable('curse')
-        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
-            return cast(SB.CleanseSpirit, dispellable_unit)
-        end
+        --CleanseSpirit
+        -- - Decurse
+        if toggle('DISPELL', false) then
+            local dispellable_unit = player.removable('curse')
+            if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+                return cast(SB.CleanseSpirit, dispellable_unit)
+            end
 
-        local dispellable_unit = group.removable('curse')
-        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
-            return cast(SB.CleanseSpirit, dispellable_unit)
+            local dispellable_unit = group.removable('curse')
+            if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+                return cast(SB.CleanseSpirit, dispellable_unit)
+            end
         end
-    end
 
         --purge
 
@@ -375,6 +375,50 @@ end -- end combat
 
 
 local function resting()
+
+    --checking for tank/offtank using dark dark_addon
+    --    print("DR: Tank is: " .. tank .. " and offtank is " .. offtank)
+
+    --[[testing homemade crap
+    local members = GetNumGroupMembers()
+    local group_type = GroupType()
+    local tank1 = "zero"
+    local tank2 = nil
+
+    if group_type == 'raid' then
+
+        for i = 1, (members - 1) do
+            local unit = group_type .. i
+            local unitName, _ = UnitName(unit)
+
+            if tank1 == "zero" and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+               -- print(unit)
+                tank1 = dark_addon.environment.conditions.unit(unit)
+                print("tank1: " .. tank1)
+            end
+            if tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                tank2 = group_type .. i
+                --tank2 = unitName
+            end
+            if tank1 == nil then
+                tank1 = 'tank'
+            elseif tank2 == nil then
+                tank2 = dark_addon.environment.conditions.unit(group_type .. i)
+
+                local iTarget = dark_addon.environment.conditions.unit(group_type .. i)
+                print(iTarget)
+                print(iTarget.name)
+                --tank2 = group_type .. i
+            end
+        end
+        print("Tank(DR): " .. tank.name)
+        print("Offtank(DR): " .. offtank.name)
+        print("offtank(PAL): " .. iTarget)
+        print("offtank name(PAL): " .. iTarget.name)
+        print("--------------")
+    end
+]]
+
 
     --CleanseSpirit
     -- - Decurse
