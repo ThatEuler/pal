@@ -131,7 +131,7 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
             end
         end
 --Flourish
-        if group.under(flourishpercent, 60, true) or lastcast(SB.Tranquility) and talent(7, 3) and -spell(SB.Flourish) == 0 then
+        if talent(7, 3) and group.under(flourishpercent, 60, true) or lastcast(SB.Tranquility) and -spell(SB.Flourish) == 0 then
             return cast(SB.Flourish)
         end
 
@@ -309,7 +309,7 @@ local ironbarkpercent = dark_addon.settings.fetch('respal_settings_ironbarkperce
   end
 
   if autojoin ==true and lfg == true or bgstatus == "confirm" then
-    PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog", false);
+    PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
     lftime = lftime + 1
   end
 
