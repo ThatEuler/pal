@@ -67,7 +67,7 @@ local function combat()
     local autoDivineProtection = dark_addon.settings.fetch('holypal_settings_autoDivineProtection', true)
     local autoDivineShield = dark_addon.settings.fetch('holypal_settings_autoDivineShield', true)
     local autoBeaconofVirtue = dark_addon.settings.fetch('holypal_settings_autoBeaconofVirtue', true)
-    autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
+    local autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
 
     -----------------------------
     --- Reticulate Splines
@@ -107,32 +107,32 @@ local function combat()
         inRange = 1
     end
 
-      -----------------------------
+    -----------------------------
     --- Find the 2 tanks
     -----------------------------
     local group_type = GroupType()
 
-        if group_type == 'raid' then
+    if group_type == 'raid' then
 
-            tank1 = 'player'
-            tank2 = 'player'
+        tank1 = 'player'
+        tank2 = 'player'
 
-            local members = GetNumGroupMembers()
-            for i = 1, (members - 1) do
-                local unit = group_type .. i
-                if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                    if tank1 == 'player' then
-                        tank1 = unit
-                    elseif tank2 == 'player' then
-                        tank2 = unit
-                        break
-                    end
+        local members = GetNumGroupMembers()
+        for i = 1, (members - 1) do
+            local unit = group_type .. i
+            if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                if tank1 == 'player' then
+                    tank1 = unit
+                elseif tank2 == 'player' then
+                    tank2 = unit
+                    break
                 end
             end
-            tank1 = dark_addon.environment.conditions.unit(tank1)
-            tank2 = dark_addon.environment.conditions.unit(tank2)
-            --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
         end
+        tank1 = dark_addon.environment.conditions.unit(tank1)
+        tank2 = dark_addon.environment.conditions.unit(tank2)
+        --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
+    end
 
 
     --[[
@@ -469,13 +469,16 @@ end
 
 local function resting()
 
+    local autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
+
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
         local group_type = GroupType()
 
+        tank1 = 'player'
+        tank2 = 'player'
+
         if group_type == 'raid' then
 
-            tank1 = 'player'
-            tank2 = 'player'
 
             local members = GetNumGroupMembers()
             for i = 1, (members - 1) do
@@ -489,11 +492,12 @@ local function resting()
                     end
                 end
             end
-            --        local iTarget = dark_addon.environment.conditions.unit(findHealer(innervateTarget))
-            tank1 = dark_addon.environment.conditions.unit(tank1)
-            tank2 = dark_addon.environment.conditions.unit(tank2)
             --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
         end
+
+        tank1 = dark_addon.environment.conditions.unit(tank1)
+        tank2 = dark_addon.environment.conditions.unit(tank2)
+
 
 
         -------------
@@ -529,14 +533,14 @@ local function resting()
         end
 
         --Auto Beacons
-        if autoBeacon and talent(7, 2) then
-            if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+        if autoBeacon and talent(7, 2) and group_type ~= 'solo' then
+            if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
                 return cast(SB.BeaconofLight, tank1)
             end
-            if tank2.buff(SB.BeaconofLight).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+            if tank2.buff(SB.BeaconofLight).down and tank2.distance <= 40 and not UnitIsDeadOrGhost("tank2") then
                 return cast(SB.BeaconofFaith, tank2)
             end
-        elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+        elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
             return cast(SB.BeaconofLight, tank1)
         end
     end
@@ -610,7 +614,7 @@ local function interface()
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
             { type = 'rule' },
-            { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '' "true" },
+            { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '', "true" },
             { type = 'rule' },
             { type = 'text', text = 'Automated CoolDowns' },
             { key = 'autoAura', type = 'checkbox', text = 'Aura Mastery', desc = '' },
