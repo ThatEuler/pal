@@ -63,13 +63,16 @@ if not player.channeling() then
 -------------
 ---Dispel----
 -------------
-  if toggle('dispel', false) and castable(SB.Purify) and player.dispellable(SB.Purify) then
-    return cast(SB.Purify, player)
-  end
-  local unit = group.dispellable(SB.Purify)
-  if unit and unit.distance < 40 then
-    return cast(SB.Purify, unit)
-  end
+    local dispellable_unit = group.removable('disease', 'magic')
+    if toggle('dispel', false) and dispellable_unit and spell(SB.Purify).cooldown == 0 then
+        return cast(SB.Purify, dispellable_unit)
+    end
+
+    -- self-cleanse
+    local dispellable_unit = player.removable('disease', 'magic')
+    if toggle('dispel', false) and dispellable_unit and spell(SB.Purify).cooldown == 0 then
+        return cast(SB.Purify, dispellable_unit)
+end
 
 
 -------------
@@ -267,6 +270,11 @@ local levitate = dark_addon.settings.fetch('holypal_utility_levitate', true)
     return cast(SB.Heal, lowest)
   elseif tank.castable(SB.Heal) and tank.health.effective <= healpercent then
     return cast(SB.Heal, tank)
+  end
+
+  --Prayer of Healing 
+  if castable(SB.PrayerofHealing) and group.under(prayerofhealingpercent, 40, true) >= prayerofhealingnumberofplayer then
+    return cast(SB.PrayerofHealing, player)
   end
 -------------
 --Levitate---

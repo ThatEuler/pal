@@ -2,8 +2,12 @@
 -- Restoration Druid for 8.1 by Tacotits - 9/2018
 -- Talents: Raid=3133213 Dungeon=1133212
 -- Holding Alt = Efflorescence
--- Holding CTRL = Cleanse - mouseover
+-- Holding CTRL = Cleanse - mouseover and Battle Ressurrect if mouseover is dead
 -- Holding Shift =
+-- TODO: Flourish Logic = Count how many Hots are active in total and watch the cooldowns for all of them so we can if < 8 seconds are remaining, Rejuv Spinners, Regrowth Spinners, Swiftmend Spinners
+
+
+
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.druid
@@ -18,67 +22,72 @@ local race = UnitRace("player")
 local x = 0 -- counting seconds in resting
 local y = 0 -- counter for opener
 local z = 0 -- time in combat
+local lftime = 0 -- Timer for Dungeon/Battleground Joining
 
 SB.Refreshment = 167152
 SB.Drink = 274914
 SB.ReplenishmentDebuff = 252753
 SB.Regrowth = 8936
 SB.SolarWrathResto = 5176
+SB.GiftOftheNaaru = 59544
+SB.AncestralCall = 274738
+SB.LightsJudgement = 255647
+
+
 local function combat()
     if not player.alive or player.buff(SB.TravelForm).exists or player.buff(SB.Refreshment).up or player.buff(SB.Drink).up or player.channeling() then
         return
     end
+-------------
+----Fetch----
+-------------
+local max_rejuvs = group.count(function (unit)
+  return unit.alive and unit.distance < 40 and unit.buff(SB.Rejuvenation).up
+end)
+local simultaneousrejuvenations = dark_addon.settings.fetch('respal_settings_simultaneousrejuvenations', 10)
+local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
+local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
+local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinpercent', 60)
+local usehealthstone = dark_addon.settings.fetch('respal_settings_healthstone.check', true)
+local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthstone.spin', 25)
+local ironbarkpercent = dark_addon.settings.fetch('respal_settings_ironbarkpercent', 66)
+local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishpercent', 75)
 
-    --- Reticulate Splines
-    local group_health_percent = 100 * UnitHealth("player") / UnitHealthMax("player") or 0
-    local group_health = group_health_percent
-    local group_unit_count = IsInGroup() and GetNumGroupMembers() or 1
-    local damaged_units = group_health_percent < 90 and 1 or 0
-    local dead_units = 0
-    for i = 1, group_unit_count - 1 do
-        local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i);
-        local unit = IsInRaid() and "raid" .. i or "party" .. i
-        local unit_health = 100 * UnitHealth(unit) / UnitHealthMax(unit) or 0
-        if unit_health < 90 then
-            damaged_units = damaged_units + 1
-        end
-        if isDead or not online or not UnitInRange(unit) then
-            dead_units = dead_units + 1
-        else
-            group_health = group_health + unit_health
-        end
+
+--[[    Trinket use
+    healing totem trink
+       if GetItemCooldown(158320) == 0 and tank.health.percent < 80 then
+       macro('/use [help] 14; [@targettarget] 14')
+     end
+
+    first mate spyglass
+    if GetItemCooldown(158163) == 0 and tank.health.percent < 80 then
+      macro('/use 13')
     end
-    group_health_percent = group_health / (group_unit_count - dead_units)
-
-    -- Barkskin
-    if player.castable(SB.Barkskin) and player.health.percent < 60 then
-        return cast(SB.Barkskin, player)
-    end
-
-    --Trinket use
-    --healing totem trink
-    --   if GetItemCooldown(158320) == 0 and tank.health.percent < 80 then
-    --   macro('/use [help] 14; [@targettarget] 14')
-    -- end
-
-    --first mate spyglass
-    --if GetItemCooldown(158163) == 0 and tank.health.percent < 80 then
-    --  macro('/use 13')
-    --end
-
-    -----------------------------
-    --- Health stone / Trinket  /etc
-    -----------------------------
-    --Health stone
-    if player.health.percent < 30 and GetItemCount(5512) >= 1 and GetItemCooldown(5512) then
+]]--
+-------------
+---Utility---
+-------------
+--Health Stone
+    if usehealthstone == true and player.health.percent < healthstonepercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
         macro('/use Healthstone')
     end
 
+-- Innervate should be used as many times during the fight as possible. Refresh Efflorescence, cast Wild Growth, and spam Rejuvenation during Innervate.
+    if player.castable(SB.Innervate) and player.power.mana.percent < 90 then
+        return cast(SB.Innervate, player)
+    end
 
-    --modifiers
+-- Barkskin
+    if player.castable(SB.Barkskin) and player.health.percent < barkskinpercent then
+        return cast(SB.Barkskin, player)
+    end
 
-    -- Maintain Efflorescence under the melee group.
-    if IsAltKeyDown() and not lastcast(SB.Efflorescence) then
+-------------
+--Modifiers--
+-------------
+-- Efflorence
+    if modifier.alt and not lastcast(SB.Efflorescence) then
         return cast(SB.Efflorescence, 'ground')
     end
 
@@ -91,51 +100,48 @@ local function combat()
         end
     end
 
-
-
-
-    --keep dots on target
-    -- During downtime, use Moonfire, Sunfire and Solar Wrath on enemies to help with the damage.
-    if player.power.mana.percent > 55 and lowest.health.percent > 55 and tank.health.percent > 55 then
-        if target.castable(SB.Moonfire) and target.debuff(SB.Moonfire).down then
-            return cast(SB.Moonfire, target)
+-------------
+---Racials---
+-------------
+    if toggle('racial', false) then
+        if race == "Orc" and castable(SB.BloodFury) then
+            return cast(SB.BloodFury)
         end
-        if target.castable(SB.Sunfire) and target.debuff(SB.Sunfire).down then
-            return cast(SB.Sunfire, target)
+        if race == "Troll" and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
+            return cast(SB.Berserking)
         end
-
-
+        if race == "MagharOrc" and castable(SB.AncestralCall) then
+            return cast(SB.AncestralCall)
+        end
+        if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+            return cast(SB.LightsJudgement)
+        end
+        if race == "Draenei" and lowest.castable(SB.GiftOftheNaaru) and lowest.health.effective >= 50 then
+            return cast(SB.GiftOftheNaaru, lowest)
+        end
     end
 
 
-    -- Innervate should be used as many times during the fight as possible. Refresh Efflorescence, cast Wild Growth, and spam Rejuvenation during Innervate.
-    if player.castable(SB.Innervate) and player.power.mana.percent < 90 then
-        return cast(SB.Innervate, player)
-
-    end
-
-    -- TODO: target/mouseover healing, healthstone
-
-    --- Healing Cooldowns
+--- Healing Cooldowns
     if toggle('cooldowns') then
 
         if toggle('IronBark', false) then
-            if tank.castable(SB.Ironbark) and tank.health.percent < 66 then
+            if tank.castable(SB.Ironbark) and tank.health.percent < ironbarkpercent then
                 return cast(SB.Ironbark, tank)
             end
         end
-
-        if group_health_percent < 75 and (lastcast(SB.WildGrowth) or lastcast(SB.Tranquility)) and talent(7, 3) and -spell(SB.Flourish) == 0 then
+--Flourish
+        if talent(7, 3) and group.under(flourishpercent, 60, true) or lastcast(SB.Tranquility) and -spell(SB.Flourish) == 0 then
             return cast(SB.Flourish)
         end
 
-        -- Keep Lifebloom, on an active tank.
+-- Keep Lifebloom, on an active tank.
         if tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
             return cast(SB.Lifebloom, tank)
         end
     end
 
-    --soothe
+--soothe
     if target.castable(SB.Soothe) then
         for i = 1, 40 do
             local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
@@ -146,7 +152,7 @@ local function combat()
         end
     end
 
-    --- Decurse
+--- Decurse
     if toggle('dispell', false) then
         local dispellable_unit = group.removable('curse', 'magic', 'poison')
         if dispellable_unit and spell(SB.NaturesCure).cooldown == 0 then
@@ -159,39 +165,35 @@ local function combat()
         end
     end
 
-    --- Healing
-    -- Use Clearcasting procs to cast Regrowth on any person in the raid.
+--- Healing
+-- Use Clearcasting procs to cast Regrowth on any person in the raid.
     if player.buff(SB.Clearcasting).up and lowest.castable(SB.Regrowth) and lowest.health.percent < 80
             and not player.moving then
         return cast(SB.Regrowth, lowest)
     end
-    -- Use Cenarion Ward on cooldown.
+-- Use Cenarion Ward on cooldown.
     if talent(1, 3) and tank.castable(SB.CenarionWard) and tank.buff(SB.CenarionWard).down then
         return cast(SB.CenarionWard, tank)
     end
 
-    if race == Troll and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
-        return cast(SB.Berserking)
-    end
 
-    -- Keep Rejuvenation, on the tank and on members of the group that just took damage or are about to take damage.
-    if tank.castable(SB.Rejuvenation) and (tank.buff(SB.Rejuvenation).down or (talent(7, 2)
+-- Keep Rejuvenation, on the tank and on members of the group that just took damage or are about to take damage.
+    if tank.castable(SB.Rejuvenation) and (tank.buff(SB.Rejuvenation).down and max_rejuvs <= simultaneousrejuvenations or (talent(7, 2)
             and tank.buff(SB.RejuvenationGermination).down)) then
         return cast(SB.Rejuvenation, tank)
     end
-    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent < 100)
+    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and max_rejuvs <= simultaneousrejuvenations and lowest.health.percent < 100)
             or (talent(7, 2) and lowest.buff(SB.RejuvenationGermination).down
             and (lowest.health.percent < 80 or player.buff(SB.Innervate))) then
         return cast(SB.Rejuvenation, lowest)
     end
 
-    -- Use Wild Growth, when at least 4/6 members of the group/raid are damaged.
-    if lowest.castable(SB.WildGrowth) and not player.moving
-            and (not IsInRaid() and damaged_units >= 4 or damaged_units >= 6) then
+-- Use Wild Growth, when at least 4/6 members of the group/raid are damaged.
+
+    if lowest.castable(SB.WildGrowth) and not player.moving and group.under(wildgrowthpercent, 30, true) >= wildgrowthnumber then
         return cast(SB.WildGrowth, lowest)
     end
-
-    -- Use Swiftmend on a player that just took heavy damage. If not in immediate danger, use Rejuvenation first.
+-- Use Swiftmend on a player that just took heavy damage. If not in immediate danger, use Rejuvenation first.
     if lowest.castable(SB.Swiftmend)
             and (lowest.buff(SB.Rejuvenation).up and lowest.health.percent <= 75 or lowest.health.percent <= 50) then
         return cast(SB.Swiftmend, lowest)
@@ -200,7 +202,7 @@ local function combat()
         return cast(SB.Swiftmend, tank)
     end
 
-    -- Use Regrowth as an emergency heal.
+-- Use Regrowth as an emergency heal.
     if not IsInRaid() then
         if tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 70 then
             return cast(SB.Regrowth, tank)
@@ -217,17 +219,56 @@ local function combat()
         end
     end
 
+-------------
+-----DPS-----
+-------------
+--keep dots on target
+--During downtime, use Moonfire, Sunfire and Solar Wrath on enemies to help with the damage.
+    if player.power.mana.percent > 55 and lowest.health.percent > 55 and tank.health.percent > 55 and toggle('dps', false) and not isCC("target") then
+        if target.castable(SB.Moonfire) and target.debuff(SB.Moonfire).down then
+            return cast(SB.Moonfire, target)
+        end
+        if target.castable(SB.Sunfire) and target.debuff(SB.Sunfire).down then
+            return cast(SB.Sunfire, target)
+        end
+    
+
     if target.castable(SB.SolarWrathResto) and not player.moving then
         return cast(SB.SolarWrathResto, target)
     end
     if target.castable(SB.Moonfire) and player.moving then
         return cast(SB.Moonfire, target)
     end
-end -- end combat()
-
+    end
+end 
 local function resting()
 
-    --print(x)
+-------------
+----Fetch----
+-------------
+local lfg = GetLFGProposal();
+local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+local bgstatus = GetBattlefieldStatus(1);
+local autojoin = dark_addon.settings.fetch('respal_settings_autojoin', true)
+local max_rejuvs = group.count(function (unit)
+  return unit.alive and unit.distance < 40 and unit.buff(SB.Rejuvenation).up
+end)
+local simultaneousrejuvenations = dark_addon.settings.fetch('respal_settings_simultaneousrejuvenations', 10)
+local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
+local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
+local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinpercent', 60)
+local usehealthstone = dark_addon.settings.fetch('respal_settings_healthstone.check', true)
+local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthstone.spin', 25)
+local ironbarkpercent = dark_addon.settings.fetch('respal_settings_ironbarkpercent', 66)
+  
+-------------
+----Forms----
+-------------
     local outdoor = IsOutdoors()
     if player.alive then
 
@@ -258,32 +299,57 @@ local function resting()
         end
 
     end
+-------------
+--Auto Join--
+-------------
+  if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
+  elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+  end
 
+  if autojoin ==true and lfg == true or bgstatus == "confirm" then
+    PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
+    lftime = lftime + 1
+  end
+
+  if lftime >=math.random(20,35) then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+    macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+    lftime = 0
+  end    
+
+
+-------------
+--Modifiers--
+-------------
     if modifier.lalt and -spell(SB.Efflorescence) == 0 then
         return cast(SB.Efflorescence, 'ground')
     end
-
-    -- Keep Lifebloom, on an active tank.
+-------------
+----Heal-----
+-------------
+-- Keep Lifebloom, on an active tank.
     if IsInGroup() and tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
         return cast(SB.Lifebloom, tank)
     end
-    -- Swiftmend
+-- Swiftmend
     if player.castable(SB.Swiftmend) and player.health.percent < 50 then
         return cast(SB.Swiftmend, player)
     end
-    -- Rejuvenation
-    if player.castable(SB.Rejuvenation) and not player.buff(SB.Rejuvenation).up and player.health.percent < 75 then
+-- Rejuvenation
+    if player.castable(SB.Rejuvenation) and not player.buff(SB.Rejuvenation).up and max_rejuvs <= simultaneousrejuvenations and player.health.percent < 75 then
         return cast(SB.Rejuvenation, player)
     end
-    -- Regrowth
+-- Regrowth
     if player.castable(SB.Regrowth) and ((player.health.percent < 75 and not player.buff(SB.Regrowth).up) or player.health.percent < 30) then
         return cast(SB.Regrowth, player)
     end
-    -- Barkskin
+-- Barkskin
     if player.castable(SB.Barkskin) and player.health.percent < 50 then
         return cast(SB.Barkskin, player)
     end
-    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent <= 95)
+    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent <= 95) and max_rejuvs <= simultaneousrejuvenations
             or (talent(7, 2) and lowest.buff(SB.RejuvenationGermination).down and lowest.health.percent <= 75) then
         return cast(SB.Rejuvenation, lowest)
     end
@@ -292,51 +358,134 @@ local function resting()
 end
 
 local function interface()
+  local settings = {
+    key = 'respal_settings',
+    title = 'Restoration Pal - Settings',
+    width = 250,
+    height = 750,
+    resize = true,
+    show = false,
+    template = {
+      { type = 'header', text = 'Restoration Pal - Settings', align= 'center' },
+      { type = 'rule' },
+      { type = 'header', text = 'Class Settings', align= 'center' },
+      { key = 'ironbarkpercent', type = 'spinner', text = 'Iron Bark', desc = 'Health Percent to Cast At', default = 66,  min = 1, max = 100, step = 5 },
+      { type = 'rule' },
+      { type = 'header', text = 'Wild Growth Settings', align= 'center' },
+      { key = 'wildgrowthpercent', type = 'spinner', text = 'Wild Growth', desc = 'Health Percent to Cast At', default = 80,  min = 1, max = 100, step = 5 },
+      { key = 'wildgrowthnumber', type = 'spinner', text = 'Wild Growth Targets', desc = 'Minimum Wild Growth Targets', default = 3, min = 1, max = 40, step = 1 },
+      { type = 'rule' },
+      { type = 'header', text = 'Rejuvenation', align= 'center' },
+      { key = 'simultaneousrejuvenations', type = 'spinner', text = 'Max Rejuvenation Targets', desc = 'Maximum Rejuvenation Targets', default = 10, min = 1, max = 20, step = 1 },
+      { type = 'rule' },
+      { type = 'header', text = 'Rejuvenation', align= 'center' },
+      { key = 'flourishpercent', type = 'spinner', text = 'Flourish', desc = 'Health Percent to Cast At', default = 75,  min = 1, max = 100, step = 5 },
+      { type = 'rule' },
+      { type = 'header', text = 'Defensives', align= 'center' },
+      { key = 'barkskinpercent', type = 'spinner', text = 'Barkskin', desc = 'Health Percent to Cast At', default = 60, min = 1, max = 100, step = 5 },
+      { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', default = 30, min = 5, max = 100, step = 5 },
+      { type = 'rule' },
+      { type = 'header', text = 'Utility', align= 'center' },
+      { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
+
+    }
+  }  
+  configWindow = dark_addon.interface.builder.buildGUI(settings)
+
     dark_addon.interface.buttons.add_toggle({
         name = 'IronBark',
         label = 'IronBark',
         on = {
-            label = 'Bark',
+            label = 'Bark ON',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Bark',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Bark OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+        }
+    })
+        dark_addon.interface.buttons.add_toggle({
+        name = 'racial',
+        label = 'Use Racials',
+        on = {
+            label = 'Racials ON',
+             color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'Racials OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'Forms',
         label = 'change forms',
         on = {
-            label = 'Forms',
+            label = 'Forms ON',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'Forms',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Forms OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
-    dark_addon.interface.buttons.add_toggle({
+        dark_addon.interface.buttons.add_toggle({
+        name = 'dps',
+        label = 'Use Damage Spells',
+        on = {
+            label = 'DPS ON',
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'DPS OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+        }
+        })
+        dark_addon.interface.buttons.add_toggle({
         name = 'dispell',
         label = 'dispell',
         on = {
-            label = 'dispell',
+            label = 'Dispell ON',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'dispell',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Dispell OFF',
+             color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
+    })
+        dark_addon.interface.buttons.add_toggle({
+        name = 'settings',
+        label = 'Rotation Settings',
+        font = 'dark_addon_icon',
+        on = {
+            label = dark_addon.interface.icon('cog'),
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = dark_addon.interface.icon('cog'),
+             color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+        },
+        callback = function(self)
+            if configWindow.parent:IsShown() then
+                configWindow.parent:Hide()
+            else
+                configWindow.parent:Show()
+            end
+        end
     })
 end
 
---dark_addon.environment.hook(your_func)
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.druid.restoration,
     name = 'respal',
