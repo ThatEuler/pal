@@ -444,27 +444,31 @@ local function resting()
 
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
         local group_type = GroupType()
-        local members = GetNumGroupMembers()
-        --[[
-                if group_type == 'raid' then
-                    for i = 1, (members - 1) do
-                        local unit = group_type .. i
-                        if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                            tank1 = unit
-                        end
-                        if (UnitGroupRolesAssigned(unit) == 'TANK') and unit ~= tank1 and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                            tank2 = unit
-                        end
-                    end
-                    if tank1 == nil then
-                        tank1 = "zip"
-                    end
-                    if tank2 == nil then
-                        tank2 = "zilch"
-                    end
-                    --      print("The two tanks are: " .. tank1 .. ", " .. tank2)
-                end
 
+        if group_type == 'raid' then
+
+            tank1 = 'player'
+            tank2 = 'player'
+
+            local members = GetNumGroupMembers()
+            for i = 1, (members - 1) do
+                local unit = group_type .. i
+                if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                    if tank1 == 'player' then
+                        tank1 = unit
+                    elseif tank2 == 'player' then
+                        tank2 = unit
+                        break
+                    end
+                end
+            end
+--        local iTarget = dark_addon.environment.conditions.unit(findHealer(innervateTarget))
+            tank1 = dark_addon.environment.conditions.unit(tank1)
+            tank2= dark_addon.environment.conditions.unit(tank2)
+            --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
+        end
+
+        --[[
                 --next attempt:
 
                 local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
