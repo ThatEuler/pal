@@ -44,6 +44,7 @@ local apotheosisflash = dark_addon.settings.fetch('holypal_settings_apotheosisfl
 local apotheosisserenetiycd = dark_addon.settings.fetch('holypal_settings_apotheosisserenetiycd', 15)
 local apotheosispoh = dark_addon.settings.fetch('holypal_settings_apotheosispoh', 90)
 local apotheosispohplayers = dark_addon.settings.fetch('holypal_settings_apotheosispohplayers', 3)
+local movingrenews = dark_addon.settings.fetch('holypal_settings_movingrenews', "always")
 
 
 -------------
@@ -161,10 +162,19 @@ end
   end
 
 --Renew
-  if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down then
-    return cast(SB.Renew, lowest)
-  elseif tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down then
-    return cast(SB.Renew, tank)
+  if movingrenews == 'renew_always' then
+    if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down then
+      return cast(SB.Renew, lowest)
+    elseif tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down then
+      return cast(SB.Renew, tank)
+    end
+  end
+  if movingrenews == 'renew_moving' then
+    if lowest.castable(SB.Renew) and lowest.health.effective <= renewlowest and max_renews <= simultaneousrenews and lowest.buff(SB.Renew).down and player.moving then
+      return cast(SB.Renew, lowest)
+    elseif tank.castable(SB.Renew) and tank.health.effective <= renewtank and max_renews <= simultaneousrenews and tank.buff(SB.Renew).down and player.moving then
+      return cast(SB.Renew, tank)
+    end
   end
 
 --Flash Heal
@@ -369,6 +379,15 @@ function interface()
       { key = 'simultaneousrenews', type = 'spinner', text = 'Max Renews', desc = 'Number of Max Simulataneous Renews', default =6, min = 1, max = 40, step = 1 },
       { key = 'renewlowest', type = 'spinner', text = 'Renew Lowest', desc = 'Health % of lowest in Group to cast at', default =85, min = 5, max = 100, step = 5 },
       { key = 'renewtank', type = 'spinner', text = 'Renew Tank', desc = 'Health % of Tank to cast at', default =90, min = 5, max = 100, step = 5 },
+      { key = 'renewmoving', type = 'dropdown',
+      text = 'Renew while',
+      desc = 'Use Renew while...',
+      default = 'renew_always',
+      list = {
+      { key = 'renew_always', text = 'Always' },
+      { key = 'renew_moving', text = 'Only Moving' },
+      }
+      },
       { type = 'rule' },
       { type = 'text', text = 'Flash Heal Settings' },
       { key = 'flashheallowest', type = 'spinner', text = 'Flash Heal Lowest', desc = 'Health % of lowest in Group to cast at', default =60, min = 5, max = 100, step = 5 },
