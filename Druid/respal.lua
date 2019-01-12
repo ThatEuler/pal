@@ -18,6 +18,7 @@ local race = UnitRace("player")
 local x = 0 -- counting seconds in resting
 local y = 0 -- counter for opener
 local z = 0 -- time in combat
+local lftime = 0 -- Timer for Dungeon/Battleground Joining
 
 SB.Refreshment = 167152
 SB.Drink = 274914
@@ -38,6 +39,7 @@ local function combat()
 -------------
 local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
 local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
+local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinpercent', 60)
 
 
 --[[    Trinket use
@@ -65,7 +67,7 @@ local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnu
     end
 
 -- Barkskin
-    if player.castable(SB.Barkskin) and player.health.percent < 60 then
+    if player.castable(SB.Barkskin) and player.health.percent < barkskinpercent then
         return cast(SB.Barkskin, player)
     end
 
@@ -232,6 +234,22 @@ local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnu
 end 
 local function resting()
 
+-------------
+----Fetch----
+-------------
+local lfg = GetLFGProposal();
+local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+local bgstatus = GetBattlefieldStatus(1);
+local autojoin = dark_addon.settings.fetch('respal_settings_autojoin', true)
+   
+-------------
+----Forms----
+-------------
     local outdoor = IsOutdoors()
     if player.alive then
 
@@ -262,6 +280,27 @@ local function resting()
         end
 
     end
+-------------
+--Auto Join--
+-------------
+  if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
+  elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+  end
+
+  if autojoin ==true and lfg == true or bgstatus == "confirm" then
+    PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog", false);
+    lftime = lftime + 1
+  end
+
+  if lftime >=math.random(20,35) then
+    SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+    macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+    lftime = 0
+  end    
+
+
 -------------
 --Modifiers--
 -------------
@@ -310,12 +349,17 @@ local function interface()
     template = {
       { type = 'header', text = 'Restoration Pal - Settings', align= 'center' },
       { type = 'rule' },
-      { type = 'text', text = 'Class Settings' },
+      { type = 'header', text = 'Class Settings', align= 'center' },
       { type = 'rule' },
-      { type = 'text', text = 'Wild Growth Settings' },
+      { type = 'header', text = 'Wild Growth Settings', align= 'center' },
       { key = 'wildgrowthpercent', type = 'spinner', text = 'Wild Growth', desc = 'Health Percent to Cast At', default = 80,  min = 1, max = 100, step = 5 },
       { key = 'wildgrowthnumber', type = 'spinner', text = 'Wild Growth Targets', desc = 'Minimum Wild Growth Targets', default = 3, min = 1, max = 40, step = 1 },
-
+      { type = 'rule' },
+      { type = 'header', text = 'Defensives', align= 'center' },
+      { key = 'barkskinpercent', type = 'spinner', text = 'Barkskin', desc = 'Health Percent to Cast At', default = 60, min = 1, max = 100, step = 1 },
+      { type = 'rule' },
+      { type = 'header', text = 'Utility', align= 'center' },
+      { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
 
     }
   }  
