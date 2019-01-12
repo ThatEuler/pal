@@ -40,7 +40,8 @@ local function combat()
 local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
 local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
 local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinpercent', 60)
-
+local usehealthstone = dark_addon.settings.fetch('respal_settings_healthstone.check', 25)
+local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthstone.spin', 20)
 
 --[[    Trinket use
     healing totem trink
@@ -57,7 +58,7 @@ local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinperce
 ---Utility---
 -------------
 --Health Stone
-    if player.health.percent < 30 and GetItemCount(5512) >= 1 and GetItemCooldown(5512) then
+    if usehealthstone == true and player.health.percent < healthstonepercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
         macro('/use Healthstone')
     end
 
@@ -357,6 +358,7 @@ local function interface()
       { type = 'rule' },
       { type = 'header', text = 'Defensives', align= 'center' },
       { key = 'barkskinpercent', type = 'spinner', text = 'Barkskin', desc = 'Health Percent to Cast At', default = 60, min = 1, max = 100, step = 1 },
+      { key = 'healthstone', type = 'checkspin', default = '30', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'header', text = 'Utility', align= 'center' },
       { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
