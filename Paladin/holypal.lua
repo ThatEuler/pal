@@ -129,11 +129,10 @@ local function combat()
                 end
             end
         end
-        tank1 = dark_addon.environment.conditions.unit(tank1)
-        tank2 = dark_addon.environment.conditions.unit(tank2)
         --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
     end
-
+        tank1 = dark_addon.environment.conditions.unit(tank1)
+        tank2 = dark_addon.environment.conditions.unit(tank2)
 
     --[[
      if tank.name == nil then
@@ -147,13 +146,13 @@ local function combat()
     -----------------------------
 
     if autoBeacon and talent(7, 2) then
-        if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+        if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
             return cast(SB.BeaconofLight, tank1)
         end
-        if tank2.buff(SB.BeaconofLight).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+        if tank2.buff(SB.BeaconofLight).down and tank2.distance <= 40 and not UnitIsDeadOrGhost("tank2") then
             return cast(SB.BeaconofFaith, tank2)
         end
-    elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+    elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
         return cast(SB.BeaconofLight, tank1)
     end
 
@@ -533,7 +532,7 @@ local function resting()
         end
 
         --Auto Beacons
-        if autoBeacon and talent(7, 2) and group_type ~= 'solo' then
+        if autoBeacon and talent(7, 2) then
             if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
                 return cast(SB.BeaconofLight, tank1)
             end
