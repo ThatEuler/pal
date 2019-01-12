@@ -41,9 +41,10 @@ local function combat()
         return
     end
 
-    if player.debuff(SB.Quake).remains < 0.5 then
-        macro('/stopcasting')
-    end
+ --[[   if player.debuff(SB.Quake).remains < 0.5 then
+        macro('/stopcas
+ting')
+    end ]]--
 
     -----------------------------
     --- Reading from settings
