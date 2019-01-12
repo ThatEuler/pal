@@ -4,6 +4,10 @@
 -- Holding Alt = Efflorescence
 -- Holding CTRL = Cleanse - mouseover and Battle Ressurrect if mouseover is dead
 -- Holding Shift =
+-- TODO: Flourish Logic = Count how many Hots are active in total and watch the cooldowns for all of them so we can if < 8 seconds are remaining, Rejuv Spinners, Regrowth Spinners, Swiftmend Spinners
+
+
+
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.druid
@@ -37,11 +41,18 @@ local function combat()
 -------------
 ----Fetch----
 -------------
+local max_rejuvs = group.count(function (unit)
+  return unit.alive and unit.distance < 40 and unit.buff(SB.Rejuvenation).up
+end)
+local simultaneousrejuvenations = dark_addon.settings.fetch('respal_settings_simultaneousrejuvenations', 10)
 local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
 local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
 local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinpercent', 60)
-local usehealthstone = dark_addon.settings.fetch('respal_settings_healthstone.check', 25)
-local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthstone.spin', 20)
+local usehealthstone = dark_addon.settings.fetch('respal_settings_healthstone.check', true)
+local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthstone.spin', 25)
+local ironbarkpercent = dark_addon.settings.fetch('respal_settings_ironbarkpercent', 66)
+local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishpercent', 75)
+
 
 --[[    Trinket use
     healing totem trink
@@ -111,19 +122,16 @@ local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthston
     end
 
 
-
--- TODO: target/mouseover healing, healthstone
-
 --- Healing Cooldowns
     if toggle('cooldowns') then
 
         if toggle('IronBark', false) then
-            if tank.castable(SB.Ironbark) and tank.health.percent < 66 then
+            if tank.castable(SB.Ironbark) and tank.health.percent < ironbarkpercent then
                 return cast(SB.Ironbark, tank)
             end
         end
-
-        if group_health_percent < 75 and (lastcast(SB.WildGrowth) or lastcast(SB.Tranquility)) and talent(7, 3) and -spell(SB.Flourish) == 0 then
+--Flourish
+        if group.under(flourishpercent, 60, true) or lastcast(SB.Tranquility) and talent(7, 3) and -spell(SB.Flourish) == 0 then
             return cast(SB.Flourish)
         end
 
@@ -170,11 +178,11 @@ local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthston
 
 
 -- Keep Rejuvenation, on the tank and on members of the group that just took damage or are about to take damage.
-    if tank.castable(SB.Rejuvenation) and (tank.buff(SB.Rejuvenation).down or (talent(7, 2)
+    if tank.castable(SB.Rejuvenation) and (tank.buff(SB.Rejuvenation).down and max_rejuvs <= simultaneousrejuvenations or (talent(7, 2)
             and tank.buff(SB.RejuvenationGermination).down)) then
         return cast(SB.Rejuvenation, tank)
     end
-    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent < 100)
+    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and max_rejuvs <= simultaneousrejuvenations and lowest.health.percent < 100)
             or (talent(7, 2) and lowest.buff(SB.RejuvenationGermination).down
             and (lowest.health.percent < 80 or player.buff(SB.Innervate))) then
         return cast(SB.Rejuvenation, lowest)
@@ -247,7 +255,17 @@ local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
 local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
 local bgstatus = GetBattlefieldStatus(1);
 local autojoin = dark_addon.settings.fetch('respal_settings_autojoin', true)
-   
+local max_rejuvs = group.count(function (unit)
+  return unit.alive and unit.distance < 40 and unit.buff(SB.Rejuvenation).up
+end)
+local simultaneousrejuvenations = dark_addon.settings.fetch('respal_settings_simultaneousrejuvenations', 10)
+local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
+local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
+local barkskinpercent = dark_addon.settings.fetch('respal_settings_barkskinpercent', 60)
+local usehealthstone = dark_addon.settings.fetch('respal_settings_healthstone.check', true)
+local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthstone.spin', 25)
+local ironbarkpercent = dark_addon.settings.fetch('respal_settings_ironbarkpercent', 66)
+  
 -------------
 ----Forms----
 -------------
@@ -320,7 +338,7 @@ local autojoin = dark_addon.settings.fetch('respal_settings_autojoin', true)
         return cast(SB.Swiftmend, player)
     end
 -- Rejuvenation
-    if player.castable(SB.Rejuvenation) and not player.buff(SB.Rejuvenation).up and player.health.percent < 75 then
+    if player.castable(SB.Rejuvenation) and not player.buff(SB.Rejuvenation).up and max_rejuvs <= simultaneousrejuvenations and player.health.percent < 75 then
         return cast(SB.Rejuvenation, player)
     end
 -- Regrowth
@@ -331,7 +349,7 @@ local autojoin = dark_addon.settings.fetch('respal_settings_autojoin', true)
     if player.castable(SB.Barkskin) and player.health.percent < 50 then
         return cast(SB.Barkskin, player)
     end
-    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent <= 95)
+    if lowest.castable(SB.Rejuvenation) and (lowest.buff(SB.Rejuvenation).down and lowest.health.percent <= 95) and max_rejuvs <= simultaneousrejuvenations
             or (talent(7, 2) and lowest.buff(SB.RejuvenationGermination).down and lowest.health.percent <= 75) then
         return cast(SB.Rejuvenation, lowest)
     end
@@ -351,14 +369,21 @@ local function interface()
       { type = 'header', text = 'Restoration Pal - Settings', align= 'center' },
       { type = 'rule' },
       { type = 'header', text = 'Class Settings', align= 'center' },
+      { key = 'ironbarkpercent', type = 'spinner', text = 'Iron Bark', desc = 'Health Percent to Cast At', default = 66,  min = 1, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'header', text = 'Wild Growth Settings', align= 'center' },
       { key = 'wildgrowthpercent', type = 'spinner', text = 'Wild Growth', desc = 'Health Percent to Cast At', default = 80,  min = 1, max = 100, step = 5 },
       { key = 'wildgrowthnumber', type = 'spinner', text = 'Wild Growth Targets', desc = 'Minimum Wild Growth Targets', default = 3, min = 1, max = 40, step = 1 },
       { type = 'rule' },
+      { type = 'header', text = 'Rejuvenation', align= 'center' },
+      { key = 'simultaneousrejuvenations', type = 'spinner', text = 'Max Rejuvenation Targets', desc = 'Maximum Rejuvenation Targets', default = 10, min = 1, max = 20, step = 1 },
+      { type = 'rule' },
+      { type = 'header', text = 'Rejuvenation', align= 'center' },
+      { key = 'flourishpercent', type = 'spinner', text = 'Flourish', desc = 'Health Percent to Cast At', default = 75,  min = 1, max = 100, step = 5 },
+      { type = 'rule' },
       { type = 'header', text = 'Defensives', align= 'center' },
-      { key = 'barkskinpercent', type = 'spinner', text = 'Barkskin', desc = 'Health Percent to Cast At', default = 60, min = 1, max = 100, step = 1 },
-      { key = 'healthstone', type = 'checkspin', default = '30', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
+      { key = 'barkskinpercent', type = 'spinner', text = 'Barkskin', desc = 'Health Percent to Cast At', default = 60, min = 1, max = 100, step = 5 },
+      { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', default = 30, min = 5, max = 100, step = 5 },
       { type = 'rule' },
       { type = 'header', text = 'Utility', align= 'center' },
       { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
