@@ -46,27 +46,28 @@ local function combat()
         return
     end
 
- --[[   if player.debuff(SB.Quake).remains < 0.5 then
-        macro('/stopcas
-ting')
-    end ]]--
+    --[[   if player.debuff(SB.Quake).remains < 0.5 then
+           macro('/stopcas
+   ting')
+       end ]]--
 
     -----------------------------
     --- Reading from settings
     -----------------------------
 
-    local autoStun = dark_addon.settings.fetch('holypal_settings_autoStun')
-    local intpercent = dark_addon.settings.fetch('holypal_settings_intpercent')
-    local usehealthstone = dark_addon.settings.fetch('holypal_settings_healthstone.check')
-    local healthstonepercent = dark_addon.settings.fetch('holypal_settings_healthstone.spin')
-    local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial')
-    local autoAura = dark_addon.settings.fetch('holypal_settings_autoAura')
-    local AutoAvengingCrusader = dark_addon.settings.fetch('holypal_settings_autoAvengingCrusader')
-    local autoHolyAvenger = dark_addon.settings.fetch('holypal_settings_autoHolyAvenger')
-    local autoWrath = dark_addon.settings.fetch('holypal_settings_autoWrath')
-    local autoDivineProtection = dark_addon.settings.fetch('holypal_settings_autoDivineProtection')
-    local autoDivineShield = dark_addon.settings.fetch('holypal_settings_autoDivineShield')
-    local autoBeaconofVirtue = dark_addon.settings.fetch('holypal_settings_autoBeaconofVirtue')
+    local autoStun = dark_addon.settings.fetch('holypal_settings_autoStun', true)
+    local intpercent = dark_addon.settings.fetch('holypal_settings_intpercent', 50)
+    local usehealthstone = dark_addon.settings.fetch('holypal_settings_healthstone.check', true)
+    local healthstonepercent = dark_addon.settings.fetch('holypal_settings_healthstone.spin', 25)
+    local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial', true)
+    local autoAura = dark_addon.settings.fetch('holypal_settings_autoAura', true)
+    local AutoAvengingCrusader = dark_addon.settings.fetch('holypal_settings_autoAvengingCrusader', true)
+    local autoHolyAvenger = dark_addon.settings.fetch('holypal_settings_autoHolyAvenger', true)
+    local autoWrath = dark_addon.settings.fetch('holypal_settings_autoWrath', true)
+    local autoDivineProtection = dark_addon.settings.fetch('holypal_settings_autoDivineProtection', true)
+    local autoDivineShield = dark_addon.settings.fetch('holypal_settings_autoDivineShield', true)
+    local autoBeaconofVirtue = dark_addon.settings.fetch('holypal_settings_autoBeaconofVirtue', true)
+    autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
 
     -----------------------------
     --- Reticulate Splines
@@ -106,7 +107,32 @@ ting')
         inRange = 1
     end
 
+      -----------------------------
+    --- Find the 2 tanks
+    -----------------------------
+    local group_type = GroupType()
 
+        if group_type == 'raid' then
+
+            tank1 = 'player'
+            tank2 = 'player'
+
+            local members = GetNumGroupMembers()
+            for i = 1, (members - 1) do
+                local unit = group_type .. i
+                if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                    if tank1 == 'player' then
+                        tank1 = unit
+                    elseif tank2 == 'player' then
+                        tank2 = unit
+                        break
+                    end
+                end
+            end
+            tank1 = dark_addon.environment.conditions.unit(tank1)
+            tank2 = dark_addon.environment.conditions.unit(tank2)
+            --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
+        end
 
 
     --[[
@@ -115,6 +141,23 @@ ting')
     end
 
   ]]
+
+    -----------------------------
+    --Auto Beacons
+    -----------------------------
+
+    if autoBeacon and talent(7, 2) then
+        if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+            return cast(SB.BeaconofLight, tank1)
+        end
+        if tank2.buff(SB.BeaconofLight).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+            return cast(SB.BeaconofFaith, tank2)
+        end
+    elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+        return cast(SB.BeaconofLight, tank1)
+    end
+
+
 
 
     ----------------------------------------------------------
@@ -190,22 +233,6 @@ ting')
     if player.moving and tank.health.percent < 40 and player.health.percent > 50 and -spell(SB.HolyShock) > 0 then
         return cast(SB.LightoftheMartyr, tank)
     end
-
-
-    -- Beacons
-    -- if talent(7, 1) and tank.buff(SB.BeaconofLight).down  then
-    --  return cast(SB.BeaconofLight, tank)
-    --end
-    --if talent(7, 2) and IsInRaid() then
-    --  if tank.buff(SB.BeaconofLight).down then
-    --   return cast(SB.BeaconofLight, tank)
-    -- end
-    -- if offtank.buff(SB.BeaconofFaith).down then
-    --   return cast(SB.BeaconofFaith, offtank)
-    -- end
-    --end
-    --]
-
 
 
     -- Lets use our blessings/LoH
@@ -462,49 +489,28 @@ local function resting()
                     end
                 end
             end
---        local iTarget = dark_addon.environment.conditions.unit(findHealer(innervateTarget))
+            --        local iTarget = dark_addon.environment.conditions.unit(findHealer(innervateTarget))
             tank1 = dark_addon.environment.conditions.unit(tank1)
-            tank2= dark_addon.environment.conditions.unit(tank2)
+            tank2 = dark_addon.environment.conditions.unit(tank2)
             --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
         end
 
-        --[[
-                --next attempt:
 
-                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+        -------------
+        -- Bubble fall
+        -------------
+        local falling = IsFalling()
 
-        if group_type == 'raid' then
-            for i = 1, (members - 1) do
-                local unit = group_type .. i
-                local name, _, _, _, _, _, _, _, _, role, _, combatRole = GetRaidRosterInfo(i);
-                if role == "maintank" then
-                    tank1 = unit
-                end
-                if role == "mainassist" then
-                    tank2 = unit
-                end
-                if tank1 == nil then
-                    tank1 = "zip"
-                end
-                if tank2 == nil then
-                    tank2 = "zilch"
-                end
-                --print("The two tanks are: " .. tank1 .. ", " .. tank2)
-            end
-        end     ]]
-        --[[local z
-        local falling = IsFalling();
-
-        if falling then
-            z = z + 1
-            if z >= 30 and -spell(SB.DivineShield) == 0 then
-                z = 0
-                return cast(SB.DivineShield, player)
-            end
-        elseif not falling then
-            z = 0
+        if falling == true then
+            falltime = falltime + 1
+        elseif falling == false then
+            falltime = 0
         end
-]]
+
+        if falltime >= 25 and -spell(SB.DivineShield) == 0 then
+            return cast(SB.DivineShield, player)
+        end
+
         if modifier.lshift and talent(3, 2) and target.enemy and -spell(SB.Repentance) == 0 then
             return cast(SB.Repentance, 'mouseover')
         end
@@ -521,105 +527,64 @@ local function resting()
                 return cast(SB.Absolution)
             end
         end
-        --BE Racial
-        local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial')
-        if autoRacial == true and race == "Blood Elf" and player.power.mana.percent < 90 and -spell(SB.ArcaneTorrent) == 0 then
-            return cast(SB.ArcaneTorrent)
+
+        --Auto Beacons
+        if autoBeacon and talent(7, 2) then
+            if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+                return cast(SB.BeaconofLight, tank1)
+            end
+            if tank2.buff(SB.BeaconofLight).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+                return cast(SB.BeaconofFaith, tank2)
+            end
+        elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
+            return cast(SB.BeaconofLight, tank1)
+        end
+    end
+
+    -- - Decurse
+    local dispellable_unit = group.removable('disease', 'magic', 'poison')
+    if toggle('DISPELL', false) and dispellable_unit and spell(SB.Cleanse).cooldown == 0 then
+        return cast(SB.Cleanse, dispellable_unit)
+    end
+
+    -- self-cleanse
+    local dispellable_unit = player.removable('disease', 'magic', 'poison')
+    if toggle('DISPELL', false) and dispellable_unit and spell(SB.Cleanse).cooldown == 0 then
+        return cast(SB.Cleanse, dispellable_unit)
+    end
+
+    --out of combat healing
+
+    if tank.castable(SB.HolyShock) and tank.health.percent <= 80 then
+        return cast(SB.HolyShock, tank)
+    end
+    if lowest.castable(SB.HolyShock) and lowest.health.percent <= 80 then
+        return cast(SB.HolyShock, lowest)
+    end
+
+    if not player.moving then
+
+        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and tank.health.percent < 70 then
         end
 
-
-
-        --find the two tank
-        --Beacons
-
-        --[[  local members = GetNumGroupMembers()
-          local group_type = GroupType()
-          if IsInRaid then
-              for i = 1, (members - 1) do
-                  local unit = group_type .. i
-                  local unitName, _ = UnitName(unit)
-                  if tank1 == nil and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                      tank1 = group_type .. i
-                  elseif tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                      tank2 = group_type .. i
-                  end
-                  if tank1 == nil then
-                      tank1 = 'player'
-                  end
-                  if tank2 == nil then
-                      tank2 = group_type .. i
-                  end
-
-          print(tank2)
-
-
-                  if talent(7, 2) then
-                      local tank1 = dark_addon.environment.conditions.unit(tank1)
-                      local tank2 = dark_addon.environment.conditions.unit(tank2)
-                      if tank1 ~= nil and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(unit) then
-                          return cast(SB.BeaconofLight, tank1)
-                      end
-                      if tank2 ~= nil and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(unit) then
-                          return cast(SB.BeaconofFaith, tank2)
-                      end
-
-                  end
-              end
-
-          end
-
-        local members = GetNumGroupMembers()
-        local group_type = GroupType()
-
-        --function getTanks()  not sure how to return more than one value from a function .... built a table?
-        ]]
-
-
-        -- - Decurse
-        local dispellable_unit = group.removable('disease', 'magic', 'poison')
-        if toggle('DISPELL', false) and dispellable_unit and spell(SB.Cleanse).cooldown == 0 then
-            return cast(SB.Cleanse, dispellable_unit)
+        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.distance < 40 and (lowest.health.percent < 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+            return cast(SB.FlashofLight, lowest)
         end
 
-        -- self-cleanse
-        local dispellable_unit = player.removable('disease', 'magic', 'poison')
-        if toggle('DISPELL', false) and dispellable_unit and spell(SB.Cleanse).cooldown == 0 then
-            return cast(SB.Cleanse, dispellable_unit)
+        if lowest.castable(SB.FlashofLight) and (lowest.health.percent < 50 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+            return cast(SB.FlashofLight, lowest)
         end
 
-        --out of combat healing
-
-        if tank.castable(SB.HolyShock) and tank.health.percent <= 80 then
-            return cast(SB.HolyShock, tank)
-        end
-        if lowest.castable(SB.HolyShock) and lowest.health.percent <= 80 then
-            return cast(SB.HolyShock, lowest)
+        if tank.castable(SB.FlashofLight) and (tank.health.percent < 60 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+            return cast(SB.FlashofLight, tank)
         end
 
-        if not player.moving then
+        if lowest.castable(SB.HolyLight) and lowest.health.percent < 70 or (lowest.health.percent < 90 and lowest.debuff(SB.GrievousWound)) then
+            return cast(SB.HolyLight, lowest)
+        end
 
-            if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and tank.health.percent < 70 then
-            end
-
-            if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.distance < 40 and (lowest.health.percent < 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
-                return cast(SB.FlashofLight, lowest)
-            end
-
-            if lowest.castable(SB.FlashofLight) and (lowest.health.percent < 50 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
-                return cast(SB.FlashofLight, lowest)
-            end
-
-            if tank.castable(SB.FlashofLight) and (tank.health.percent < 60 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
-                return cast(SB.FlashofLight, tank)
-            end
-
-            if lowest.castable(SB.HolyLight) and lowest.health.percent < 70 or (lowest.health.percent < 90 and lowest.debuff(SB.GrievousWound)) then
-                return cast(SB.HolyLight, lowest)
-            end
-
-            if tank.castable(SB.HolyLight) and (tank.health.percent < 85 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
-                return cast(SB.HolyLight, tank)
-            end
+        if tank.castable(SB.HolyLight) and (tank.health.percent < 85 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+            return cast(SB.HolyLight, tank)
         end
     end
 end
@@ -644,6 +609,8 @@ local function interface()
             { type = 'text', text = 'Utility' },
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
+            { type = 'rule' },
+            { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '' "true" },
             { type = 'rule' },
             { type = 'text', text = 'Automated CoolDowns' },
             { key = 'autoAura', type = 'checkbox', text = 'Aura Mastery', desc = '' },
