@@ -24,7 +24,9 @@ SB.Drink = 274914
 SB.ReplenishmentDebuff = 252753
 SB.Regrowth = 8936
 SB.SolarWrathResto = 5176
-
+SB.GiftOftheNaaru = 59544
+SB.AncestralCall = 274738
+SB.LightsJudgement = 255647
 
 
 local function combat()
@@ -37,10 +39,6 @@ local function combat()
 local wildgrowthpercent = dark_addon.settings.fetch('respal_settings_wildgrowthpercent', 80)
 local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnumber', 3)
 
--- Barkskin
-    if player.castable(SB.Barkskin) and player.health.percent < 60 then
-        return cast(SB.Barkskin, player)
-    end
 
 --[[    Trinket use
     healing totem trink
@@ -65,6 +63,12 @@ local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnu
     if player.castable(SB.Innervate) and player.power.mana.percent < 90 then
         return cast(SB.Innervate, player)
     end
+
+-- Barkskin
+    if player.castable(SB.Barkskin) and player.health.percent < 60 then
+        return cast(SB.Barkskin, player)
+    end
+
 -------------
 --Modifiers--
 -------------
@@ -81,6 +85,28 @@ local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnu
             return cast(SB.Rebirth, 'mouseover')
         end
     end
+
+-------------
+---Racials---
+-------------
+    if toggle('racial', false) then
+        if race == "Orc" and castable(SB.BloodFury) then
+            return cast(SB.BloodFury)
+        end
+        if race == "Troll" and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
+            return cast(SB.Berserking)
+        end
+        if race == "MagharOrc" and castable(SB.AncestralCall) then
+            return cast(SB.AncestralCall)
+        end
+        if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+            return cast(SB.LightsJudgement)
+        end
+        if race == "Draenei" and lowest.castable(SB.GiftOftheNaaru) and lowest.health.effective >= 50 then
+            return cast(SB.GiftOftheNaaru, lowest)
+        end
+    end
+
 
 
 -- TODO: target/mouseover healing, healthstone
@@ -139,9 +165,6 @@ local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnu
         return cast(SB.CenarionWard, tank)
     end
 
-    if race == Troll and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
-        return cast(SB.Berserking)
-    end
 
 -- Keep Rejuvenation, on the tank and on members of the group that just took damage or are about to take damage.
     if tank.castable(SB.Rejuvenation) and (tank.buff(SB.Rejuvenation).down or (talent(7, 2)
@@ -159,7 +182,7 @@ local wildgrowthnumber = dark_addon.settings.fetch('respal_settings_wildgrowthnu
     if lowest.castable(SB.WildGrowth) and not player.moving and group.under(wildgrowthpercent, 30, true) >= wildgrowthnumber then
         return cast(SB.WildGrowth, lowest)
     end
-    -- Use Swiftmend on a player that just took heavy damage. If not in immediate danger, use Rejuvenation first.
+-- Use Swiftmend on a player that just took heavy damage. If not in immediate danger, use Rejuvenation first.
     if lowest.castable(SB.Swiftmend)
             and (lowest.buff(SB.Rejuvenation).up and lowest.health.percent <= 75 or lowest.health.percent <= 50) then
         return cast(SB.Swiftmend, lowest)
@@ -239,11 +262,15 @@ local function resting()
         end
 
     end
-
+-------------
+--Modifiers--
+-------------
     if modifier.lalt and -spell(SB.Efflorescence) == 0 then
         return cast(SB.Efflorescence, 'ground')
     end
-
+-------------
+----Heal-----
+-------------
 -- Keep Lifebloom, on an active tank.
     if IsInGroup() and tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
         return cast(SB.Lifebloom, tank)
@@ -308,6 +335,20 @@ local function interface()
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
+        dark_addon.interface.buttons.add_toggle({
+        name = 'racial',
+        label = 'Use Racials',
+        on = {
+            label = 'Racials ON',
+             color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'Racials OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+        }
+    })
     dark_addon.interface.buttons.add_toggle({
         name = 'Forms',
         label = 'change forms',
@@ -322,7 +363,7 @@ local function interface()
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
-    dark_addon.interface.buttons.add_toggle({
+        dark_addon.interface.buttons.add_toggle({
         name = 'dps',
         label = 'Use Damage Spells',
         on = {
@@ -336,7 +377,7 @@ local function interface()
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
         })
-    dark_addon.interface.buttons.add_toggle({
+        dark_addon.interface.buttons.add_toggle({
         name = 'dispell',
         label = 'dispell',
         on = {
@@ -350,7 +391,7 @@ local function interface()
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
-    dark_addon.interface.buttons.add_toggle({
+        dark_addon.interface.buttons.add_toggle({
         name = 'settings',
         label = 'Rotation Settings',
         font = 'dark_addon_icon',
