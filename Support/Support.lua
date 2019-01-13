@@ -118,3 +118,49 @@ function isCC(target)
     end
     return false
 end
+
+local function GroupType()
+    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
+end
+
+
+function getTanks()
+    local tank1 = nil
+    local tank2 = nil
+
+    local group_type = GroupType()
+    local members = GetNumGroupMembers()
+    for i = 1, (members - 1) do
+        local unit = group_type .. i
+        if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+            if tank1 == nil then
+                tank1 = unit
+            elseif tank2 == nil then
+                tank2 = unit
+                break
+            end
+        end
+    end
+    --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
+    if tank1 ~= nil then
+        tank1 = dark_addon.environment.conditions.unit(tank1)
+
+    end
+    if tank2 ~= nil then
+        tank2 = dark_addon.environment.conditions.unit(tank2)
+    end
+    return tank1, tank2
+end
+
+function doBeacons(autoBeacon, tank1, tank2, SB)
+    if autoBeacon and talent(7, 2) and tank1 ~= nil then
+        if tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
+            return cast(SB.BeaconofLight, tank1)
+        end
+        if tank2 ~= nil and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost("tank2") then
+            return cast(SB.BeaconofFaith, tank2)
+        end
+    elseif tank1 ~= nil and talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
+        return cast(SB.BeaconofLight, tank1)
+    end
+end

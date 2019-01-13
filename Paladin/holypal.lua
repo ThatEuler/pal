@@ -18,9 +18,6 @@ local DB = dark_addon.rotation.spellbooks.paladin
 local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
 
-local tank1 = nil
-local tank2 = nil
-
 SB.Quake = 240447
 SB.GrievousWound = 240559
 
@@ -108,54 +105,23 @@ local function combat()
     end
 
     -----------------------------
-    --- Find the 2 tanks
-    -----------------------------
-    local group_type = GroupType()
-
-    tank1 = 'player'
-    tank2 = 'player'
-
-    local members = GetNumGroupMembers()
-    for i = 1, (members - 1) do
-        local unit = group_type .. i
-        if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-            if tank1 == 'player' then
-                tank1 = unit
-            elseif tank2 == 'player' then
-                tank2 = unit
-                break
-            end
-        end
-    end
-    --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
-
-    tank1 = dark_addon.environment.conditions.unit(tank1)
-    tank2 = dark_addon.environment.conditions.unit(tank2)
-
-    --[[
-     if tank.name == nil then
-        print ('SET TANK AS FOCUS')
-    end
-
-  ]]
-
-    -----------------------------
     --Auto Beacons
     -----------------------------
 
-    if autoBeacon and talent(7, 2) then
-        if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
+    if autoBeacon and (talent(7, 1) or talent(7, 2)) then
+        local tank1, tank2 = getTanks()
+        if tank1 == nil then
+            tank1 = player
+        elseif tank2 == nil then
+            tank2 = player
+        end
+        if tank1.castable(SB.BeaconofLight) and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(tank1.unitID) then
             return cast(SB.BeaconofLight, tank1)
         end
-        if tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost("tank2") then
+        if tank2 ~= nil and talent(7, 2) and tank2.castable(SB.BeaconofFaith) and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(tank2.unitID) then
             return cast(SB.BeaconofFaith, tank2)
         end
-    elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
-        return cast(SB.BeaconofLight, tank1)
     end
-
-
-
 
     ----------------------------------------------------------
     --- Health stone / Trinket  / Items / etc
@@ -469,29 +435,6 @@ local function resting()
     local autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
 
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
-        local group_type = GroupType()
-
-        tank1 = 'player'
-        tank2 = 'player'
-
-        local members = GetNumGroupMembers()
-        for i = 1, (members - 1) do
-            local unit = group_type .. i
-            if (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-                if tank1 == 'player' then
-                    tank1 = unit
-                elseif tank2 == 'player' then
-                    tank2 = unit
-                    break
-                end
-            end
-        end
-        --print("The two tanks are: " .. tank1.name .. ", " .. tank2.name)
-
-
-        tank1 = dark_addon.environment.conditions.unit(tank1)
-        tank2 = dark_addon.environment.conditions.unit(tank2)
-
 
 
         -------------
@@ -530,16 +473,25 @@ local function resting()
         --Auto Beacons
         -----------------------------
 
-        if autoBeacon and talent(7, 2) then
-            if tank1.buff(SB.BeaconofLight).down and tank1 ~= player and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
+        local tank1, tank2 = getTanks()
+
+        if tank1 == nil then
+            tank1 = player
+        elseif tank2 == nil then
+            tank2 = player
+        end
+
+        --print("The two tanks are: " .. tank1.name .. ", " .. (tank2 and tank2.name or "nil"))
+
+        if autoBeacon and (talent(7, 1) or talent(7, 2)) then
+            if tank1.castable(SB.BeaconofLight) and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(tank1.unitID) then
                 return cast(SB.BeaconofLight, tank1)
             end
-            if tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost("tank2") then
+            if tank2 ~= nil and talent(7, 2) and tank2.castable(SB.BeaconofFaith) and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(tank2.unitID) then
                 return cast(SB.BeaconofFaith, tank2)
             end
-        elseif talent(7, 1) and autoBeacon and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost("tank1") then
-            return cast(SB.BeaconofLight, tank1)
         end
+
 
 
 
