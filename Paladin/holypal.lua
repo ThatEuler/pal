@@ -69,6 +69,9 @@ local function combat()
     local boplowest = dark_addon.settings.fetch('holypal_settings_boplowest', 20)
     local blessingofsacrificelowest = dark_addon.settings.fetch('holypal_settings_blessingofsacrificelowest', 20)
     local blessingofsacrificetank = dark_addon.settings.fetch('holypal_settings_blessingofsacrificetank', 40)
+    local holyshocktank = dark_addon.settings.fetch('holypal_settings_holyshocktank', 80)
+    local holyshocklowest = dark_addon.settings.fetch('holypal_settings_holyshocklowest', 70)
+    local holylightgeneral = dark_addon.settings.fetch('holypal_settings_holylightgeneral', 80)
 
 
     -----------------------------
@@ -348,11 +351,11 @@ local function combat()
 
     -- holy shock on CD
 
-    if lowest.castable(SB.HolyShock) and lowest.distance < 40 and (lowest.health.percent <= 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+    if lowest.castable(SB.HolyShock) and lowest.distance < 40 and (lowest.health.percent <= holyshocklowest or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
         return cast(SB.HolyShock, lowest)
     end
 
-    if tank.castable(SB.HolyShock) and tank.distance <= 40 and (tank.health.percent < 80 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+    if tank.castable(SB.HolyShock) and tank.distance <= 40 and (tank.health.percent <= holyshocktank or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
         return cast(SB.HolyShock, tank)
     end
 
@@ -574,20 +577,19 @@ local function interface()
         template = {
             { type = 'header', text = 'Holy Paladin Pal - Settings', align= 'center' },
             { type = 'rule' },
-            { type = 'header', text = 'Class Settings', align= 'center' },
-            { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '', "true" },
-            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection ', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
 
             { type = 'rule' },
             { type = 'header', text = 'Heal Settings', align= 'center' },
             { type = 'text', text = 'Lay on Hands',},
             { key = 'layonhandslowest', type = 'spinner', text = 'Lay on Hands Tank', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
             { key = 'layonhandstank', type = 'spinner', text = 'Lay on Hands Lowest', desc = 'Health Percent to Cast At', default = 15,  min = 1, max = 100, step = 5 },
-            { key = 'blessingofsacrificetank', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of Tank to Cast At', default = 40,  min = 1, max = 100, step = 5 },
-            { key = 'blessingofsacrificelowest', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of lowest to Cast At', default = 25,  min = 1, max = 100, step = 5 },
+            { key = 'holyshocktank', type = 'spinner', text = 'Holy Shock', desc = 'Health Percent of Tank to Cast At', default = 80,  min = 1, max = 100, step = 5 },
+            { key = 'holyshocklowest', type = 'spinner', text = 'Holy Shock', desc = 'Health Percent of lowest to Cast At', default = 70,  min = 1, max = 100, step = 5 },
+            { key = 'holylightgeneral', type = 'spinner', text = 'Holy Light', desc = 'Health Percent to Cast At', default = 80,  min = 1, max = 100, step = 5 },
 
             { type = 'rule' },
             { type = 'header', text = 'Automated CoolDowns', align= 'center' },
+            { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '', "true" },
             { key = 'autoAura', type = 'checkbox', text = 'Aura Mastery', desc = '' },
             { key = 'autoAvengingCrusader', type = 'checkbox', text = 'AvengingCrusader', desc = '' },
             { key = 'autoHolyAvenger', type = 'checkbox', text = 'Holy Avenger', desc = '' },
@@ -598,6 +600,9 @@ local function interface()
             { type = 'rule' },
 
             { type = 'header', text = 'Utility', align= 'center' },
+            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection ', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+            { key = 'blessingofsacrificetank', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of Tank to Cast At', default = 40,  min = 1, max = 100, step = 5 },
+            { key = 'blessingofsacrificelowest', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of lowest to Cast At', default = 20,  min = 1, max = 100, step = 5 },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
             { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
