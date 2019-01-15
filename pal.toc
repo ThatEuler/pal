@@ -19,3 +19,4 @@ Shaman\ShamPalRest.lua
 Shaman\ShamPalEle.lua
 Shaman\Elepal.lua
 Priest\holyPal.lua
+Warrior\protwarpal.lua
