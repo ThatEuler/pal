@@ -142,13 +142,6 @@ local function combat()
     end
 
 
-    --healthstone
-    if GetItemCooldown(5512) == 0 and player.health.percent < 30 then
-        return macro('/use Healthstone')
-    end
-
-
-
     -- Modifiers
     if modifier.shift and target.enemy and -spell(SB.HammerofJustice) == 0 then
         return cast(SB.HammerofJustice, 'target')
