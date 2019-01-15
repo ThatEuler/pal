@@ -228,9 +228,9 @@ local function interface()
 end
 
 dark_addon.rotation.register({
-    spec = dark_addon.rotation.classes.paladin.protection,
-    name = 'protpal',
-    label = 'Pal  - PROT',
+    spec = dark_addon.rotation.classes.warrior.protection,
+    name = 'protwarpal',
+    label = 'Pal: Prot Warrior - BETA',
     combat = combat,
     resting = resting,
     interface = interface,
