@@ -56,7 +56,6 @@ local function combat()
     local intpercent = dark_addon.settings.fetch('holypal_settings_intpercent', 50)
     local usehealthstone = dark_addon.settings.fetch('holypal_settings_healthstone.check', true)
     local healthstonepercent = dark_addon.settings.fetch('holypal_settings_healthstone.spin', 25)
-    local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial', true)
     local autoAura = dark_addon.settings.fetch('holypal_settings_autoAura', true)
     local AutoAvengingCrusader = dark_addon.settings.fetch('holypal_settings_autoAvengingCrusader', true)
     local autoHolyAvenger = dark_addon.settings.fetch('holypal_settings_autoHolyAvenger', true)
@@ -65,6 +64,9 @@ local function combat()
     local autoDivineShield = dark_addon.settings.fetch('holypal_settings_autoDivineShield', true)
     local autoBeaconofVirtue = dark_addon.settings.fetch('holypal_settings_autoBeaconofVirtue', true)
     local autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
+    local layonhandstank = dark_addon.settings.fetch('holypal_settings_layonhandstank', 20)
+    local layonhandslowest = dark_addon.settings.fetch('holypal_settings_layonhandslowest', 15)
+    local boplowest = dark_addon.settings.fetch('holypal_settings_boplowest', 20)
 
     -----------------------------
     --- Reticulate Splines
@@ -194,17 +196,17 @@ local function combat()
     -- Lets use our blessings/LoH
 
     -- LoH on dying players
-    if tank.castable(SB.LayonHands) and tank.debuff(SB.Forbearance).down and tank.health.percent <= 20 then
+    if tank.castable(SB.LayonHands) and tank.debuff(SB.Forbearance).down and tank.health.percent <= layonhandstank then
         return cast(SB.LayonHands, tank)
     end
 
-    if lowest.castable(SB.LayonHands) and lowest.debuff(SB.Forbearance).down and lowest.health.percent <= 15 then
+    if lowest.castable(SB.LayonHands) and lowest.debuff(SB.Forbearance).down and lowest.health.percent <= layonhandslowest then
         return cast(SB.LayonHands, lowest)
     end
 
     -- BoP bad players
     if toggle('BoP', false) and lowest.castable(SB.BlessingofProtection) and lowest.debuff(SB.Forbearance).down and lowest ~= tank and lowest ~= player then
-        if lowest.health.percent <= 20 then
+        if lowest.health.percent <= boplowest then
             return cast(SB.BlessingofProtection, lowest)
         elseif lowest.health.percent <= 50 and lowest.debuff(SB.GrievousWound).count > 3 then
             return cast(SB.BlessingofProtection, lowest)
@@ -300,8 +302,24 @@ local function combat()
         return cast(SB.Judgment, 'target')
     end
 
-    --BE Racial
-    if autoRacial == true and race == "Blood Elf" and -spell(SB.ArcaneTorrent) == 0 then
+    --Racials
+   if toggle('racial', false) then
+        if race == "Orc" and castable(SB.BloodFury) then
+            return cast(SB.BloodFury)
+        end
+        if race == "Troll" and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
+            return cast(SB.Berserking)
+        end
+        if race == "MagharOrc" and castable(SB.AncestralCall) then
+            return cast(SB.AncestralCall)
+        end
+        if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+            return cast(SB.LightsJudgement)
+        end
+        if race == "Draenei" and lowest.castable(SB.GiftOftheNaaru) and lowest.health.effective >= 50 then
+            return cast(SB.GiftOftheNaaru, lowest)
+        end
+        if toggle('racial', false) and race == "Blood Elf" and -spell(SB.ArcaneTorrent) == 0 then
         if player.power.mana.percent < 60 then
             return cast(SB.ArcaneTorrent)
         end
@@ -316,8 +334,14 @@ local function combat()
                     return cast(SB.ArcaneTorrent)
                 end
             end
+            end
         end
     end
+
+
+
+
+   
 
     -- holy shock on CD
 
@@ -545,21 +569,20 @@ local function interface()
         resize = true,
         show = false,
         template = {
-            { type = 'header', text = '               Holy Paladin Settings' },
-            { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
+            { type = 'header', text = 'Holy Paladin Pal - Settings', align= 'center' },
             { type = 'rule' },
-            { type = 'text', text = 'General Settings' },
-            { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
-            -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
-            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
-            { type = 'rule' },
-            { type = 'text', text = 'Utility' },
-            { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
-            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
-            { type = 'rule' },
+            { type = 'header', text = 'Class Settings', align= 'center' },
             { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '', "true" },
+            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection Emergency', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+
             { type = 'rule' },
-            { type = 'text', text = 'Automated CoolDowns' },
+            { type = 'header', text = 'Heal Settings', align= 'center' },
+            { type = 'text', text = 'Lay on Hands',},
+            { key = 'layonhandslowest', type = 'spinner', text = 'Lay on Hands Tank', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+            { key = 'layonhandstank', type = 'spinner', text = 'Lay on Hands Lowest', desc = 'Health Percent to Cast At', default = 15,  min = 1, max = 100, step = 5 },
+
+            { type = 'rule' },
+            { type = 'header', text = 'Automated CoolDowns', align= 'center' },
             { key = 'autoAura', type = 'checkbox', text = 'Aura Mastery', desc = '' },
             { key = 'autoAvengingCrusader', type = 'checkbox', text = 'AvengingCrusader', desc = '' },
             { key = 'autoHolyAvenger', type = 'checkbox', text = 'Holy Avenger', desc = '' },
@@ -568,6 +591,12 @@ local function interface()
             { key = 'autoDivineShield', type = 'checkbox', text = 'Divine Shield', desc = '' },
             { key = 'autoBeaconofVirtue', type = 'checkbox', text = 'Beacon of Virtue', desc = '' },
             { type = 'rule' },
+            
+            { type = 'header', text = 'Utility', align= 'center' },
+            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
+            { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
+            { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
+
         }
     }
 
@@ -577,56 +606,70 @@ local function interface()
         name = 'DPS',
         label = 'DPS',
         on = {
-            label = 'DPS',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            label = 'Dps ON',
+            color = dark_addon.interface.color.pink,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_pink, 0.7)
         },
         off = {
-            label = 'DPS',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Dps OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'DISPELL',
         label = 'DISP',
         on = {
-            label = 'DISP',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            label = 'Dispell ON',
+            color = dark_addon.interface.color.pink,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_pink, 0.7)
         },
         off = {
-            label = 'DISP',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'Dispell OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'BoP',
-        label = 'BoP',
+        label = 'Blessing of Protection',
         on = {
-            label = 'BoP',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            label = 'BoP ON',
+            color = dark_addon.interface.color.pink,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_pink, 0.7)
         },
         off = {
-            label = 'BoP',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'BoP ON',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
         name = 'LoD',
-        label = 'LightOfDawn',
+        label = 'Light Of Dawn',
         on = {
-            label = 'LoD',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            label = 'LoD ON',
+            color = dark_addon.interface.color.pink,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_pink, 0.7)
         },
         off = {
-            label = 'LoD',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            label = 'LoD OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
+        }
+    })
+        dark_addon.interface.buttons.add_toggle({
+        name = 'racial',
+        label = 'Use Racials',
+        on = {
+            label = 'Racials ON',
+            color = dark_addon.interface.color.pink,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_pink, 0.7)
+        },
+        off = {
+            label = 'Racials OFF',
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         }
     })
     dark_addon.interface.buttons.add_toggle({
@@ -635,13 +678,13 @@ local function interface()
         font = 'dark_addon_icon',
         on = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.cyan,
-            color2 = dark_addon.interface.color.dark_cyan
+            color = dark_addon.interface.color.pink,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_pink, 0.7)
         },
         off = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            color = dark_addon.interface.color.red,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.red, 0.5)
         },
         callback = function(self)
             if configWindow.parent:IsShown() then
