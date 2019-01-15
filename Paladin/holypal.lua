@@ -149,6 +149,9 @@ local function combat()
     --Trinket/item use
     local specificTrinket13 = GetInventoryItemID("player", 13)
     local specificTrinket14 = GetInventoryItemID("player", 14)
+    local trinket13 = GetInventoryItemID("player", 13)
+    local trinket14 = GetInventoryItemID("player", 14)
+
     if toggle('trinketuse', false) then
         if specificTrinket13 == 160649 and player.buff(SB.Avatar).up and GetItemCooldown(160649) == 0 then
             return macro('/use [help] 13; [@targettarget] 13')
@@ -156,12 +159,9 @@ local function combat()
         if specificTrinket14 == 160649 and player.buff(SB.Avatar).up and GetItemCooldown(160649) == 0 then
             return macro('/use [help] 14; [@targettarget] 14')
         end
-
-    local trinket13 = GetInventoryItemID("player", 13)
         if IsUsableItem(trinket13) and GetItemCooldown(trinket13) == 0 and tank.health.percent < 50 and tank.distance < 40 then
             macro('/use [help] 13; [@targettarget] 13')
         end
-    local trinket14 = GetInventoryItemID("player", 14)
         if IsUsableItem(trinket14) and GetItemCooldown(trinket14) == 0 and tank.health.percent < 50 and tank.distance < 40 then
             macro('/use [help] 14; [@targettarget] 14')
         end
