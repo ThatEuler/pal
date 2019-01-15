@@ -603,7 +603,7 @@ local function interface()
             { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection ', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
             { key = 'blessingofsacrificetank', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of Tank to Cast At', default = 40,  min = 1, max = 100, step = 5 },
             { key = 'blessingofsacrificelowest', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of lowest to Cast At', default = 20,  min = 1, max = 100, step = 5 },
-            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
+            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
             { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
 
