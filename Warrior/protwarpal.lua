@@ -29,9 +29,8 @@ local function combat()
     local shoutInt = dark_addon.settings.fetch('protwarrior_settings_shoutInt', true)
     local shockwaveInt = dark_addon.settings.fetch('protwarrior_settings_shockwaveInt', true)
     local stormboltInt = dark_addon.settings.fetch('protwarrior_settings_stormboltInt', true)
-    local usehealthstone = dark_addon.settings.fetch('protwarrior_settings_usehealthstone', true)
-    local healthPop = dark_addon.settings.fetch('protwarrior_settings_healthPop', 35)
-    local usehealpot = dark_addon.settings.fetch('protwarrior_settings_usehealpot', true)
+    local healthPop = dark_addon.settings.fetch('protwarrior_settings_healthPop.check', true)
+    local healthPoppercent = dark_addon.settings.fetch('protwarrior_settings_healthPop.spin', 35)
     local useTrinkets = dark_addon.settings.fetch('protwarrior_settings_useTrinkets', true)
 
     if not target.alive or not target.enemy then
@@ -89,11 +88,11 @@ local function combat()
 
 
     --Health stone
-    if usehealthstone and player.health.percent < healthPop and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
+    if healthPop == true and player.health.percent < healthPoppercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
         macro('/use Healthstone')
     end
     --health pot
-    if usehealpot == true and GetItemCount(152494) >= 1 and player.health.percent < healthPop and GetItemCooldown(5512) > 0 then
+    if usehealpot == true and GetItemCount(152494) >= 1 and player.health.percent < healthPoppercent and GetItemCooldown(5512) > 0 then
         macro('/use Coastal Healing Potion')
     end
 
@@ -153,7 +152,6 @@ local function resting()
 
 
 
-
 end
 
 local function interface()
@@ -170,7 +168,7 @@ local function interface()
             { type = 'rule' },
             { type = 'text', text = 'General Settings' },
             { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
-            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %',  default_check = true, default_spin = 25, min = 5, max = 100, step = 5 },
+            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %',  default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
             -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
             { type = 'rule' },
