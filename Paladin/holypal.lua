@@ -67,6 +67,9 @@ local function combat()
     local layonhandstank = dark_addon.settings.fetch('holypal_settings_layonhandstank', 20)
     local layonhandslowest = dark_addon.settings.fetch('holypal_settings_layonhandslowest', 15)
     local boplowest = dark_addon.settings.fetch('holypal_settings_boplowest', 20)
+    local blessingofsacrificelowest = dark_addon.settings.fetch('holypal_settings_blessingofsacrificelowest', 20)
+    local blessingofsacrificetank = dark_addon.settings.fetch('holypal_settings_blessingofsacrificetank', 40)
+
 
     -----------------------------
     --- Reticulate Splines
@@ -214,11 +217,11 @@ local function combat()
     end
 
     --BlessingofSacrifice	on semi bad players
-    if tank.castable(SB.BlessingofSacrifice) and tank ~= player and tank.health.percent <= 40 then
+    if tank.castable(SB.BlessingofSacrifice) and tank ~= player and tank.health.percent <= blessingofsacrificetank then
         return cast(SB.BlessingofSacrifice, tank)
     end
 
-    if lowest.castable(SB.BlessingofSacrifice) and lowest ~= player and lowest.health.percent <= 20 then
+    if lowest.castable(SB.BlessingofSacrifice) and lowest ~= player and lowest.health.percent <= blessingofsacrificelowest then
         return cast(SB.BlessingofSacrifice, lowest)
     end
 
@@ -573,13 +576,15 @@ local function interface()
             { type = 'rule' },
             { type = 'header', text = 'Class Settings', align= 'center' },
             { key = 'autoBeacon', type = 'checkbox', text = 'Auto Beacons', desc = '', "true" },
-            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection Emergency', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection ', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
 
             { type = 'rule' },
             { type = 'header', text = 'Heal Settings', align= 'center' },
             { type = 'text', text = 'Lay on Hands',},
             { key = 'layonhandslowest', type = 'spinner', text = 'Lay on Hands Tank', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
             { key = 'layonhandstank', type = 'spinner', text = 'Lay on Hands Lowest', desc = 'Health Percent to Cast At', default = 15,  min = 1, max = 100, step = 5 },
+            { key = 'blessingofsacrificetank', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of Tank to Cast At', default = 40,  min = 1, max = 100, step = 5 },
+            { key = 'blessingofsacrificelowest', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of lowest to Cast At', default = 25,  min = 1, max = 100, step = 5 },
 
             { type = 'rule' },
             { type = 'header', text = 'Automated CoolDowns', align= 'center' },
@@ -591,7 +596,7 @@ local function interface()
             { key = 'autoDivineShield', type = 'checkbox', text = 'Divine Shield', desc = '' },
             { key = 'autoBeaconofVirtue', type = 'checkbox', text = 'Beacon of Virtue', desc = '' },
             { type = 'rule' },
-            
+
             { type = 'header', text = 'Utility', align= 'center' },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
