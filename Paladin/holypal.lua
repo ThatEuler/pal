@@ -17,7 +17,7 @@ local TB = dark_addon.rotation.spellbooks.paladin
 local DB = dark_addon.rotation.spellbooks.paladin
 local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
-
+local lftime = 0 -- Timer for Dungeon/Battleground Joining
 SB.Quake = 240447
 SB.GrievousWound = 240559
 
@@ -72,7 +72,9 @@ local function combat()
     local holyshocktank = dark_addon.settings.fetch('holypal_settings_holyshocktank', 80)
     local holyshocklowest = dark_addon.settings.fetch('holypal_settings_holyshocklowest', 70)
     local holylightgeneral = dark_addon.settings.fetch('holypal_settings_holylightgeneral', 80)
-
+    local flashoflightlowest = dark_addon.settings.fetch('holypal_settings_flashoflightlowest', 50)
+    local flashoflighttank = dark_addon.settings.fetch('holypal_settings_flashoflighttank', 60)
+    local flashoflightgeneralbuffed = dark_addon.settings.fetch('holypal_settings_flashoflightgeneralbuffed', 70)
 
     -----------------------------
     --- Reticulate Splines
@@ -393,22 +395,23 @@ local function combat()
         return cast(SB.LightofDawn)
     end
 
+
     -- Use any Infusion of Light procs on Flash of Light on low health targets.
     --InfusionofLight
     if not player.moving then
-        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and (tank.health.percent < 70 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and tank.distance < 40 and (tank.health.percent < flashoflightgeneralbuffed or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
             return cast(SB.FlashofLight, tank)
         end
 
-        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.distance < 40 and (lowest.health.percent < 70 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+        if player.buff(SB.InfusionofLight) and -spell(SB.FlashofLight) == 0 and lowest.distance < 40 and (lowest.health.percent < flashoflightgeneralbuffed or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
             return cast(SB.FlashofLight, lowest)
         end
 
-        if lowest.castable(SB.FlashofLight) and (lowest.health.percent < 50 or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
+        if lowest.castable(SB.FlashofLight) and (lowest.health.percent < flashoflightlowest or (lowest.debuff(SB.GrievousWound).up and lowest.health.percent < 90)) then
             return cast(SB.FlashofLight, lowest)
         end
 
-        if tank.castable(SB.FlashofLight) and (tank.health.percent < 60 or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
+        if tank.castable(SB.FlashofLight) and (tank.health.percent < flashoflighttank or (tank.debuff(SB.GrievousWound).up and tank.health.percent < 90)) then
             return cast(SB.FlashofLight, tank)
         end
     end
@@ -454,12 +457,37 @@ local function combat()
 end
 
 local function resting()
-
+    local lfg = GetLFGProposal();
+    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+    local bgstatus = GetBattlefieldStatus(1);
+    local autojoin = dark_addon.settings.fetch('holypal_settings_autojoin', true)
     local autoBeacon = dark_addon.settings.fetch('holypal_settings_autoBeacon', true)
 
     if player.alive and player.buff(SB.Refreshment).down and player.buff(SB.Drink).down then
+        -------------
+        --Auto Join--
+        -------------
+    if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+     SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
+    elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+        SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+    end
 
+    if autojoin ==true and lfg == true or bgstatus == "confirm" then
+        PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
+        lftime = lftime + 1
+    end
 
+    if lftime >=math.random(20,35) then
+        SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+        macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+        lftime = 0
+    end    
         -------------
         -- Bubble fall
         -------------
@@ -566,12 +594,15 @@ local function resting()
         end
     end
 end
+
+
+
 local function interface()
     local settings = {
         key = 'holypal_settings',
         title = 'Holy Paladin',
         width = 250,
-        height = 380,
+        height = 850,
         resize = true,
         show = false,
         template = {
@@ -581,11 +612,14 @@ local function interface()
             { type = 'rule' },
             { type = 'header', text = 'Heal Settings', align= 'center' },
             { type = 'text', text = 'Lay on Hands',},
-            { key = 'layonhandslowest', type = 'spinner', text = 'Lay on Hands Tank', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
-            { key = 'layonhandstank', type = 'spinner', text = 'Lay on Hands Lowest', desc = 'Health Percent to Cast At', default = 15,  min = 1, max = 100, step = 5 },
-            { key = 'holyshocktank', type = 'spinner', text = 'Holy Shock', desc = 'Health Percent of Tank to Cast At', default = 80,  min = 1, max = 100, step = 5 },
-            { key = 'holyshocklowest', type = 'spinner', text = 'Holy Shock', desc = 'Health Percent of lowest to Cast At', default = 70,  min = 1, max = 100, step = 5 },
-            { key = 'holylightgeneral', type = 'spinner', text = 'Holy Light', desc = 'Health Percent to Cast At', default = 80,  min = 1, max = 100, step = 5 },
+            { key = 'layonhandslowest', type = 'spinner', text = 'Lay on Hands Tank', desc = 'Health % to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+            { key = 'layonhandstank', type = 'spinner', text = 'Lay on Hands lowest', desc = 'Health % to Cast At', default = 15,  min = 1, max = 100, step = 5 },
+            { key = 'holyshocktank', type = 'spinner', text = 'Holy Shock', desc = 'Health % of Tank to Cast At', default = 80,  min = 1, max = 100, step = 5 },
+            { key = 'holyshocklowest', type = 'spinner', text = 'Holy Shock', desc = 'Health % of lowest to Cast At', default = 70,  min = 1, max = 100, step = 5 },
+            { key = 'holylightgeneral', type = 'spinner', text = 'Holy Light', desc = 'Health % to Cast At', default = 80,  min = 1, max = 100, step = 5 },
+            { key = 'flashoflightlowest', type = 'spinner', text = 'Flash of Light', desc = 'Health % of lowest to Cast At', default = 50,  min = 1, max = 100, step = 5 },
+            { key = 'flashoflighttank', type = 'spinner', text = 'Flash of Light', desc = 'Health % of Tank to Cast At', default = 60,  min = 1, max = 100, step = 5 },
+            { key = 'flashoflightgeneralbuffed', type = 'spinner', text = 'Flash of Light Infusion of Light', desc = 'Health % to Cast At', default = 70,  min = 1, max = 100, step = 5 },
 
             { type = 'rule' },
             { type = 'header', text = 'Automated CoolDowns', align= 'center' },
@@ -600,12 +634,13 @@ local function interface()
             { type = 'rule' },
 
             { type = 'header', text = 'Utility', align= 'center' },
-            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection ', desc = 'Health Percent to Cast At', default = 20,  min = 1, max = 100, step = 5 },
-            { key = 'blessingofsacrificetank', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of Tank to Cast At', default = 40,  min = 1, max = 100, step = 5 },
-            { key = 'blessingofsacrificelowest', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health Percent of lowest to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+            { key = 'boplowest', type = 'spinner', text = 'Blessing of Protection ', desc = 'Health % to Cast At', default = 20,  min = 1, max = 100, step = 5 },
+            { key = 'blessingofsacrificetank', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health % of Tank to Cast At', default = 40,  min = 1, max = 100, step = 5 },
+            { key = 'blessingofsacrificelowest', type = 'spinner', text = 'Blessing of Sacrifice', desc = 'Health % of lowest to Cast At', default = 20,  min = 1, max = 100, step = 5 },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
             { key = 'autoStun', type = 'checkbox', text = 'Stun', desc = 'Use stun as an interrupt' },
             { key = 'healthstone', type = 'checkspin', text = 'Healthstone', desc = 'Auto use Healthstone at health %', min = 5, max = 100, step = 5 },
+            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
 
         }
     }
