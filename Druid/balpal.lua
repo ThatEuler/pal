@@ -206,7 +206,7 @@ local function combat()
         end
     end
     -- Interupts
-    if toggle('interrupts', false) and target.interrupt(intpercent) and target.distance <= 45 and -spell(SB.SolarBeam) == 0 then
+    if toggle('interrupts', false) and target.interrupt(intpercent) and target.distance <= 45 and target.castable(SB.SolarBeam) then
         return cast(SB.SolarBeam, 'target')
     end
 
