@@ -179,7 +179,7 @@ local function interface()
             { type = 'text', text = 'Interrupts' },
             { key = 'shoutInt', type = 'checkbox', text = 'Stun', desc = 'Use shout as an interrupt' },
             { key = 'shockwaveInt', type = 'checkbox', text = 'Stun', desc = 'Use shockwave as an interrupt', "true" },
-            { key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt' "true" },
+            { key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt', "true" },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
             { type = 'rule' },
             { key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '' },
