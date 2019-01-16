@@ -12,6 +12,8 @@ local badguy = UnitClassification("target")
 
 --missing spells
 SB.RevengeProc = 5302
+SB.DeafeningCrash = 272824
+SB.ShieldBlockBuff = 132404
 
 local function combat()
 
@@ -26,12 +28,14 @@ local function combat()
     --- Reading from settings
     -----------------------------
 
+    local autoTaunt = dark_addon.settings.fetch('protwarrior_settings_autoTaunt', true)
     local shoutInt = dark_addon.settings.fetch('protwarrior_settings_shoutInt', true)
     local shockwaveInt = dark_addon.settings.fetch('protwarrior_settings_shockwaveInt', true)
     local stormboltInt = dark_addon.settings.fetch('protwarrior_settings_stormboltInt', true)
     local healthPop = dark_addon.settings.fetch('protwarrior_settings_healthPop.check', true)
     local healthPoppercent = dark_addon.settings.fetch('protwarrior_settings_healthPop.spin', 35)
     local useTrinkets = dark_addon.settings.fetch('protwarrior_settings_useTrinkets', true)
+    local deafeningCrash = dark_addon.settings.fetch('protwarrior_settings_deafeningCrash', false)
 
     if not target.alive or not target.enemy then
         return
@@ -49,7 +53,7 @@ local function combat()
             return cast(SB.Pummel, 'target')
         elseif shoutInt and castable(SB.IntimidatingShout) then
             return cast(SB.IntimidatingShout)
-        elseif shockwaveInt and castable(SB.ShockWave) then
+        elseif shockwaveInt and UnitLevel("player") >= 50 and castable(SB.ShockWave) then
             return cast(SB.ShockWave)
         elseif stormboltInt and target.castable(SB.StormBolt) then
             return cast(SB.StormBolt, target)
@@ -114,78 +118,85 @@ local function combat()
         if IsInRaid() == false and target.castable(SB.Intercept) and player.spell(SB.Intercept).count > 1 then
             return cast(SB.Intercept, target)
         end
-        --TODO: need to do this only if we took talent booming voice - otherwise it becomes a defensive CD
         if talent(6, 1) and castable(SB.DemoralizingShout) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
             return cast(SB.DemoralizingShout)
         end
     end
 
     -------------------------
+    --- auto taunt
+    -------------------------
+
+    if autoTaunt and target.castable(SB.Taunt) and not (UnitIsUnit("targettarget", "player")) then
+        return cast(SB.Taunt)
+    end
+
+    -------------------------
     --- Damage mitigation
     -------------------------
 
-    if castable(SB.ShieldBlock) and target.time_to_die > 6 and player.health.percent < 90 then
-        return cast(SB.ShieldBlock)
-    elseif (player.buff(SB.ShieldBlock).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if castable(SB.DemoralizingShout) and (enemyCount >= 3 or player.health.percent < 75) then
+    if target.castable(SB.ShieldBlock) and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+        return cast(SB.ShieldBlock, target)
+    elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
+        if castable(SB.DemoralizingShout) and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
             return cast(SB.DemoralizingShout)
-        elseif castable(SB.IgnorePain) and player.health.percent < 85 then
+        elseif castable(SB.IgnorePain) and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
             return cast(SB.IgnorePain)
+        elseif castable(SB.LastStand) and player.health.percent < 50 then
+            return cast(SB.LastStand)
+        elseif castable(SB.ShieldWall) and player.health.percent < 20 then
+            return cast(SB.ShieldWall)
         end
-    elseif castable(SB.LastStand) and player.health.percent < 50 then
-        return cast(SB.LastStand)
-    elseif castable(ShieldWall) and player.health.percent < 20 then
-        return cast(SB.ShieldWall)
     end
 
-
--------------------------
---- Standard Rotation stuff
--------------------------
-
-if target.castable(SB.StormBolt) then
-    return cast(SB.StormBolt, target)
-elseif target.castable(SB.VictoryRush) then
-    return cast(SB.VictoryRush, target)
-end
-
--------------------------
---- single Target Standard Rotation
--------------------------
-if enemyCount == 1 and target.enemy and target.distance <= 8 then
-    if target.castable(SB.ShieldSlam) then
-        return cast(SB.ShieldSlam, target)
-    elseif target.castable(SB.Revenge) and player.buff(SB.RevengeProc).up then
-        return cast(SV.Revenge, target)
-    elseif castable(SB.ThunderClap) then
-        return cast(SB.ThunderClap)
-    elseif target.castable(SB.Devastate) then
-        return cast(SB.Devastate, target)
+    -------------------------
+    --- Standard Rotation stuff
+    -------------------------
+    if target.castable(SB.HeroicThrow) and target.enemy and (target.distance > 8 and target.distance <= 30) then
+        return cast(SB.HeroicThrow, target)
     end
-end
-
--------------------------
---- multi Target Standard Rotation
--------------------------
-if enemyCount >= 2 and target.enemy and target.distance <= 8 then
-    if enemyCount >= 3 and castable(SB.ShockWave) then
-        return cast(SB.ShockWave)
-    elseif castable(SB.ThunderClap) then
-        return cast(SB.ThunderClap)
-    elseif player.health.percent >= 65 and target.castable(SB.Revenge) then
-        return cast(SB.Revenge, target)
-    elseif target.castable(SB.ShieldSlam) then
-        return cast(SB.ShieldSlam, target)
-    elseif target.castable(SB.Devastate) then
-        return cast(SB.Devastate, target)
+    if target.castable(SB.StormBolt) then
+        return cast(SB.StormBolt, target)
+    elseif -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
+        return cast(SB.VictoryRush, target)
     end
-end
+
+    -------------------------
+    --- single Target Standard Rotation
+    -------------------------
+    if enemyCount == 1 and target.enemy and target.distance <= 8 then
+        if target.castable(SB.ShieldSlam) then
+            return cast(SB.ShieldSlam, target)
+        elseif target.castable(SB.Revenge) and player.buff(SB.RevengeProc).up then
+            return cast(SV.Revenge, target)
+        elseif castable(SB.ThunderClap) then
+            return cast(SB.ThunderClap)
+        elseif target.castable(SB.Devastate) then
+            return cast(SB.Devastate, target)
+        end
+    end
+
+    -------------------------
+    --- multi Target Standard Rotation
+    -------------------------
+    if enemyCount >= 2 and target.enemy and target.distance <= 8 then
+        if enemyCount >= 3 and UnitLevel("player") >= 50 and -spell(SB.ShockWave) == 0 then
+            return cast(SB.ShockWave)
+        elseif castable(SB.ThunderClap) then
+            return cast(SB.ThunderClap)
+        elseif player.health.percent >= 65 and target.castable(SB.Revenge) then
+            return cast(SB.Revenge, target)
+        elseif target.castable(SB.ShieldSlam) then
+            return cast(SB.ShieldSlam, target)
+        elseif target.castable(SB.Devastate) then
+            return cast(SB.Devastate, target)
+        end
+    end
 
 
 end
 
 local function resting()
-
 
 
 end
@@ -203,19 +214,22 @@ local function interface()
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
             { type = 'rule' },
             { type = 'text', text = 'General Settings' },
+            { key = 'autoTaunt', type = 'checkbox', text = 'Auto Taunt', desc = '', default = true },
             { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
-            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %',  default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
+            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %', default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
             -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
             { type = 'rule' },
             { type = 'text', text = 'Interrupts' },
-            { key = 'shoutInt', type = 'checkbox', text = 'Stun', desc = 'Use shout as an interrupt', default = true },
-            { key = 'shockwaveInt', type = 'checkbox', text = 'Stun', desc = 'Use shockwave as an interrupt', default = true },
-            { key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt', default = true },
+            { key = 'shoutInt', type = 'checkbox', text = 'Use shout as an interrupt', desc = '', default = true },
+            { key = 'shockwaveInt', type = 'checkbox', text = 'Use shockwave as an interrupt', desc = '', default = true },
+            { key = 'stormboltInt', type = 'checkbox', text = 'Use Storm Bolt as an interrupt', desc = '', default = true },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', default = true },
             { type = 'rule' },
-            { key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '' , default = true },
+            { key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '', default = true },
             { type = 'rule' },
+            { type = 'text', text = 'Traits that impact rotation - enable if you got them' },
+            { key = 'deafeningCrash', type = 'checkbox', text = 'Deafening Crash', desc = '', default = true },
         }
     }
 
@@ -260,12 +274,12 @@ local function interface()
 end
 
 dark_addon.rotation.register({
-spec = dark_addon.rotation.classes.warrior.protection,
-name = 'protwarpal',
-label = 'Pal: Prot Warrior - BETA',
-combat = combat,
-resting = resting,
-interface = interface,
+    spec = dark_addon.rotation.classes.warrior.protection,
+    name = 'protwarpal',
+    label = 'Pal: Prot Warrior - BETA',
+    combat = combat,
+    resting = resting,
+    interface = interface,
 })
 
 
