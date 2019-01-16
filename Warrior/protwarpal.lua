@@ -29,9 +29,8 @@ local function combat()
     local shoutInt = dark_addon.settings.fetch('protwarrior_settings_shoutInt', true)
     local shockwaveInt = dark_addon.settings.fetch('protwarrior_settings_shockwaveInt', true)
     local stormboltInt = dark_addon.settings.fetch('protwarrior_settings_stormboltInt', true)
-    local usehealthstone = dark_addon.settings.fetch('protwarrior_settings_usehealthstone', true)
-    local healthPop = dark_addon.settings.fetch('protwarrior_settings_healthPop', 35)
-    local usehealpot = dark_addon.settings.fetch('protwarrior_settings_usehealpot', true)
+    local healthPop = dark_addon.settings.fetch('protwarrior_settings_healthPop.check', true)
+    local healthPoppercent = dark_addon.settings.fetch('protwarrior_settings_healthPop.spin', 35)
     local useTrinkets = dark_addon.settings.fetch('protwarrior_settings_useTrinkets', true)
 
     if not target.alive or not target.enemy then
@@ -94,11 +93,11 @@ local function combat()
 
 
     --Health stone
-    if usehealthstone and player.health.percent < healthPop and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
+    if healthPop == true and player.health.percent < healthPoppercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
         macro('/use Healthstone')
     end
     --health pot
-    if usehealpot == true and GetItemCount(152494) >= 1 and player.health.percent < healthPop and GetItemCooldown(5512) > 0 then
+    if usehealpot == true and GetItemCount(152494) >= 1 and player.health.percent < healthPoppercent and GetItemCooldown(5512) > 0 then
         macro('/use Coastal Healing Potion')
     end
 
@@ -106,8 +105,6 @@ local function combat()
     -------------------------
     --- Cool Downs
     -------------------------
-
-
     --avatar - on CD, but dont pop if mobs almost ead or trash - cant wait up to 4 seconds to get shield slam in
     if toggle('cooldowns', false) and target.time_to_die > 8 and badguy ~= "normal" and badguy ~= "minus" then
         if castable(SB.Avatar) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
@@ -190,77 +187,76 @@ end
 local function resting()
 
 
+
 end
 
 local function interface()
-local settings = {
-key = 'protwarrior_settings',
-title = 'Protection Warrior - the REAL tank!',
-width = 250,
-height = 380,
-resize = true,
-show = false,
-template = {
-{ type = 'header', text = '               Protection Warrior - the REAL tank!' },
-{ type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
-{ type = 'rule' },
-{ type = 'text', text = 'General Settings' },
-{ key = 'usehealthstone', type = 'checkbox', text = 'Healthstone', desc = 'Use Healthstone', "true" },
-{ key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', "true" },
+    local settings = {
+        key = 'protwarrior_settings',
+        title = 'Protection Warrior - the REAL tank!',
+        width = 250,
+        height = 380,
+        resize = true,
+        show = false,
+        template = {
+            { type = 'header', text = '               Protection Warrior - the REAL tank!' },
+            { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
+            { type = 'rule' },
+            { type = 'text', text = 'General Settings' },
+            { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
+            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %',  default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
+            -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
+            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
+            { type = 'rule' },
+            { type = 'text', text = 'Interrupts' },
+            { key = 'shoutInt', type = 'checkbox', text = 'Stun', desc = 'Use shout as an interrupt', default = true },
+            { key = 'shockwaveInt', type = 'checkbox', text = 'Stun', desc = 'Use shockwave as an interrupt', default = true },
+            { key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt', default = true },
+            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', default = true },
+            { type = 'rule' },
+            { key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '' , default = true },
+            { type = 'rule' },
+        }
+    }
 
-{ key = 'healthPop', type = 'checkspin', text = '', desc = 'Auto use Healthstone/Healpot at health %', min = 5, max = 100, step = 5 },
--- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
-{ key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
-{ type = 'rule' },
-{ type = 'text', text = 'Interrupts' },
-{ key = 'shoutInt', type = 'checkbox', text = 'Stun', desc = 'Use shout as an interrupt' },
-{ key = 'shockwaveInt', type = 'checkbox', text = 'Stun', desc = 'Use shockwave as an interrupt', "true" },
-{ key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt' "true" },
-{ key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
-{ type = 'rule' },
-{ key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '' },
-{ type = 'rule' },
-}
-}
+    configWindow = dark_addon.interface.builder.buildGUI(settings)
 
-configWindow = dark_addon.interface.builder.buildGUI(settings)
-
-dark_addon.interface.buttons.add_toggle({
-name = 'XxX',
-label = 'XxX',
-on = {
-label = 'XxX',
-color = dark_addon.interface.color.orange,
-color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-},
-off = {
-label = 'xXx',
-color = dark_addon.interface.color.grey,
-color2 = dark_addon.interface.color.dark_grey
-}
-})
-dark_addon.interface.buttons.add_toggle({
-name = 'settings',
-label = 'Rotation Settings',
-font = 'dark_addon_icon',
-on = {
-label = dark_addon.interface.icon('cog'),
-color = dark_addon.interface.color.cyan,
-color2 = dark_addon.interface.color.dark_cyan
-},
-off = {
-label = dark_addon.interface.icon('cog'),
-color = dark_addon.interface.color.grey,
-color2 = dark_addon.interface.color.dark_grey
-},
-callback = function (self)
-if configWindow.parent:IsShown() then
-configWindow.parent:Hide()
-else
-configWindow.parent:Show()
-end
-end
-})
+    dark_addon.interface.buttons.add_toggle({
+        name = 'XxX',
+        label = 'XxX',
+        on = {
+            label = 'XxX',
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'xXx',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        }
+    })
+    dark_addon.interface.buttons.add_toggle({
+        name = 'settings',
+        label = 'Rotation Settings',
+        font = 'dark_addon_icon',
+        on = {
+            label = dark_addon.interface.icon('cog'),
+            color = dark_addon.interface.color.cyan,
+            color2 = dark_addon.interface.color.dark_cyan
+        },
+        off = {
+            label = dark_addon.interface.icon('cog'),
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        },
+        callback = function(self)
+            if configWindow.parent:IsShown() then
+                configWindow.parent:Hide()
+            else
+                configWindow.parent:Show()
+            end
+        end
+    })
 end
 
 dark_addon.rotation.register({
