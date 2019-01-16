@@ -153,10 +153,10 @@ local function combat()
     local trinket14 = GetInventoryItemID("player", 14)
 
     if toggle('trinketuse', false) then
-        if specificTrinket13 == 160649 and player.buff(SB.Avatar).up and GetItemCooldown(160649) == 0 then
+        if specificTrinket13 == 160649 and player.buff(SB.AvengingWrath).up and GetItemCooldown(160649) == 0 then
             return macro('/use [help] 13; [@targettarget] 13')
         end
-        if specificTrinket14 == 160649 and player.buff(SB.Avatar).up and GetItemCooldown(160649) == 0 then
+        if specificTrinket14 == 160649 and player.buff(SB.AvengingWrath).up and GetItemCooldown(160649) == 0 then
             return macro('/use [help] 14; [@targettarget] 14')
         end
         if IsUsableItem(trinket13) and GetItemCooldown(trinket13) == 0 and tank.health.percent < 50 and tank.distance < 40 then
