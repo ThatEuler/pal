@@ -180,7 +180,7 @@ local function combat()
     --- multi Target Standard Rotation
     -------------------------
     if enemyCount >= 2 and target.enemy and target.distance <= 8 then
-        if enemyCount >= 3 and UnitLevel("player") >= 50 and -spell(SB.ShockWave) == 0 then
+        if enemyCount >= 3 and UnitLevel("player") >= 50 and -spell(SB.Shockwave) == 0 then
             return cast(SB.ShockWave)
         elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
