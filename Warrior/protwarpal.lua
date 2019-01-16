@@ -57,6 +57,11 @@ local function combat()
         end
     end
 
+    --spellreflection
+    if castable(SB.SpellReflect) and (target.interrupt(0, 20) or not target.interrupt()) then
+        return cast(SB.SpellReflect)
+    end
+
     -------------------------
     --- Trinkets /Healthstones
     -------------------------
@@ -101,6 +106,8 @@ local function combat()
     -------------------------
     --- Cool Downs
     -------------------------
+
+
     --avatar - on CD, but dont pop if mobs almost ead or trash - cant wait up to 4 seconds to get shield slam in
     if toggle('cooldowns', false) and target.time_to_die > 8 and badguy ~= "normal" and badguy ~= "minus" then
         if castable(SB.Avatar) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
@@ -110,41 +117,72 @@ local function combat()
         if IsInRaid() == false and target.castable(SB.Intercept) and player.spell(SB.Intercept).count > 1 then
             return cast(SB.Intercept, target)
         end
-        --TODO: need to do this only if we took talent booing voice - otherwise it becomes a defensive CD
-        if castable(SB.DemoralizingShout) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
+        --TODO: need to do this only if we took talent booming voice - otherwise it becomes a defensive CD
+        if talent(6, 1) and castable(SB.DemoralizingShout) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
             return cast(SB.DemoralizingShout)
         end
     end
 
     -------------------------
-    --- single Target Standard Rotation
+    --- Damage mitigation
     -------------------------
-    if enemyCount == 1 and target.enemy and target.distance <= 8 then
-        if target.castable(SB.ShieldSlam) then
-            return cast(SB.ShieldSlam, target)
-        elseif target.castable(SB.Revenge) and player.buff(SB.RevengeProc).up then
-            return cast(SV.Revenge, target)
-        elseif castable(SB.ThunderClap) then
-            return cast(SB.ThunderClap)
-        elseif target.castable(SB.Devastate) then
-            return cast(SB.Devastate, target)
+
+    if castable(SB.ShieldBlock) and target.time_to_die > 6 and player.health.percent < 90 then
+        return cast(SB.ShieldBlock)
+    elseif (player.buff(SB.ShieldBlock).down or player.health.percent < 40) and target.time_to_die > 6 then
+        if castable(SB.DemoralizingShout) and (enemyCount >= 3 or player.health.percent < 75) then
+            return cast(SB.DemoralizingShout)
+        elseif castable(SB.IgnorePain) and player.health.percent < 85 then
+            return cast(SB.IgnorePain)
         end
+    elseif castable(SB.LastStand) and player.health.percent < 50 then
+        return cast(SB.LastStand)
+    elseif castable(ShieldWall) and player.health.percent < 20 then
+        return cast(SB.ShieldWall)
     end
 
-    -------------------------
-    --- multi Target Standard Rotation
-    -------------------------
-    if enemyCount >= 2 and target.enemy and target.distance <= 8 then
-        if castable(SB.ThunderClap) then
-            return cast(SB.ThunderClap)
-        elseif player.health.percent >= 50 and target.castable(SB.Revenge) then
-            return cast(SB.Revenge, target)
-        elseif target.castable(SB.ShieldSlam) then
-            return cast(SB.ShieldSlam, target)
-        elseif target.castable(SB.Devastate) then
-            return cast(SB.Devastate, target)
-        end
+
+-------------------------
+--- Standard Rotation stuff
+-------------------------
+
+if target.castable(SB.StormBolt) then
+    return cast(SB.StormBolt, target)
+elseif target.castable(SB.VictoryRush) then
+    return cast(SB.VictoryRush, target)
+end
+
+-------------------------
+--- single Target Standard Rotation
+-------------------------
+if enemyCount == 1 and target.enemy and target.distance <= 8 then
+    if target.castable(SB.ShieldSlam) then
+        return cast(SB.ShieldSlam, target)
+    elseif target.castable(SB.Revenge) and player.buff(SB.RevengeProc).up then
+        return cast(SV.Revenge, target)
+    elseif castable(SB.ThunderClap) then
+        return cast(SB.ThunderClap)
+    elseif target.castable(SB.Devastate) then
+        return cast(SB.Devastate, target)
     end
+end
+
+-------------------------
+--- multi Target Standard Rotation
+-------------------------
+if enemyCount >= 2 and target.enemy and target.distance <= 8 then
+    if enemyCount >= 3 and castable(SB.ShockWave) then
+        return cast(SB.ShockWave)
+    elseif castable(SB.ThunderClap) then
+        return cast(SB.ThunderClap)
+    elseif player.health.percent >= 65 and target.castable(SB.Revenge) then
+        return cast(SB.Revenge, target)
+    elseif target.castable(SB.ShieldSlam) then
+        return cast(SB.ShieldSlam, target)
+    elseif target.castable(SB.Devastate) then
+        return cast(SB.Devastate, target)
+    end
+end
 
 
 end
@@ -152,88 +190,86 @@ end
 local function resting()
 
 
-
-
 end
 
 local function interface()
-    local settings = {
-        key = 'protwarrior_settings',
-        title = 'Protection Warrior - the REAL tank!',
-        width = 250,
-        height = 380,
-        resize = true,
-        show = false,
-        template = {
-            { type = 'header', text = '               Protection Warrior - the REAL tank!' },
-            { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
-            { type = 'rule' },
-            { type = 'text', text = 'General Settings' },
-            { key = 'usehealthstone', type = 'checkbox', text = 'Healthstone', desc = 'Use Healthstone', "true" },
-            { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', "true" },
+local settings = {
+key = 'protwarrior_settings',
+title = 'Protection Warrior - the REAL tank!',
+width = 250,
+height = 380,
+resize = true,
+show = false,
+template = {
+{ type = 'header', text = '               Protection Warrior - the REAL tank!' },
+{ type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
+{ type = 'rule' },
+{ type = 'text', text = 'General Settings' },
+{ key = 'usehealthstone', type = 'checkbox', text = 'Healthstone', desc = 'Use Healthstone', "true" },
+{ key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', "true" },
 
-            { key = 'healthPop', type = 'checkspin', text = '', desc = 'Auto use Healthstone/Healpot at health %', min = 5, max = 100, step = 5 },
-            -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
-            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
-            { type = 'rule' },
-            { type = 'text', text = 'Interrupts' },
-            { key = 'shoutInt', type = 'checkbox', text = 'Stun', desc = 'Use shout as an interrupt' },
-            { key = 'shockwaveInt', type = 'checkbox', text = 'Stun', desc = 'Use shockwave as an interrupt', "true" },
-            { key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt' "true" },
-            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
-            { type = 'rule' },
-            { key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '' },
-            { type = 'rule' },
-        }
-    }
+{ key = 'healthPop', type = 'checkspin', text = '', desc = 'Auto use Healthstone/Healpot at health %', min = 5, max = 100, step = 5 },
+-- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
+{ key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
+{ type = 'rule' },
+{ type = 'text', text = 'Interrupts' },
+{ key = 'shoutInt', type = 'checkbox', text = 'Stun', desc = 'Use shout as an interrupt' },
+{ key = 'shockwaveInt', type = 'checkbox', text = 'Stun', desc = 'Use shockwave as an interrupt', "true" },
+{ key = 'stormboltInt', type = 'checkbox', text = 'Stun', desc = 'Use Storm Bolt as an interrupt' "true" },
+{ key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', "true" },
+{ type = 'rule' },
+{ key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '' },
+{ type = 'rule' },
+}
+}
 
-    configWindow = dark_addon.interface.builder.buildGUI(settings)
+configWindow = dark_addon.interface.builder.buildGUI(settings)
 
-    dark_addon.interface.buttons.add_toggle({
-        name = 'XxX',
-        label = 'XxX',
-        on = {
-            label = 'XxX',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-        },
-        off = {
-            label = 'xXx',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        }
-    })
-    dark_addon.interface.buttons.add_toggle({
-        name = 'settings',
-        label = 'Rotation Settings',
-        font = 'dark_addon_icon',
-        on = {
-            label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.cyan,
-            color2 = dark_addon.interface.color.dark_cyan
-        },
-        off = {
-            label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        },
-        callback = function(self)
-            if configWindow.parent:IsShown() then
-                configWindow.parent:Hide()
-            else
-                configWindow.parent:Show()
-            end
-        end
-    })
+dark_addon.interface.buttons.add_toggle({
+name = 'XxX',
+label = 'XxX',
+on = {
+label = 'XxX',
+color = dark_addon.interface.color.orange,
+color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+},
+off = {
+label = 'xXx',
+color = dark_addon.interface.color.grey,
+color2 = dark_addon.interface.color.dark_grey
+}
+})
+dark_addon.interface.buttons.add_toggle({
+name = 'settings',
+label = 'Rotation Settings',
+font = 'dark_addon_icon',
+on = {
+label = dark_addon.interface.icon('cog'),
+color = dark_addon.interface.color.cyan,
+color2 = dark_addon.interface.color.dark_cyan
+},
+off = {
+label = dark_addon.interface.icon('cog'),
+color = dark_addon.interface.color.grey,
+color2 = dark_addon.interface.color.dark_grey
+},
+callback = function (self)
+if configWindow.parent:IsShown() then
+configWindow.parent:Hide()
+else
+configWindow.parent:Show()
+end
+end
+})
 end
 
 dark_addon.rotation.register({
-    spec = dark_addon.rotation.classes.warrior.protection,
-    name = 'protwarpal',
-    label = 'Pal: Prot Warrior - BETA',
-    combat = combat,
-    resting = resting,
-    interface = interface,
+spec = dark_addon.rotation.classes.warrior.protection,
+name = 'protwarpal',
+label = 'Pal: Prot Warrior - BETA',
+combat = combat,
+resting = resting,
+interface = interface,
 })
 
 
@@ -241,7 +277,11 @@ dark_addon.rotation.register({
 
 4.1. Shield Block
 
-Shield Block Icon Shield Block is your primary active mitigation ability. In the vast majority of situations, most of the damage you will take is blockable. As such, keeping Shield Block up as much as possible is key to smoothing out damage and helping you survive. Shield Block scales with the damage you are taking since it is a percent reduction to damage rather than a flat amount like Ignore Pain Icon Ignore Pain is.
+Shield Block Icon Shield Block is your primary active mitigation ability. In the vast
+majority of situations, most of the damage you will take is blockable. As such,
+keeping Shield Block up as much as possible is key to smoothing out damage and
+helping you survive. Shield Block scales with the damage you are taking since it
+is a percent reduction to damage rather than a flat amount like Ignore Pain Icon Ignore Pain is.
 
 It is important to understand the difference between overall Shield Block Icon Shield Block uptime and effective uptime. You want to have as much effective Shield Block uptime as possible. All that means is having Shield Block up when you are tanking something that actually melees you.
 
