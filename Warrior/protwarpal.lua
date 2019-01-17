@@ -58,8 +58,8 @@ local function combat()
             return cast(SB.Pummel, 'target')
         elseif shoutInt and castable(SB.IntimidatingShout) then
             return cast(SB.IntimidatingShout)
-        elseif shockwaveInt and UnitLevel("player") >= 50 and castable(SB.ShockWave) then
-            return cast(SB.ShockWave)
+        elseif shockwaveInt and UnitLevel("player") >= 50 and castable(SB.Shockwave) then
+            return cast(SB.Shockwave)
         elseif stormboltInt and target.castable(SB.StormBolt) then
             return cast(SB.StormBolt, target)
         end
