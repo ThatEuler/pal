@@ -332,7 +332,7 @@ local function combat()
         if race == "Troll" and -spell(SB.Berserking) == 0 and tank.health.percent <= 70 then
             return cast(SB.Berserking)
         end
-        if race == "MagharOrc" and castable(SB.AncestralCall) then
+        if race == "Mag'har Orc" and castable(SB.AncestralCall) then
             return cast(SB.AncestralCall)
         end
         if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then

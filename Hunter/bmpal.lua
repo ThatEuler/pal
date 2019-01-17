@@ -55,7 +55,7 @@ local function combat()
             if race == "Troll" and castabe(SB.Berserking) then
                 cast(SB.Berserking)
             end
-            if race == "MagharOrc" and castable(SB.AncestralCall) then
+            if race == "Mag'har Orc" and castable(SB.AncestralCall) then
                 cast(SB.AncestralCall)
             end
             if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
