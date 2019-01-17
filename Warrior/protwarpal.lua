@@ -65,6 +65,11 @@ local function combat()
         return cast(SB.SpellReflect)
     end
 
+    --regain control
+    if not HasFullControl() and castable(SB.BerserkerRage) then
+        return cast(SB.BerserkerRage)
+    end
+
     -------------------------
     --- Trinkets /Healthstones
     -------------------------
@@ -124,6 +129,32 @@ local function combat()
     end
 
     -------------------------
+    --- auto racial
+    -------------------------
+    if autoRacial == true and target.distance <= 8 and target.time_to_die > 6 then
+        if race == "Blood Elf" - spell(SB.ArcaneTorrent) == 0 then
+            for i = 1, 40 do
+                local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitAura("target", i)
+                if spell_id == nil then
+                    break
+                end
+                if name and PB[spell_id] then
+                    print("Purging " .. name .. " off the target.")
+                    return cast(SB.ArcaneTorrent)
+                end
+            end
+        end
+    elseif race == "Orc" and castable(SB.BloodFury) then
+        cast(SB.BloodFury)
+    elseif race == "Troll" and castabe(SB.Berserking) then
+        cast(SB.Berserking)
+    elseif race == "MagharOrc" and castable(SB.AncestralCall) then
+        cast(SB.AncestralCall)
+    elseif race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+        cast(SB.LightsJudgement)
+    end
+
+    -------------------------
     --- auto taunt
     -------------------------
 
@@ -167,8 +198,8 @@ local function combat()
     if enemyCount == 1 and target.enemy and target.distance <= 8 then
         if target.castable(SB.ShieldSlam) then
             return cast(SB.ShieldSlam, target)
-        elseif target.castable(SB.Revenge) and player.buff(SB.RevengeProc).up then
-            return cast(SV.Revenge, target)
+        elseif -spell(SB.Revenge) == 0 and player.buff(SB.RevengeProc).up then
+            return cast(SB.Revenge)
         elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
         elseif target.castable(SB.Devastate) then
@@ -184,8 +215,8 @@ local function combat()
             return cast(SB.Shockwave)
         elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
-        elseif player.health.percent >= 65 and target.castable(SB.Revenge) then
-            return cast(SB.Revenge, target)
+        elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up) and -spell(SB.Revenge) == 0 then
+            return cast(SB.Revenge)
         elseif target.castable(SB.ShieldSlam) then
             return cast(SB.ShieldSlam, target)
         elseif target.castable(SB.Devastate) then
@@ -224,9 +255,7 @@ local function interface()
             { key = 'shoutInt', type = 'checkbox', text = 'Use shout as an interrupt', desc = '', default = true },
             { key = 'shockwaveInt', type = 'checkbox', text = 'Use shockwave as an interrupt', desc = '', default = true },
             { key = 'stormboltInt', type = 'checkbox', text = 'Use Storm Bolt as an interrupt', desc = '', default = true },
-            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Blood Elf only)', default = true },
-            { type = 'rule' },
-            { key = 'useTrinkets', type = 'checkbox', text = 'Use Trinkets?', desc = '', default = true },
+            { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial', default = true },
             { type = 'rule' },
             { type = 'text', text = 'Traits that impact rotation - enable if you got them' },
             { key = 'deafeningCrash', type = 'checkbox', text = 'Deafening Crash', desc = '', default = true },
@@ -281,80 +310,3 @@ dark_addon.rotation.register({
     resting = resting,
     interface = interface,
 })
-
-
---[[
-
-4.1. Shield Block
-
-Shield Block Icon Shield Block is your primary active mitigation ability. In the vast
-majority of situations, most of the damage you will take is blockable. As such,
-keeping Shield Block up as much as possible is key to smoothing out damage and
-helping you survive. Shield Block scales with the damage you are taking since it
-is a percent reduction to damage rather than a flat amount like Ignore Pain Icon Ignore Pain is.
-
-It is important to understand the difference between overall Shield Block Icon Shield Block uptime and effective uptime. You want to have as much effective Shield Block uptime as possible. All that means is having Shield Block up when you are tanking something that actually melees you.
-
-Essentially, anytime you are tanking something, you should be keeping Shield Block Icon Shield Block up as much as possible. It should still, however, be used intelligently, much like you would use major cooldowns. Timing is important, so there are a few things to look out for in this regard:
-
-Shield Block Icon Shield Block works against all melee attacks (as in, auto-attacks/white hits), but there are also many boss abilities/mechanics that are blockable as well. Sometimes, things that you would expect to be blockable are not, and things that you would not expect to be blockable are. You simply have to have knowledge of what these blockable mechanics are. The point here is that if you do know a higher damage ability is blockable, you are much better off delaying Shield Block so that the last bit of its duration blocks that ability.
-For further benefit, you can time Shield Block Icon Shield Block with the enemy's melee swings. Most enemies have a swing timer between 1.5 and 2 seconds. If you cast Shield Block right after a melee, you essentially just lost 2 seconds of effective uptime. Sometimes it can be difficult to tell when an enemy is actually melee attacking you, so this point is not super important, but can be beneficial if done properly.
-Also be aware of the enemy's spell casts/channels. If the boss is about to spend 5 seconds casting a spell, you should delay Shield Block Icon Shield Block accordingly.
-Similar to the first point, but if you know an enemy is about to deal increased damage, you should delay Shield Block Icon Shield Block for those periods as well. For example, in Mythic+, enemies deal significantly more damage once they hit 30% health if the Raging Icon Raging affix is active. While this is not a specific ability, its a mechanic you should be aware of and adjust Shield Block usage around.
-If you are not currently tanking, and there is a good amount of time before you do tank again, use Shield Block Icon Shield Block to increase Shield Slam Icon Shield Slam's damage. Just be sure to time it in such a way that as you are about to tank again, you have close to 2 charges of Shield Block, so you can maximize effective uptime.
-
-As said above, Shield Block Icon Shield Block is your primary active mitigation ability. It takes priority over Ignore Pain Icon Ignore Pain assuming you are taking blockable damage (which is almost always).
-
-4.1.1. Last Stand
-
-When using Bolster Icon Bolster, Last Stand Icon Last Stand should be used like Shield Block Icon Shield Block assuming you do not need Last Stand for a specific mechanic. You should do your best to not overlap Last Stand and Shield Block, as it does not add to Shield Block's duration. Having them both up at the same time provides no additional benefit. Since Last Stand lasts 15 seconds, it gives you the time to gain very close to, or a full Shield Block charge (depending on your Haste). So if used when you have a charge of Shield Block available, you risk wasting a bit of Shield Block cooldown time. Essentially, once you have used both charges of Shield Block and the actual Shield Block buff has expired, further increase your effective block uptime by using Last Stand.
-
-4.2. Ignore Pain
-
-Ignore Pain Icon Ignore Pain reduces damage by a flat amount, and with its current tuning, is much weaker than Shield Block Icon Shield Block. As such, it should be used in addition to Shield Block, not in place of it.
-
-Shield Block Icon Shield Block is limited by its cooldown, where Ignore Pain Icon Ignore Pain is simply limited by the amount of Rage you have available. So, once you have Shield Block up and on cooldown, spend your remaining Rage on Ignore Pain, making sure you save enough Rage to use Shield Block once it comes off cooldown. More or less, Ignore Pain should be used to further smooth out your damage intake.
-
-Just like Shield Block Icon Shield Block though, it can and should be used intelligently if doing so provides a benefit.
-
-It is very important to track your current absorb amount so you are not spending Rage on Ignore Pain Icon Ignore Pain if you are at, or close to, the cap. Since Ignore Pain's cap is 1.3 times Ignore Pain on cast, you generally should not cast Ignore Pain again until your absorb is close to depleting. This WeakAura tracks your current absorb and cap.
-If you are not tanking, and are taking very little or no damage, do not use your Rage on Ignore Pain Icon Ignore Pain. Depending on how long you are not tanking for, it will simply expire, wasting that Rage. Instead, try to cast an Ignore Pain right before you start tanking again. If you are taking damage while not tanking, cast Ignore Pain as needed to help out your healers.
-While generally speaking you will want to use Ignore Pain Icon Ignore Pain to smooth out your damage intake, it can also be very important to pool your Rage and cast Ignore Pain right before a large spike of damage, increasing the chance that you survive that spike.
-Additionally, if you are ever in the extremely rare situation where there is very, very little blockable damage, or none at all, you will of course want to prioritize Ignore Pain Icon Ignore Pain over Shield Block Icon Shield Block.
-
-5. Rotation during Avatar
-
-This section only applies if you are using Unstoppable Force Icon Unstoppable Force.
-
-With Unstoppable Force Icon Unstoppable Force, when you cast Avatar Icon Avatar, your ability priority stays the same, but you have to approach it in a different way.
-
-During Avatar Icon Avatar, Thunder Clap Icon Thunder Clap is available every other global cooldown. This means that you will be rotating between Thunder Clap and another ability based on the ability priority. For example, if you get lucky and many of your Thunder Clap casts reset Shield Slam Icon Shield Slam, you will find yourself alternating between Thunder Clap and Shield Slam.
-
-As another example, you might have a cast sequence that looks like this: Shield Slam Icon Shield Slam, Thunder Clap Icon Thunder Clap, Shield Slam Icon Shield Slam, Thunder Clap Icon Thunder Clap, Revenge Icon Revenge (free), Thunder Clap Icon Thunder Clap, Ignore Pain Icon Ignore Pain...
-
-Again, your ability priority does not change. Shield Slam Icon Shield Slam is still above Thunder Clap Icon Thunder Clap. Just be aware that during Avatar Icon Avatar, Thunder Clap has a significantly reduced cooldown and adjust accordingly.
-
-Also, it is very easy to Rage cap during Avatar Icon Avatar, so be ready to dump Rage into Ignore Pain Icon Ignore Pain / Revenge Icon Revenge.
-
-If going purely for damage, Thunder Clap Icon Thunder Clap takes priority over Shield Slam Icon Shield Slam. This is true for single-target as well, with the exception being that if and only if Shield Block Icon Shield Block is up, Shield Slam deals more damage on single-target.
-
-6. Cooldown Usage for Protection Warriors
-
-As a Protection Warrior, you have a number of defensive cooldowns. Using your defensive cooldowns properly is extremely important. You want to plan out your cooldowns before going into an encounter and maximize their usage as much as possible. Outlined below are your various defensive cooldowns and how they should be used. For more info on cooldown usage in general, see the mistakes page.
-
-6.1. Last Stand
-
-Last Stand Icon Last Stand can and should be used in two different ways depending on the situation. With Bolster Icon Bolster, Last Stand should be used to extend effective block uptime as outlined above in the Shield Block Icon Shield Block section. If there are many high-damage mechanics or if you are able to have Shield Block up for the majority of your active tanking time, then Last Stand should instead be used as an emergency cooldown - if your health drops to a dangerously low level unexpectedly - or as a pre-emptive cooldown to prepare for a large damage spike.
-
-If you are not running Bolster Icon Bolster, then simply use it as an emergency or preemptive cooldown.
-
-6.2. Shield Wall
-
-Shield Wall Icon Shield Wall should be used to prepare for a large damage spike, or during periods of high damage. It is not recommended to use it if your health suddenly drops low, as it does nothing to get your health back up, but in situations where you have nothing else, you want to use it if it increases your chance to survive.
-
-6.3. Demoralizing Shout
-
-With Booming Voice Icon Booming Voice, Demoralizing Shout Icon Demoralizing Shout should be used on cooldown and for damage purposes. Its cooldown is fairly short, particularly with Anger Management Icon Anger Management, so you will have fairly high uptime on the damage reduction. More often than not you will have it up at a good time, helping you smooth out damage.
-
-
-]]
