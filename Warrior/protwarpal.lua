@@ -210,7 +210,7 @@ local function combat()
     if enemyCount == 1 and target.enemy and target.distance <= 8 then
         if target.castable(SB.ShieldSlam) then
             return cast(SB.ShieldSlam, target)
-        elseif -spell(SB.Revenge) == 0 and player.buff(SB.RevengeProc).up then
+        elseif -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36) then
             return cast(SB.Revenge)
         elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
@@ -227,10 +227,10 @@ local function combat()
             return cast(SB.Shockwave)
         elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
-        elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up) and -spell(SB.Revenge) == 0 then
-            return cast(SB.Revenge)
         elseif target.castable(SB.ShieldSlam) then
             return cast(SB.ShieldSlam, target)
+        elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up or UnitLevel("player") < 36) and -spell(SB.Revenge) == 0 then
+            return cast(SB.Revenge)
         elseif target.castable(SB.Devastate) then
             return cast(SB.Devastate, target)
         end
