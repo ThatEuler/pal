@@ -14,6 +14,11 @@ local badguy = UnitClassification("target")
 SB.RevengeProc = 5302
 SB.DeafeningCrash = 272824
 SB.ShieldBlockBuff = 132404
+--racials
+SB.GiftOftheNaaru = 59544
+SB.MendingBuff = 41635
+SB.AncestralCall = 274738
+SB.LightsJudgement = 255647
 
 local function combat()
 
@@ -151,13 +156,13 @@ local function combat()
                 end
             end
         end
-    elseif race == "Orc" and castable(SB.BloodFury) then
+    elseif race == "Orc" and -spell(SB.BloodFury) == 0 then
         cast(SB.BloodFury)
-    elseif race == "Troll" and castabe(SB.Berserking) then
+    elseif race == "Troll" and -spell(SB.Berserking) == 0 then
         cast(SB.Berserking)
-    elseif race == "Mag'har Orc" and castable(SB.AncestralCall) then
+    elseif race == "Mag'har Orc" and -spell(SB.AncestralCall) == 0 then
         cast(SB.AncestralCall)
-    elseif race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
+    elseif race == "LightforgedDraenei" and -spell(SB.LightsJudgement) == 0 then
         cast(SB.LightsJudgement)
     end
 
@@ -173,16 +178,16 @@ local function combat()
     --- Damage mitigation
     -------------------------
 
-    if target.castable(SB.ShieldBlock) and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
-        return cast(SB.ShieldBlock, target)
+    if -spell(SB.ShieldBlock) == 0 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+        return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if castable(SB.DemoralizingShout) and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
+        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
             return cast(SB.DemoralizingShout)
-        elseif castable(SB.IgnorePain) and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
+        elseif UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
             return cast(SB.IgnorePain)
-        elseif castable(SB.LastStand) and player.health.percent < 50 then
+        elseif UnitLevel("player") >= 32 and -spell(SB.LastStand) == 0 and player.health.percent < 50 then
             return cast(SB.LastStand)
-        elseif castable(SB.ShieldWall) and player.health.percent < 20 then
+        elseif UnitLevel("player") >= 55 and -spell(SB.ShieldWall) == 0 and player.health.percent < 20 then
             return cast(SB.ShieldWall)
         end
     end
