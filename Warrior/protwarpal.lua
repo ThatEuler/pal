@@ -98,6 +98,13 @@ local function combat()
         if Trinket14 == 159611 and target.enemy and target.distance < 8 and target.health.percent > 50 and GetItemCooldown(159611) == 0 and -spell(SB.Avatar) > 10 and player.buff(SB.Avatar).down then
             macro('/use [@player] 14 ')
         end
+        --touch of the void
+        if Trinket13 == 128318 and target.time_to_die > 10 and GetItemCooldown(128318) == 0 then
+            macro('/use 13')
+        end
+        if Trinket14 == 128318 and target.time_to_die > 10 and GetItemCooldown(128318) == 0 then
+            macro('/use 14')
+        end
     end
 
 
@@ -148,7 +155,7 @@ local function combat()
         cast(SB.BloodFury)
     elseif race == "Troll" and castabe(SB.Berserking) then
         cast(SB.Berserking)
-    elseif race == "MagharOrc" and castable(SB.AncestralCall) then
+    elseif race == "Mag'har Orc" and castable(SB.AncestralCall) then
         cast(SB.AncestralCall)
     elseif race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
         cast(SB.LightsJudgement)
