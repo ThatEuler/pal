@@ -99,10 +99,10 @@ local function combat()
             macro('/use [@player] 14 ')
         end
         --touch of the void
-        if Trinket13 == 128318 and target.time_to_die > 10 and GetItemCooldown(128318) == 0 then
+        if Trinket13 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and GetItemCooldown(128318) == 0 then
             macro('/use 13')
         end
-        if Trinket14 == 128318 and target.time_to_die > 10 and GetItemCooldown(128318) == 0 then
+        if Trinket14 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and GetItemCooldown(128318) == 0 then
             macro('/use 14')
         end
     end
