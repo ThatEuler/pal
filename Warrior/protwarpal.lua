@@ -178,7 +178,7 @@ local function combat()
     --- Damage mitigation
     -------------------------
 
-    if -spell(SB.ShieldBlock) == 0 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+    if castable(SB.ShieldBlock) and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
         if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
@@ -210,7 +210,7 @@ local function combat()
     if enemyCount == 1 and target.enemy and target.distance <= 8 then
         if target.castable(SB.ShieldSlam) then
             return cast(SB.ShieldSlam, target)
-        elseif -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36) then
+        elseif castable(SB.Revenge) and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
             return cast(SB.Revenge)
         elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
