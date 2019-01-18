@@ -128,7 +128,7 @@ local function combat()
         if tank1.castable(SB.BeaconofLight) and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(tank1.unitID) then
             return cast(SB.BeaconofLight, tank1)
         end
-        if tank2 ~= nil and talent(7, 2) and tank2.castable(SB.BeaconofFaith) and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(tank2.unitID) then
+        if tank2 ~= nil and talent(7, 2) and tank2.castable(SB.BeaconofFaith) and (tank2.buff(SB.BeaconofFaith).down and tank2.buff(SB.BeaconofLight).down) and tank2.distance <= 40 and not UnitIsDeadOrGhost(tank2.unitID) then
             return cast(SB.BeaconofFaith, tank2)
         end
     end
@@ -147,23 +147,20 @@ local function combat()
     end
 
     --Trinket/item use
-    local specificTrinket13 = GetInventoryItemID("player", 13)
-    local specificTrinket14 = GetInventoryItemID("player", 14)
+
+
     local trinket13 = GetInventoryItemID("player", 13)
     local trinket14 = GetInventoryItemID("player", 14)
 
     if toggle('trinketuse', false) then
-        if specificTrinket13 == 160649 and player.buff(SB.AvengingWrath).up and GetItemCooldown(160649) == 0 then
+        if trinket13 == 160649 and GetItemCooldown(160649) == 0 and tank.distance < 30 and tank.health.percent < 80 then
             return macro('/use [help] 13; [@targettarget] 13')
-        end
-        if specificTrinket14 == 160649 and player.buff(SB.AvengingWrath).up and GetItemCooldown(160649) == 0 then
+        elseif  trinket14 == 160649 and GetItemCooldown(160649) == 0 and tank.health.percent < 80 then
             return macro('/use [help] 14; [@targettarget] 14')
-        end
-        if IsUsableItem(trinket13) and GetItemCooldown(trinket13) == 0 and tank.health.percent < 50 and tank.distance < 40 then
-            macro('/use [help] 13; [@targettarget] 13')
-        end
-        if IsUsableItem(trinket14) and GetItemCooldown(trinket14) == 0 and tank.health.percent < 50 and tank.distance < 40 then
-            macro('/use [help] 14; [@targettarget] 14')
+       elseif IsUsableItem(trinket13) and GetItemCooldown(trinket13) == 0 and tank.health.percent < 50 and tank.distance < 40 then
+            macro('/use 13')
+        elseif IsUsableItem(trinket14) and GetItemCooldown(trinket14) == 0 and tank.health.percent < 50 and tank.distance < 40 then
+            macro('/use 1414')
         end
     end
     -- Modifiers
