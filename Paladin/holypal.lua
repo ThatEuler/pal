@@ -552,7 +552,7 @@ local function resting()
             if tank1.castable(SB.BeaconofLight) and tank1.buff(SB.BeaconofLight).down and tank1.distance <= 40 and not UnitIsDeadOrGhost(tank1.unitID) then
                 return cast(SB.BeaconofLight, tank1)
             end
-            if tank2 ~= nil and talent(7, 2) and tank2.castable(SB.BeaconofFaith) and tank2.buff(SB.BeaconofFaith).down and tank2.distance <= 40 and not UnitIsDeadOrGhost(tank2.unitID) then
+            if tank2 ~= nil and talent(7, 2) and tank2.castable(SB.BeaconofFaith) and (tank2.buff(SB.BeaconofFaith).down and tank2.buff(SB.BeaconofLight).down) and tank2.distance <= 40 and not UnitIsDeadOrGhost(tank2.unitID) then
                 return cast(SB.BeaconofFaith, tank2)
             end
         end
