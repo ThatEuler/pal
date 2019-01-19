@@ -33,13 +33,23 @@ local function combat()
             return cast(SB.Intercept, 'mouseover')
         end
     end
+    --[[  trying old method
+        if toggle('multitarget', false) then
+            enemyCount = enemies.around(8)
+        elseif toggle('multitarget', true) then
+            enemyCount = 1
+        end
+    ]]
 
-    if toggle('multitarget', false) then
-        enemyCount = enemies.around(8)
-    elseif toggle('multitarget', true) then
-        enemyCount = 1
+    local enemyCount = 0
+    for i = 1, 40 do
+        if UnitExists('nameplate' .. i) and IsSpellInRange('Shield Slam', 'nameplate' .. i) == 1 and UnitAffectingCombat('nameplate' .. i) then
+            enemyCount = enemyCount + 1
+        end
+        if enemyCount == 0 then
+            enemyCount = 1
+        end
     end
-
 
     -----------------------------
     --- Reading from settings
@@ -208,7 +218,7 @@ local function combat()
     --- Standard Rotation stuff
     -------------------------
 
-    if not isCC("target") then
+    if UnitAffectingCombat("target") and not isCC("target") then
         if -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
             return cast(SB.VictoryRush, target)
         elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
@@ -220,7 +230,7 @@ local function combat()
     -------------------------
     --- single Target Standard Rotation
     -------------------------
-    if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") then
+    if enemyCount == 1 and target.enemy and target.distance <= 8 and UnitAffectingCombat("target") then
         if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
         elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
@@ -235,7 +245,7 @@ local function combat()
     -------------------------
     --- multi Target Standard Rotation
     -------------------------
-    if enemyCount >= 2 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
+    if enemyCount >= 2 and target.enemy and target.distance <= 8 and UnitAffectingCombat("target") then
         if enemyCount >= 3 and UnitLevel("player") >= 50 and -spell(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif castable(SB.ThunderClap) and -spell(SB.ThunderClap) == 0 then
