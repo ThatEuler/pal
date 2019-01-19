@@ -22,6 +22,7 @@ SB.LightsJudgement = 255647
 
 local function combat()
 
+<<<<<<< HEAD
     if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
         return cast(SB.HeroicThrow, 'mouseover')
     end
@@ -34,6 +35,8 @@ local function combat()
         end
     end
 
+=======
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
     if toggle('multitarget', false) then
         enemyCount = enemies.around(8)
     elseif toggle('multitarget', true) then
@@ -78,7 +81,11 @@ local function combat()
     end
 
     --spellreflection
+<<<<<<< HEAD
     if castable(SB.SpellReflect) and target.interrupt(100, false) then
+=======
+    if castable(SB.SpellReflect) and (target.interrupt(0, 20) or not target.interrupt()) then
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
         return cast(SB.SpellReflect)
     end
 
@@ -190,7 +197,11 @@ local function combat()
     --- Damage mitigation
     -------------------------
 
+<<<<<<< HEAD
     if -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+=======
+    if castable(SB.ShieldBlock) and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
         if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
@@ -207,6 +218,17 @@ local function combat()
     -------------------------
     --- Standard Rotation stuff
     -------------------------
+<<<<<<< HEAD
+=======
+    if target.castable(SB.HeroicThrow) and target.enemy and (target.distance > 8 and target.distance <= 30) then
+        return cast(SB.HeroicThrow, target)
+    end
+    if target.castable(SB.StormBolt) then
+        return cast(SB.StormBolt, target)
+    elseif -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
+        return cast(SB.VictoryRush, target)
+    end
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
 
     if not isCC("target") then
         if -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
@@ -220,14 +242,23 @@ local function combat()
     -------------------------
     --- single Target Standard Rotation
     -------------------------
+<<<<<<< HEAD
     if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") then
         if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
+=======
+    if enemyCount == 1 and target.enemy and target.distance <= 8 then
+        if target.castable(SB.ShieldSlam) then
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
             return cast(SB.ShieldSlam, target)
-        elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
+        elseif castable(SB.Revenge) and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
             return cast(SB.Revenge)
+<<<<<<< HEAD
         elseif castable(SB.ThunderClap) and target.distance <= 6 and -spell(SB.ThunderClap) == 0 then
+=======
+        elseif castable(SB.ThunderClap) then
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
             return cast(SB.ThunderClap)
-        elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then
+        elseif target.castable(SB.Devastate) then
             return cast(SB.Devastate, target)
         end
     end
@@ -238,13 +269,13 @@ local function combat()
     if enemyCount >= 2 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
         if enemyCount >= 3 and UnitLevel("player") >= 50 and -spell(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
-        elseif castable(SB.ThunderClap) and -spell(SB.ThunderClap) == 0 then
+        elseif castable(SB.ThunderClap) then
             return cast(SB.ThunderClap)
-        elseif target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
+        elseif target.castable(SB.ShieldSlam) then
             return cast(SB.ShieldSlam, target)
         elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up or UnitLevel("player") < 36) and -spell(SB.Revenge) == 0 then
             return cast(SB.Revenge)
-        elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then
+        elseif target.castable(SB.Devastate) then
             return cast(SB.Devastate, target)
         end
     end
@@ -253,6 +284,7 @@ local function combat()
 end
 
 local function resting()
+<<<<<<< HEAD
     if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
         return cast(SB.HeroicThrow, 'mouseover')
     end
@@ -264,6 +296,8 @@ local function resting()
             return cast(SB.Intercept, 'mouseover')
         end
     end
+=======
+>>>>>>> parent of f951e69... Added CD checks, changed Spellreflect, added modifiers
 
 
 end
