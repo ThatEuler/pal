@@ -26,11 +26,22 @@ local function combat()
         return cast(SB.HeroicThrow, 'mouseover')
     end
 
+<<<<<<< HEAD
     if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
         elseif castable(SB.Intercept) and mouseover.distance <= 25 then
+=======
+    if modifier.shift and mouseover.exists then
+        if castable(SB.Intercept) and mouseover.distance < 25 then
+>>>>>>> parent of 3cec141... lots of tweaks
             return cast(SB.Intercept, 'mouseover')
+        end
+    end
+
+    if modifier.shift and not mouseover.exists then
+        if castable(SB.HeroicLeap) then
+            return cast(SB.HeroicLeap, 'ground')
         end
     end
 
@@ -78,8 +89,8 @@ local function combat()
     end
 
     --spellreflection
-    if castable(SB.SpellReflect) and target.interrupt(100, false) then
-        return cast(SB.SpellReflect)
+   if castable(SB.SpellReflect) and target.interrupt(100, false) then
+      return cast(SB.SpellReflect)
     end
 
     --regain control
@@ -182,7 +193,7 @@ local function combat()
     --- auto taunt
     -------------------------
 
-    if autoTaunt and -spell(SB.Taunt) == 0 and UnitAffectingCombat("target") and not (UnitIsUnit("targettarget", "player")) then
+    if autoTaunt and target.castable(SB.Taunt) and not (UnitIsUnit("targettarget", "player")) then
         return cast(SB.Taunt)
     end
 
@@ -190,12 +201,12 @@ local function combat()
     --- Damage mitigation
     -------------------------
 
-    if -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+    if castable(SB.ShieldBlock) and -spell(SB.ShieldBlock) == 0 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
         if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
             return cast(SB.DemoralizingShout)
-        elseif UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40 and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
+        elseif UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
             return cast(SB.IgnorePain)
         elseif UnitLevel("player") >= 32 and -spell(SB.LastStand) == 0 and player.health.percent < 50 then
             return cast(SB.LastStand)
@@ -207,25 +218,24 @@ local function combat()
     -------------------------
     --- Standard Rotation stuff
     -------------------------
-
-    if not isCC("target") and UnitAffectingCombat("target") then
-        if -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
-            return cast(SB.VictoryRush, target)
-        elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
-            return cast(SB.HeroicThrow, target)
-        elseif target.castable(SB.StormBolt) then
-            return cast(SB.StormBolt, target)
-        end
+    if target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
+        return cast(SB.HeroicThrow, target)
     end
+    if target.castable(SB.StormBolt) then
+        return cast(SB.StormBolt, target)
+    elseif -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
+        return cast(SB.VictoryRush, target)
+    end
+
     -------------------------
     --- single Target Standard Rotation
     -------------------------
-    if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
+    if enemyCount == 1 and target.enemy and target.distance <= 8 then
         if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
         elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
             return cast(SB.Revenge)
-        elseif castable(SB.ThunderClap) and target.distance <= 6 and -spell(SB.ThunderClap) == 0 then
+        elseif castable(SB.ThunderClap) and -spell(SB.ThunderClap) == 0 then
             return cast(SB.ThunderClap)
         elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then
             return cast(SB.Devastate, target)
@@ -235,7 +245,7 @@ local function combat()
     -------------------------
     --- multi Target Standard Rotation
     -------------------------
-    if enemyCount >= 2 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
+    if enemyCount >= 2 and target.enemy and target.distance <= 8 then
         if enemyCount >= 3 and UnitLevel("player") >= 50 and -spell(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif castable(SB.ThunderClap) and -spell(SB.ThunderClap) == 0 then
@@ -257,11 +267,22 @@ local function resting()
         return cast(SB.HeroicThrow, 'mouseover')
     end
 
+<<<<<<< HEAD
     if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
         elseif castable(SB.Intercept) and mouseover.distance <= 25 then
+=======
+    if modifier.shift and mouseover.exists then
+        if castable(SB.Intercept) and mouseover.distance < 25 then
+>>>>>>> parent of 3cec141... lots of tweaks
             return cast(SB.Intercept, 'mouseover')
+        end
+    end
+
+    if modifier.shift and not mouseover.exists then
+        if castable(SB.HeroicLeap) then
+            return cast(SB.HeroicLeap, 'ground')
         end
     end
 
@@ -277,7 +298,7 @@ local function interface()
         resize = true,
         show = false,
         template = {
-            { type = 'header', text = 'Protection Warrior - the REAL tank!' },
+            { type = 'header', text = '               Protection Warrior - the REAL tank!' },
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
             { type = 'rule' },
             { type = 'text', text = 'General Settings' },
