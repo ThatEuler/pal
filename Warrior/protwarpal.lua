@@ -218,8 +218,20 @@ local function combat()
     -------------------------
     --- Standard Rotation stuff
     -------------------------
+<<<<<<< HEAD
     if target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
         return cast(SB.HeroicThrow, target)
+=======
+
+    if not isCC("target") and UnitAffectingCombat("target") then
+        if -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
+            return cast(SB.VictoryRush, target)
+        elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
+            return cast(SB.HeroicThrow, target)
+        elseif target.castable(SB.StormBolt) then
+            return cast(SB.StormBolt, target)
+        end
+>>>>>>> parent of 4b8f556... removed check ...was checking too much
     end
     if target.castable(SB.StormBolt) then
         return cast(SB.StormBolt, target)
@@ -230,7 +242,11 @@ local function combat()
     -------------------------
     --- single Target Standard Rotation
     -------------------------
+<<<<<<< HEAD
     if enemyCount == 1 and target.enemy and target.distance <= 8 then
+=======
+    if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
+>>>>>>> parent of 4b8f556... removed check ...was checking too much
         if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
         elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
