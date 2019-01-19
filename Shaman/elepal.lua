@@ -278,225 +278,225 @@ earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
             if player.buff(SB.AzeriteEchooftheElementals).up then
                 echoCount = player.buff(SB.AzeriteEchooftheElementals).count
             end
-        end
-        if target.castable(SB.EarthShock) then
-            if (talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up) or (-power.maelstrom >= (maelstrom_pool - 10)) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
-                return cast(SB.Earthshock, target)
-            elseif not talent(4, 1) and not talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 60) then
-                return cast(SB.Earthshock, target)
-            elseif not talent(4, 1) and talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 50) then
-                return cast(SB.Earthshock, target)
-            elseif not (talent(4, 2) or -spell(SB.Stormelemental) > 120) and ((target.time_to_die) - (-spell(SB.Stormelemental)) - (150 * math.floor((target.time_to_die - (-spell(SB.Stormelemental)))) % 150) >= 30 * (1 + echoCount) >= 2) then
-                return cast(SB.Earthshock, target)
+
+            if target.castable(SB.EarthShock) then
+                if (talent(4, 1) and player.buff(SB.Surgeofpower).down and player.buff(SB.MasteroftheElements).up) or (-power.maelstrom >= (maelstrom_pool - 10)) or (player.buff(SB.StormKeeper).up and enemyCount < 2) then
+                    return cast(SB.Earthshock, target)
+                elseif not talent(4, 1) and not talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 60) then
+                    return cast(SB.Earthshock, target)
+                elseif not talent(4, 1) and talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 50) then
+                    return cast(SB.Earthshock, target)
+                elseif not (talent(4, 2) or -spell(SB.Stormelemental) > 120) and ((target.time_to_die) - (-spell(SB.Stormelemental)) - (150 * math.floor((target.time_to_die - (-spell(SB.Stormelemental)))) % 150) >= 30 * (1 + echoCount) >= 2) then
+                    return cast(SB.Earthshock, target)
+                end
+
             end
 
-        end
-
-        --lightningbolt - round2
-        if talent(4, 2) and target.castable(SB.Lightningbolt) and -spell(SB.Stormelemental) > 120 then
-            return cast(SB.Lightningbolt, target)
-        end
-
-        --frost shock
-        if talent(6, 3) and talent(4, 1) and player.buff(SB.Icefury).up and player.buff(SB.MasteroftheElements).up then
-            return cast(SB.FrostShock, target)
-        end
-
-        --lavaburst
-        if player.buff(SB.Ascendance).up and target.castable(SB.LavaBurst) then
-            return cast(SB.LavaBurst, target)
-        end
-
-        --re-dot
-        if target.castable(SB.Flameshock) and enemyCount > 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).up then
-            return cast(SB.Flameshock, target)
-        elseif target.castable(SB.Flameshock) and enemyCount == 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).down then
-            return cast(SB.Flameshock, target)
-        end
-
-        --lightningbolt - round3
-        if target.castable(SB.Lightningbolt) and player.buff(SB.Surgeofpower).up then
-            return cast(SB.Lightningbolt, target)
-        end
-        --lava burst
-        if target.castable(SB.LavaBurst) then
-            return cast(SB.LavaBurst, target)
-        end
-
-        if talent(6, 3) and target.castable(SB.Icefury) then
-            return cast(SB.Icefury, target)
-        end
-
-        --lightningbolt - round4
-        if target.castable(SB.Lightningbolt) then
-            return cast(SB.Lightningbolt, target)
-        end
-
-        if target.castable(SB.FrostShock) then
-            return cast(SB.FrostShock, target)
-        end
-    end --end single rotation
-
-    --AOE rotation
-    if enemyCount >= 3 then
-
-        --stormkeeper
-        if talent(7, 2) and -spell(SB.StormKeeper) == 0 then
-            return cast(SB.StormKeeper, player)
-        end
-        --Ascendance
-        if talent(7, 3) and -spell(SB.Ascendance) == 0 then
-            if (talent(4, 2) and -spell(SB.Stormelemental) < 120 and -spell(SB.Stormelemental) > 15 or not talent(4, 2)) then
-                return cast(SB.Ascendance)
+            --lightningbolt - round2
+            if talent(4, 2) and target.castable(SB.Lightningbolt) and -spell(SB.Stormelemental) > 120 then
+                return cast(SB.Lightningbolt, target)
             end
-        end
-        -- flame shock
-        if target.castable(SB.Flameshock) and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6)
-                and enemyCount < 5 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120) or enemyCount == 3 and (player.buff(SB.Windgust).down or player.buff(SB.Windgust).count < 14)) then
-            return cast(SB.Flameshock, target)
-        end
-        --lave burst
-        if target.castable(SB.Lavaburst) and (player.buff(SB.LavaSurge).up or player.buff(SB.Ascendance).up)
-                and enemyCount < 4 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120)) then
-            return cast(SB.Lavaburst, target)
-        end
-        --elemental blast
-        if talent(1, 3) and target.castable(SB.ElementalBlast) and enemyCount < 4 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120)) then
-            return cast(SB.ElementalBlast, target)
-        end
-        --lava beam
-        if talent(7, 3) and player.buff(SB.Ascendance).up and target.castable(SB.LavaBeam) then
-            return cast(SB.LavaBeam, target)
-        end
-        if target.castable(SB.ChainLightning) then
-            return cast(SB.ChainLightning, target)
 
-        end
+            --frost shock
+            if talent(6, 3) and talent(4, 1) and player.buff(SB.Icefury).up and player.buff(SB.MasteroftheElements).up then
+                return cast(SB.FrostShock, target)
+            end
+
+            --lavaburst
+            if player.buff(SB.Ascendance).up and target.castable(SB.LavaBurst) then
+                return cast(SB.LavaBurst, target)
+            end
+
+            --re-dot
+            if target.castable(SB.Flameshock) and enemyCount > 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).up then
+                return cast(SB.Flameshock, target)
+            elseif target.castable(SB.Flameshock) and enemyCount == 1 and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6) and player.buff(SB.Surgeofpower).down then
+                return cast(SB.Flameshock, target)
+            end
+
+            --lightningbolt - round3
+            if target.castable(SB.Lightningbolt) and player.buff(SB.Surgeofpower).up then
+                return cast(SB.Lightningbolt, target)
+            end
+            --lava burst
+            if target.castable(SB.LavaBurst) then
+                return cast(SB.LavaBurst, target)
+            end
+
+            if talent(6, 3) and target.castable(SB.Icefury) then
+                return cast(SB.Icefury, target)
+            end
+
+            --lightningbolt - round4
+            if target.castable(SB.Lightningbolt) then
+                return cast(SB.Lightningbolt, target)
+            end
+
+            if target.castable(SB.FrostShock) then
+                return cast(SB.FrostShock, target)
+            end
+        end --end single rotation
+
+        --AOE rotation
+        if enemyCount >= 3 then
+
+            --stormkeeper
+            if talent(7, 2) and -spell(SB.StormKeeper) == 0 then
+                return cast(SB.StormKeeper, player)
+            end
+            --Ascendance
+            if talent(7, 3) and -spell(SB.Ascendance) == 0 then
+                if (talent(4, 2) and -spell(SB.Stormelemental) < 120 and -spell(SB.Stormelemental) > 15 or not talent(4, 2)) then
+                    return cast(SB.Ascendance)
+                end
+            end
+            -- flame shock
+            if target.castable(SB.Flameshock) and (not target.debuff(SB.FlameShock) or target.debuff(SB.FlameShock).remains <= 6)
+                    and enemyCount < 5 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120) or enemyCount == 3 and (player.buff(SB.Windgust).down or player.buff(SB.Windgust).count < 14)) then
+                return cast(SB.Flameshock, target)
+            end
+            --lave burst
+            if target.castable(SB.Lavaburst) and (player.buff(SB.LavaSurge).up or player.buff(SB.Ascendance).up)
+                    and enemyCount < 4 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120)) then
+                return cast(SB.Lavaburst, target)
+            end
+            --elemental blast
+            if talent(1, 3) and target.castable(SB.ElementalBlast) and enemyCount < 4 and (not talent(4, 2) or (talent(4, 2) and -spell(SB.Stormelemental) < 120)) then
+                return cast(SB.ElementalBlast, target)
+            end
+            --lava beam
+            if talent(7, 3) and player.buff(SB.Ascendance).up and target.castable(SB.LavaBeam) then
+                return cast(SB.LavaBeam, target)
+            end
+            if target.castable(SB.ChainLightning) then
+                return cast(SB.ChainLightning, target)
+
+            end
 
 
-    end -- end AOE
-end --end target alive
+        end -- end AOE
+    end --end target alive
 end -- end combat
 
 
 local function resting()
 
---checking for tank/offtank using dark dark_addon
---    print("DR: Tank is: " .. tank .. " and offtank is " .. offtank)
+    --checking for tank/offtank using dark dark_addon
+    --    print("DR: Tank is: " .. tank .. " and offtank is " .. offtank)
 
---[[testing homemade crap
-local members = GetNumGroupMembers()
-local group_type = GroupType()
-local tank1 = "zero"
-local tank2 = nil
+    --[[testing homemade crap
+    local members = GetNumGroupMembers()
+    local group_type = GroupType()
+    local tank1 = "zero"
+    local tank2 = nil
 
-if group_type == 'raid' then
+    if group_type == 'raid' then
 
-    for i = 1, (members - 1) do
-        local unit = group_type .. i
-        local unitName, _ = UnitName(unit)
+        for i = 1, (members - 1) do
+            local unit = group_type .. i
+            local unitName, _ = UnitName(unit)
 
-        if tank1 == "zero" and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-           -- print(unit)
-            tank1 = dark_addon.environment.conditions.unit(unit)
-            print("tank1: " .. tank1)
+            if tank1 == "zero" and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+               -- print(unit)
+                tank1 = dark_addon.environment.conditions.unit(unit)
+                print("tank1: " .. tank1)
+            end
+            if tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
+                tank2 = group_type .. i
+                --tank2 = unitName
+            end
+            if tank1 == nil then
+                tank1 = 'tank'
+            elseif tank2 == nil then
+                tank2 = dark_addon.environment.conditions.unit(group_type .. i)
+
+                local iTarget = dark_addon.environment.conditions.unit(group_type .. i)
+                print(iTarget)
+                print(iTarget.name)
+                --tank2 = group_type .. i
+            end
         end
-        if tank1 ~= UnitGroupRolesAssigned(unit) and (UnitGroupRolesAssigned(unit) == 'TANK') and not UnitCanAttack('player', unit) and not UnitIsDeadOrGhost(unit) then
-            tank2 = group_type .. i
-            --tank2 = unitName
-        end
-        if tank1 == nil then
-            tank1 = 'tank'
-        elseif tank2 == nil then
-            tank2 = dark_addon.environment.conditions.unit(group_type .. i)
+        print("Tank(DR): " .. tank.name)
+        print("Offtank(DR): " .. offtank.name)
+        print("offtank(PAL): " .. iTarget)
+        print("offtank name(PAL): " .. iTarget.name)
+        print("--------------")
+    end
+    ]]
 
-            local iTarget = dark_addon.environment.conditions.unit(group_type .. i)
-            print(iTarget)
-            print(iTarget.name)
-            --tank2 = group_type .. i
+
+    --CleanseSpirit
+    -- - Decurse
+    if toggle('DISPELL', false) then
+        local dispellable_unit = player.removable('curse')
+        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+            return cast(SB.CleanseSpirit, dispellable_unit)
+        end
+
+        local dispellable_unit = group.removable('curse')
+        if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
+            return cast(SB.CleanseSpirit, dispellable_unit)
         end
     end
-    print("Tank(DR): " .. tank.name)
-    print("Offtank(DR): " .. offtank.name)
-    print("offtank(PAL): " .. iTarget)
-    print("offtank name(PAL): " .. iTarget.name)
-    print("--------------")
-end
-]]
 
+    if talent(2, 3) and modifier.alt then
+        return cast(SB.TotemMastery)
+    end
 
---CleanseSpirit
--- - Decurse
-if toggle('DISPELL', false) then
-local dispellable_unit = player.removable('curse')
-if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
-return cast(SB.CleanseSpirit, dispellable_unit)
-end
+    if modifier.shift and -power.maelstrom >= 60 then
+        return cast(SB.Earthquake, 'ground')
+    end
 
-local dispellable_unit = group.removable('curse')
-if dispellable_unit and spell(SB.CleanseSpirit).cooldown == 0 then
-return cast(SB.CleanseSpirit, dispellable_unit)
-end
-end
+    if modifier.control and mouseover.alive and -spell(SB.AncestralSpirit) == 0 then
+        return cast(SB.AncestralSpirit, 'mouseover')
+    end
 
-if talent(2, 3) and modifier.alt then
-return cast(SB.TotemMastery)
-end
-
-if modifier.shift and -power.maelstrom >= 60 then
-return cast(SB.Earthquake, 'ground')
-end
-
-if modifier.control and mouseover.alive and -spell(SB.AncestralSpirit) == 0 then
-return cast(SB.AncestralSpirit, 'mouseover')
-end
-
-if player.moving and not player.buff(SB.GhostWolf).up then
-x = x + 1
-if x >= 7 then
-x = 0
-return cast(SB.GhostWolf)
-end
-end
+    if player.moving and not player.buff(SB.GhostWolf).up then
+        x = x + 1
+        if x >= 7 then
+            x = 0
+            return cast(SB.GhostWolf)
+        end
+    end
 end
 
 function interface()
-dark_addon.interface.buttons.add_toggle({
-name = 'DEF',
-label = 'Defensive CD',
-on = {
-label = 'DEF',
-color = dark_addon.interface.color.orange,
-color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-},
-off = {
-label = 'DEF',
-color = dark_addon.interface.color.grey,
-color2 = dark_addon.interface.color.dark_grey
-}
-})
-dark_addon.interface.buttons.add_toggle({
-name = 'DISPELL',
-label = 'DISP',
-on = {
-label = 'DISP',
-color = dark_addon.interface.color.orange,
-color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-},
-off = {
-label = 'DISP',
-color = dark_addon.interface.color.grey,
-color2 = dark_addon.interface.color.dark_grey
-}
-})
+    dark_addon.interface.buttons.add_toggle({
+        name = 'DEF',
+        label = 'Defensive CD',
+        on = {
+            label = 'DEF',
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'DEF',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        }
+    })
+    dark_addon.interface.buttons.add_toggle({
+        name = 'DISPELL',
+        label = 'DISP',
+        on = {
+            label = 'DISP',
+            color = dark_addon.interface.color.orange,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = 'DISP',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        }
+    })
 end
 
 dark_addon.rotation.register({
-spec = dark_addon.rotation.classes.shaman.elemental,
-name = 'elepal',
-label = '8.1 BETA',
-combat = combat,
-resting = resting,
-interface = interface
+    spec = dark_addon.rotation.classes.shaman.elemental,
+    name = 'elepal',
+    label = '8.1 BETA',
+    combat = combat,
+    resting = resting,
+    interface = interface
 
 })
