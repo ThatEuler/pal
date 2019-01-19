@@ -27,7 +27,7 @@ local function combat()
     end
 
     if modifier.shift then
-        if castable(SB.HeroicLeap) and (mouseover.distance > 8 and mouseover.distance < 40) then
+        if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
         elseif castable(SB.Intercept) and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
@@ -258,7 +258,7 @@ local function resting()
     end
 
     if modifier.shift then
-        if castable(SB.HeroicLeap) and (mouseover.distance > 8 and mouseover.distance < 40) then
+        if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
         elseif castable(SB.Intercept) and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
