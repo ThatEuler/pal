@@ -1,7 +1,7 @@
----  Protection Warrior for 8.1 by Laksmackt - 01/2019
----
---- Holding Shift =
---- Supported talents:
+---  Protection Warrior for 8.1 by Laksmackt and Rebecca  - 01/2019
+--- Holding Shift = mobility - will leap if it can, will intercept if possible
+---CTRL = stun - hammer or shockwave
+--- Supported talents: all
 
 
 local dark_addon = dark_interface
@@ -9,6 +9,7 @@ local SB = dark_addon.rotation.spellbooks.warrior
 local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
 local badguy = UnitClassification("target")
+local enemyCount = 0
 
 --missing spells
 SB.RevengeProc = 5302
