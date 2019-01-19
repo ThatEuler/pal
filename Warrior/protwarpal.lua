@@ -26,15 +26,11 @@ local function combat()
         return cast(SB.HeroicThrow, 'mouseover')
     end
 
-    if modifier.shift and mouseover.exists then
-        if castable(SB.Intercept) and mouseover.distance < 25 then
-            return cast(SB.Intercept, 'mouseover')
-        end
-    end
-
-    if modifier.shift and not mouseover.exists then
+    if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
+        elseif target.castable(SB.Intercept) then
+            return cast(SB.Intercept, 'mouseover')
         end
     end
 
@@ -184,9 +180,18 @@ local function combat()
     -------------------------
     --- auto taunt
     -------------------------
+    --[[
+        if autoTaunt and -spell(SB.Taunt) == 0 and UnitAffectingCombat("target") and not (UnitIsUnit("targettarget", "player")) then
+            return cast(SB.Taunt)
+        end
+    ]]
 
-    if autoTaunt and -spell(SB.Taunt) == 0 and UnitAffectingCombat("target") and not (UnitIsUnit("targettarget", "player")) then
-        return cast(SB.Taunt)
+    if autoTaunt and -spell(SB.Taunt) == 0 then
+        for i = 1, 40 do
+            if UnitExists('nameplate' .. i) and IsSpellInRange('Taunt', 'nameplate' .. i) == 1 and UnitAffectingCombat('nameplate' .. i) and not (UnitIsUnit("targettarget", "player")) then
+                return cast(SB.Taunt, 'nameplate' .. i)
+            end
+        end
     end
 
     -------------------------
@@ -256,7 +261,7 @@ local function combat()
 end
 
 local function resting()
-  
+
     if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
         return cast(SB.HeroicThrow, 'mouseover')
     end
