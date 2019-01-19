@@ -10,7 +10,6 @@ local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
 local badguy = UnitClassification("target")
 local enemyCount = 0
-
 --missing spells
 SB.RevengeProc = 5302
 SB.DeafeningCrash = 272824
@@ -27,11 +26,15 @@ local function combat()
         return cast(SB.HeroicThrow, 'mouseover')
     end
 
-    if modifier.shift then
+    if modifier.shift and mouseover.exists then
+        if castable(SB.Intercept) and mouseover.distance < 25 then
+            return cast(SB.Intercept, 'mouseover')
+        end
+    end
+
+    if modifier.shift and not mouseover.exists then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
-        elseif castable(SB.Intercept) and mouseover.distance <= 25 then
-            return cast(SB.Intercept, 'mouseover')
         end
     end
 
@@ -40,7 +43,6 @@ local function combat()
     elseif toggle('multitarget', true) then
         enemyCount = 1
     end
-
 
     -----------------------------
     --- Reading from settings
@@ -209,7 +211,7 @@ local function combat()
     --- Standard Rotation stuff
     -------------------------
 
-    if not isCC("target") then
+    if not isCC("target") and UnitAffectingCombat("target") then
         if -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
             return cast(SB.VictoryRush, target)
         elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
@@ -221,7 +223,7 @@ local function combat()
     -------------------------
     --- single Target Standard Rotation
     -------------------------
-    if enemyCount == 1 and target.enemy and target.distance <= 8 and UnitAffectingCombat("target") then
+    if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
         if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
         elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
@@ -254,18 +256,22 @@ local function combat()
 end
 
 local function resting()
+  
     if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
         return cast(SB.HeroicThrow, 'mouseover')
     end
 
-    if modifier.shift then
-        if castable(SB.HeroicLeap) then
-            return cast(SB.HeroicLeap, 'ground')
-        elseif castable(SB.Intercept) and mouseover.distance <= 25 then
+    if modifier.shift and mouseover.exists then
+        if castable(SB.Intercept) and mouseover.distance < 25 then
             return cast(SB.Intercept, 'mouseover')
         end
     end
 
+    if modifier.shift and not mouseover.exists then
+        if castable(SB.HeroicLeap) then
+            return cast(SB.HeroicLeap, 'ground')
+        end
+    end
 
 end
 
