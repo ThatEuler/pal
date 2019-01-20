@@ -16,6 +16,7 @@ local enemyCount = 0
 SB.RevengeProc = 5302
 SB.DeafeningCrash = 272824
 SB.ShieldBlockBuff = 132404
+SB.VictoryRushBuff = 32216
 --racials
 SB.GiftOftheNaaru = 59544
 SB.MendingBuff = 41635
@@ -223,7 +224,7 @@ local function combat()
     -------------------------
 
     if not isCC("target") and UnitAffectingCombat("target") then
-        if -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
+        if player.buff(SB.VictoryRushBuff).up and -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 99 then
             return cast(SB.VictoryRush, target)
         elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
             return cast(SB.HeroicThrow, target)
