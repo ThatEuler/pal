@@ -10,6 +10,8 @@ local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
 local badguy = UnitClassification("target")
 local enemyCount = 0
+
+
 --missing spells
 SB.RevengeProc = 5302
 SB.DeafeningCrash = 272824
@@ -29,7 +31,7 @@ local function combat()
     if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
-        elseif target.castable(SB.Intercept) then
+        elseif -spell(SB.Intercept) == 0 and target.enemy and target.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
     end
@@ -44,7 +46,7 @@ local function combat()
     --- Reading from settings
     -----------------------------
 
-    local autoTaunt = dark_addon.settings.fetch('protwarrior_settings_autoTaunt', true)
+
     local shoutInt = dark_addon.settings.fetch('protwarrior_settings_shoutInt', true)
     local shockwaveInt = dark_addon.settings.fetch('protwarrior_settings_shockwaveInt', true)
     local stormboltInt = dark_addon.settings.fetch('protwarrior_settings_stormboltInt', true)
@@ -185,14 +187,18 @@ local function combat()
             return cast(SB.Taunt)
         end
     ]]
-
-    if autoTaunt and -spell(SB.Taunt) == 0 then
+    local taunttarget
+    if toggle('autoTaunt', false) and -spell(SB.Taunt) == 0 then
         for i = 1, 40 do
-            if UnitExists('nameplate' .. i) and IsSpellInRange('Taunt', 'nameplate' .. i) == 1 and UnitAffectingCombat('nameplate' .. i) and not (UnitIsUnit("targettarget", "player")) then
-                return cast(SB.Taunt, 'nameplate' .. i)
+            local isTanking = UnitThreatSituation("player", "mouseover")
+            if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
+                --taunttarget = dark_addon.environment.conditions.unit('mouseover')
+                -- print("attempting to taunt " .. mouseover)
+                return cast(SB.Taunt, mouseover)
             end
         end
     end
+
 
     -------------------------
     --- Damage mitigation
@@ -250,7 +256,7 @@ local function combat()
             return cast(SB.ThunderClap)
         elseif target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
-        elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up or UnitLevel("player") < 36) and -spell(SB.Revenge) == 0 then
+        elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) and -spell(SB.Revenge) == 0 then
             return cast(SB.Revenge)
         elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then
             return cast(SB.Devastate, target)
@@ -266,20 +272,16 @@ local function resting()
         return cast(SB.HeroicThrow, 'mouseover')
     end
 
-    if modifier.shift and mouseover.exists then
-        if castable(SB.Intercept) and mouseover.distance < 25 then
-            return cast(SB.Intercept, 'mouseover')
-        end
-    end
-
-    if modifier.shift and not mouseover.exists then
+    if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
+        elseif -spell(SB.Intercept) == 0 and target.enemy and target.distance <= 25 then
+            return cast(SB.Intercept, 'mouseover')
         end
+
+
     end
-
 end
-
 local function interface()
     local settings = {
         key = 'protwarrior_settings',
@@ -293,7 +295,6 @@ local function interface()
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
             { type = 'rule' },
             { type = 'text', text = 'General Settings' },
-            { key = 'autoTaunt', type = 'checkbox', text = 'Auto Taunt', desc = '', default = true },
             { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
             { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %', default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
             -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
@@ -313,15 +314,15 @@ local function interface()
     configWindow = dark_addon.interface.builder.buildGUI(settings)
 
     dark_addon.interface.buttons.add_toggle({
-        name = 'XxX',
-        label = 'XxX',
+        name = 'autoTaunt',
+        label = 'Taunt',
         on = {
-            label = 'XxX',
+            label = 'Taunt On',
             color = dark_addon.interface.color.orange,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
-            label = 'xXx',
+            label = 'Taunt Off',
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         }
