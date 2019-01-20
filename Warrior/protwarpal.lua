@@ -17,6 +17,7 @@ SB.RevengeProc = 5302
 SB.DeafeningCrash = 272824
 SB.ShieldBlockBuff = 132404
 SB.VictoryRushBuff = 32216
+SB.BattleShout = 6673
 --racials
 SB.GiftOftheNaaru = 59544
 SB.MendingBuff = 41635
@@ -141,7 +142,8 @@ local function combat()
     --- Cool Downs
     -------------------------
     --avatar - on CD, but dont pop if mobs almost ead or trash - cant wait up to 4 seconds to get shield slam in
-    if toggle('cooldowns', false) and target.time_to_die > 8 and badguy ~= "normal" and badguy ~= "minus" then
+    -- and badguy ~= "normal" and badguy ~= "minus"
+    if toggle('cooldowns', false) and target.time_to_die > 8 then
         if castable(SB.Avatar) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
             return cast(SB.Avatar)
         end
@@ -276,12 +278,22 @@ local function resting()
     if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
-        elseif -spell(SB.Intercept) == 0 and target.enemy and target.distance <= 25 then
+        elseif -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
-
-
     end
+
+    -------------
+    ----Buff-----
+    ------------
+    local allies_without_my_buff = group.count(function(unit)
+        return unit.alive and unit.distance < 40 and unit.buff(SB.BattleShout).down
+    end)
+    if allies_without_my_buff >= 1 and castable(SB.BattleShout) then
+        return cast(SB.BattleShout)
+    end
+
+
 end
 local function interface()
     local settings = {
