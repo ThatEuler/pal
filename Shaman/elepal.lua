@@ -286,7 +286,7 @@ earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
                     return cast(SB.Earthshock, target)
                 elseif not talent(4, 1) and talent(2, 2) and (player.buff(SB.StormKeeper).up or -power.maelstrom >= 50) then
                     return cast(SB.Earthshock, target)
-                elseif not (talent(4, 2) or -spell(SB.Stormelemental) > 120) and ((target.time_to_die) - (-spell(SB.Stormelemental)) - (150 * math.floor((target.time_to_die - (-spell(SB.Stormelemental)))) % 150) >= 30 * (1 + echoCount) >= 2) then
+                elseif talent(7, 2) and not (talent(4, 2) or -spell(SB.Stormelemental) > 120) and ((target.time_to_die) - (-spell(SB.Stormelemental)) - (150 * math.floor((target.time_to_die - (-spell(SB.Stormelemental)))) % 150) >= 30 * (1 + echoCount) >= 2) then
                     return cast(SB.Earthshock, target)
                 end
 
