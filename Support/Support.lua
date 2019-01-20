@@ -29,7 +29,27 @@ dark_addon.rotation.spellbooks.purgeables = {
     [256957] = "?",
     [272659] = "?",
     [262947] = "?",
-    [262540] = "?"
+    [262540] = "?",
+    [66009] = "Hand of Protection",
+    [12472] = "Icy Veins",
+    [10060] = "Power Infusion",
+    [2825] = "Bloodlust",
+    [29166] = "Innervate",
+    [12042] = "Arcane Power",
+    [32182] = "Heroism",
+    [1044] = "Blessing of Freedom",
+    [198111] = "Temporal Shield",
+    [213610] = "Holy Ward",
+    [196098] = "Soul Harvest",
+    [11426] = "Ice Barrier",
+    [212295] = "Nether Ward",
+    [196762] = "Inner Focus",
+    [198144] = "Ice Form",
+    [235450] = "Prismatic Barrier",
+    [235313] = "Blazing Barrier",
+    [190319] = "Combustion",
+    [210294] = "Divine Favor",
+    [33763] = "Lifebloom"
 
 }
 
@@ -122,7 +142,6 @@ end
 local function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
-
 
 function getTanks()
     local tank1 = nil
