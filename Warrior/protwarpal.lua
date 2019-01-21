@@ -35,7 +35,7 @@ local function combat()
     if modifier.shift then
         if castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
-        elseif -spell(SB.Intercept) == 0 and target.enemy and target.distance <= 25 then
+        elseif -spell(SB.Intercept) == 0 and target.enemy and (target.distance <= 25 and target.distance >= 10) then
             return cast(SB.Intercept, 'mouseover')
         end
     end
