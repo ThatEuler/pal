@@ -234,7 +234,7 @@ local function combat()
             and not talent(4, 3) and player.buff(SB.LastStand).up then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and not talent(6,1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6,1) and and -power.rage <= 60) then
+        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and not talent(6, 1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6, 1) and -power.rage <= 60)) then
             return cast(SB.DemoralizingShout)
         elseif ignorepain and UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40
                 and (player.buff(SB.IgnorePain).down and player.health.percent < ignorepainpercent
@@ -264,7 +264,7 @@ local function combat()
     --- single Target Standard Rotation
     -------------------------
     if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
-        if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 and then
+        if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
         elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
             return cast(SB.Revenge)
