@@ -25,36 +25,20 @@ SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
 local function combat()
-    -------------------------
-    -------Modifiers---------
-    -------------------------
-    if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
-        return cast(SB.HeroicThrow, 'mouseover')
-    end
-
-    if modifier.shift then
-        if castable(SB.HeroicLeap) then
-            return cast(SB.HeroicLeap, 'ground')
-        elseif -spell(SB.Intercept) == 0 and target.enemy and (target.distance <= 25 and target.distance >= 10) then
-            return cast(SB.Intercept, 'mouseover')
-        end
-    end
-
-    if modifier.control and -spell(SB.Shockwave) == 0 then
-        return cast(SB.Shockwave)
-    elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
-        return cast(SB.StormBolt, 'target')
-    end
-
+     -----------------------------
+    --- Reading from settings
+    -----------------------------
     if toggle('multitarget', false) then
         enemyCount = enemies.around(8)
     elseif toggle('multitarget', true) then
         enemyCount = 1
     end
 
-    -----------------------------
-    --- Reading from settings
-    -----------------------------
+
+
+    local shift = dark_addon.settings.fetch('protwarrior_settings_shift', 'shift_leap')
+    local alt = dark_addon.settings.fetch('protwarrior_settings_alt', 'alt_throw')
+    local ctrl = dark_addon.settings.fetch('protwarrior_settings_ctrl', 'ctrl_shockwave')
 
 
     local shoutInt = dark_addon.settings.fetch('protwarrior_settings_shoutInt', true)
@@ -77,6 +61,75 @@ local function combat()
     local laststandpercent = dark_addon.settings.fetch('protwarrior_defensives_laststand.spin', 50)
     local shieldwall = dark_addon.settings.fetch('protwarrior_defensives_shieldwall.check', true)
     local shieldwallpercent = dark_addon.settings.fetch('protwarrior_defensives_shieldwall.spin', 35)
+
+
+
+
+
+    -------------------------
+    -------Modifiers---------
+    -------------------------
+    if shift == "shift_leap"  then
+        if modifier.shift and castable(SB.HeroicLeap) then
+        return cast(SB.HeroicLeap, 'ground')
+        elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+            return cast(SB.Intercept, 'mouseover')
+        end
+    end
+    if shift == "shift_throw" then
+        if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+            return cast(SB.HeroicThrow, 'mouseover')
+        end
+    end    
+    if shift == "shift_shockwave" then
+        if modifier.shift and castable(SB.Shockwave) == 0 then
+            return cast(SB.Shockwave)
+        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            return cast(SB.StormBolt, 'target')
+        end
+    end
+    if ctrl == "ctrl_leap"  then
+        if modifier.control and castable(SB.HeroicLeap) then
+        return cast(SB.HeroicLeap, 'ground')
+        elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+            return cast(SB.Intercept, 'mouseover')
+        end
+    end
+    if ctrl == "ctrl_throw" then
+        if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+            return cast(SB.HeroicThrow, 'mouseover')
+        end
+    end    
+    if ctrl == "ctrl_shockwave" then
+        if modifier.control and castable(SB.Shockwave) == 0 then
+            return cast(SB.Shockwave)
+        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            return cast(SB.StormBolt, 'target')
+        end
+    end    
+    if alt == "alt_leap"  then
+        if modifier.alt and castable(SB.HeroicLeap) then
+        return cast(SB.HeroicLeap, 'ground')
+        elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+            return cast(SB.Intercept, 'mouseover')
+        end
+    end
+    if alt == "alt_throw" then
+        if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+            return cast(SB.HeroicThrow, 'mouseover')
+        end
+    end    
+    if alt == "alt_shockwave" then
+        if modifier.alt and castable(SB.Shockwave) == 0 then
+            return cast(SB.Shockwave)
+        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            return cast(SB.StormBolt, 'target')
+        end
+    end
+
+
+
+
 
     if not target.alive or not target.enemy then
         return
@@ -309,28 +362,72 @@ local function resting()
     local bgstatus = GetBattlefieldStatus(1);
     local autojoin = dark_addon.settings.fetch('protwarrior_settings_autojoin', true)
 
+    local shift = dark_addon.settings.fetch('protwarrior_settings_shift', 'shift_leap')
+    local alt = dark_addon.settings.fetch('protwarrior_settings_alt', 'alt_throw')
+    local ctrl = dark_addon.settings.fetch('protwarrior_settings_ctrl', 'ctrl_shockwave')
 
     -------------------------
     -------Modifiers---------
     -------------------------
 
-    if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
-        return cast(SB.HeroicThrow, 'mouseover')
-    end
-
-    if modifier.shift then
-        if castable(SB.HeroicLeap) then
-            return cast(SB.HeroicLeap, 'ground')
-        elseif -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+    if shift == "shift_leap"  then
+        if modifier.shift and castable(SB.HeroicLeap) then
+        return cast(SB.HeroicLeap, 'ground')
+        elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
     end
-
-    if modifier.control and -spell(SB.Shockwave) == 0 then
-        return cast(SB.Shockwave)
-    elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
-        return cast(SB.StormBolt, 'target')
+    if shift == "shift_throw" then
+        if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+            return cast(SB.HeroicThrow, 'mouseover')
+        end
+    end    
+    if shift == "shift_shockwave" then
+        if modifier.shift and castable(SB.Shockwave) == 0 then
+            return cast(SB.Shockwave)
+        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            return cast(SB.StormBolt, 'target')
+        end
     end
+    if ctrl == "ctrl_leap"  then
+        if modifier.control and castable(SB.HeroicLeap) then
+        return cast(SB.HeroicLeap, 'ground')
+        elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+            return cast(SB.Intercept, 'mouseover')
+        end
+    end
+    if ctrl == "ctrl_throw" then
+        if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+            return cast(SB.HeroicThrow, 'mouseover')
+        end
+    end    
+    if ctrl == "ctrl_shockwave" then
+        if modifier.control and castable(SB.Shockwave) == 0 then
+            return cast(SB.Shockwave)
+        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            return cast(SB.StormBolt, 'target')
+        end
+    end    
+    if alt == "alt_leap"  then
+        if modifier.alt and castable(SB.HeroicLeap) then
+        return cast(SB.HeroicLeap, 'ground')
+        elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+            return cast(SB.Intercept, 'mouseover')
+        end
+    end
+    if alt == "alt_throw" then
+        if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+            return cast(SB.HeroicThrow, 'mouseover')
+        end
+    end    
+    if alt == "alt_shockwave" then
+        if modifier.alt and castable(SB.Shockwave) == 0 then
+            return cast(SB.Shockwave)
+        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            return cast(SB.StormBolt, 'target')
+        end
+    end
+
 
     -------------
     --Auto Join--
@@ -352,8 +449,8 @@ local function resting()
         lftime = 0
     end
 
-    -------------
-    ----Buff-----
+    ------------
+    ----Buff----
     ------------
     local allies_without_my_buff = group.count(function(unit)
         return unit.alive and unit.distance < 40 and unit.buff(SB.BattleShout).down
@@ -375,6 +472,42 @@ local function interface()
         template = {
             { type = 'header', text = 'Protection Warrior - the REAL tank!', align = 'center' },
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
+            { type = 'rule' },
+            { type = 'header', text = 'Modifiers', align = 'center' },
+            { key = 'shift', type = 'dropdown',
+            text = 'Shift Modifier',
+                desc = '',
+                default = 'shift_leap',
+                list = {
+                    { key = 'shift_leap', text = 'Leap/Intercept' },
+                    { key = 'shift_throw', text = 'Heroic Throw' },
+                    { key = 'shift_shockwave', text = 'Swave/Bolt' },
+
+                }
+            },
+            { key = 'alt', type = 'dropdown',
+                text = 'Alt Modifier',
+                desc = '',
+                default = 'alt_throw',
+                list = {
+                    { key = 'alt_leap', text = 'Leap/Intercept' },
+                    { key = 'alt_throw', text = 'Heroic Throw' },
+                    { key = 'alt_shockwave', text = 'Swave/Bolt' },
+
+                }
+            },
+            { key = 'ctrl', type = 'dropdown',
+                text = 'Ctrl Modifier',
+                desc = '',
+                default = 'ctrl_shockwave',
+                list = {
+                    { key = 'ctrl_leap', text = 'Leap/Intercept' },
+                    { key = 'ctrl_throw', text = 'Heroic Throw' },
+                    { key = 'ctrl_shockwave', text = 'Swave/Bolt' },
+
+                }
+            },
+
             { type = 'rule' },
             { type = 'header', text = 'Interrupts', align = 'center' },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
