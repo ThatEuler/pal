@@ -183,3 +183,7 @@ function doBeacons(autoBeacon, tank1, tank2, SB)
         return cast(SB.BeaconofLight, tank1)
     end
 end
+
+local function GroupType()
+    return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
+end
