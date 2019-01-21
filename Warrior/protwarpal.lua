@@ -87,6 +87,7 @@ local function combat()
 
     --regain control
     if not HasFullControl() and castable(SB.BerserkerRage) then
+        print("Berserk!")
         return cast(SB.BerserkerRage)
     end
 
@@ -192,11 +193,12 @@ local function combat()
     ]]
     local taunttarget
     if toggle('autoTaunt', false) and -spell(SB.Taunt) == 0 then
+        if IsSpellInRange('Taunt', 'target') and UnitAffectingCombat('target') and (isTanking == 0 or isTanking == nil) then
+            return cast(SB.Taunt, target)
+        end
         for i = 1, 40 do
             local isTanking = UnitThreatSituation("player", "mouseover")
             if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
-                --taunttarget = dark_addon.environment.conditions.unit('mouseover')
-                -- print("attempting to taunt " .. mouseover)
                 return cast(SB.Taunt, mouseover)
             end
         end
@@ -207,12 +209,17 @@ local function combat()
     --- Damage mitigation
     -------------------------
 
-    if -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+    if -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6
+            and ((player.buff(SB.IgnorePain).down and player.health.percent < 90)
+            or (player.buff(SB.IgnorePain).up and player.health.percent < 60))
+            and not talent(4, 3) and player.buff(SB.LastStand).up then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
         if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
             return cast(SB.DemoralizingShout)
-        elseif UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40 and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
+        elseif UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40
+                and (player.buff(SB.IgnorePain).down and player.health.percent < 85
+        or player.buff(SB.IgnorePain).up and player.health.percent < 45) then
             return cast(SB.IgnorePain)
         elseif UnitLevel("player") >= 32 and -spell(SB.LastStand) == 0 and player.health.percent < 50 then
             return cast(SB.LastStand)
@@ -281,6 +288,12 @@ local function resting()
         elseif -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
+    end
+
+    if modifier.control and -spell(SB.Shockwave) == 0 then
+        return cast(SB.Shockwave)
+    elseif talent()
+        return cast(SB.HeroicThrow, 'mouseover')
     end
 
     -------------
