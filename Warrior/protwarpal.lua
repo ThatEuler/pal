@@ -10,7 +10,7 @@ local PB = dark_addon.rotation.spellbooks.purgeables
 local race = UnitRace("player")
 local badguy = UnitClassification("target")
 local enemyCount = 0
-
+local lftime = 0 
 
 --missing spells
 SB.RevengeProc = 5302
@@ -25,7 +25,9 @@ SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
 local function combat()
-
+    -------------------------
+    -------Modifiers---------
+    -------------------------
     if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
         return cast(SB.HeroicThrow, 'mouseover')
     end
@@ -56,6 +58,23 @@ local function combat()
     local healthPoppercent = dark_addon.settings.fetch('protwarrior_settings_healthPop.spin', 35)
     local useTrinkets = dark_addon.settings.fetch('protwarrior_settings_useTrinkets', true)
     local deafeningCrash = dark_addon.settings.fetch('protwarrior_settings_deafeningCrash', false)
+
+
+    --Defensives
+    local shieldblock = dark_addon.settings.fetch('protwarrior_defensives_shieldblock.check', true)
+    local shieldblockpercent = dark_addon.settings.fetch('protwarrior_defensives_shieldblock.spin', 90)
+    local demoshout = dark_addon.settings.fetch('protwarrior_defensives_demoshout.check', true)
+    local demoshoutpercent = dark_addon.settings.fetch('protwarrior_defensives_demoshout.spin', 75)
+    local ignorepain = dark_addon.settings.fetch('protwarrior_defensives_ignorepain.check', true)
+    local ignorepainpercent = dark_addon.settings.fetch('protwarrior_defensives_ignorepain.spin', 85)
+    local laststand = dark_addon.settings.fetch('protwarrior_defensives_laststand.check', true)
+    local laststandpercent = dark_addon.settings.fetch('protwarrior_defensives_laststand.spin', 50)
+    local shieldwall = dark_addon.settings.fetch('protwarrior_defensives_shieldwall.check', true)
+    local shieldwallpercent = dark_addon.settings.fetch('protwarrior_defensives_shieldwall.spin', 35)
+
+
+
+
 
     if not target.alive or not target.enemy then
         return
@@ -128,6 +147,9 @@ local function combat()
     end
 
 
+
+
+
     --Health stone
     if healthPop == true and player.health.percent < healthPoppercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
         macro('/use Healthstone')
@@ -157,7 +179,7 @@ local function combat()
     end
 
     -------------------------
-    --- auto racial
+    -------Auto racial-------
     -------------------------
     if autoRacial == true and target.distance <= 8 and target.time_to_die > 6 then
         if race == "Blood Elf" - spell(SB.ArcaneTorrent) == 0 then
@@ -172,18 +194,18 @@ local function combat()
                 end
             end
         end
-    elseif race == "Orc" and -spell(SB.BloodFury) == 0 then
-        cast(SB.BloodFury)
-    elseif race == "Troll" and -spell(SB.Berserking) == 0 then
-        cast(SB.Berserking)
-    elseif race == "Mag'har Orc" and -spell(SB.AncestralCall) == 0 then
-        cast(SB.AncestralCall)
-    elseif race == "LightforgedDraenei" and -spell(SB.LightsJudgement) == 0 then
-        cast(SB.LightsJudgement)
+        elseif race == "Orc" and -spell(SB.BloodFury) == 0 then
+            cast(SB.BloodFury)
+        elseif race == "Troll" and -spell(SB.Berserking) == 0 then
+            cast(SB.Berserking)
+        elseif race == "Mag'har Orc" and -spell(SB.AncestralCall) == 0 then
+            cast(SB.AncestralCall)
+        elseif race == "LightforgedDraenei" and -spell(SB.LightsJudgement) == 0 then
+            cast(SB.LightsJudgement)
     end
 
     -------------------------
-    --- auto taunt
+    -------Auto Taunt--------
     -------------------------
     --[[
         if autoTaunt and -spell(SB.Taunt) == 0 and UnitAffectingCombat("target") and not (UnitIsUnit("targettarget", "player")) then
@@ -207,16 +229,16 @@ local function combat()
     --- Damage mitigation
     -------------------------
 
-    if -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6 and player.health.percent < 90 and not (talent(4, 3) and player.buff(SB.LastStand).up) then
+    if shieldblock == true and -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6 and player.health.percent < shieldblockpercent and not (talent(4, 3) and player.buff(SB.LastStand).up) then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and (enemyCount >= 3 or player.health.percent < 75 or deafeningCrash) then
+        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and demoshout == true and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash) then
             return cast(SB.DemoralizingShout)
-        elseif UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40 and player.buff(SB.IgnorePain).down and player.health.percent < 85 then
+        elseif UnitLevel("player") >= 36 and ignorepain == true and -spell(SB.IgnorePain) == 0 and -power.rage >= 40 and player.buff(SB.IgnorePain).down and player.health.percent < ignorepainpercent then
             return cast(SB.IgnorePain)
-        elseif UnitLevel("player") >= 32 and -spell(SB.LastStand) == 0 and player.health.percent < 50 then
+        elseif UnitLevel("player") >= 32 and laststand == true and -spell(SB.LastStand) == 0 and player.health.percent < laststandpercent then
             return cast(SB.LastStand)
-        elseif UnitLevel("player") >= 55 and -spell(SB.ShieldWall) == 0 and player.health.percent < 20 then
+        elseif UnitLevel("player") >= 55 and shieldwall == true and -spell(SB.ShieldWall) == 0 and player.health.percent < shieldwallpercent then
             return cast(SB.ShieldWall)
         end
     end
@@ -270,6 +292,24 @@ local function combat()
 end
 
 local function resting()
+    -----------------------------
+    --- Reading from settings
+    -----------------------------
+
+    local lfg = GetLFGProposal();
+    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+    local bgstatus = GetBattlefieldStatus(1);
+    local autojoin = dark_addon.settings.fetch('protwarrior_settings_autojoin', true)
+
+
+    -------------------------
+    -------Modifiers---------
+    -------------------------
 
     if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
         return cast(SB.HeroicThrow, 'mouseover')
@@ -282,6 +322,26 @@ local function resting()
             return cast(SB.Intercept, 'mouseover')
         end
     end
+
+    -------------
+    --Auto Join--
+    -------------
+    if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+     SetCVar ("Sound_EnableSoundWhenGameIsInBG",1)
+    elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+        SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+    end
+
+    if autojoin ==true and lfg == true or bgstatus == "confirm" then
+        PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
+        lftime = lftime + 1
+    end
+
+    if lftime >=math.random(20,35) then
+        SetCVar ("Sound_EnableSoundWhenGameIsInBG",0)
+        macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+        lftime = 0
+    end    
 
     -------------
     ----Buff-----
@@ -300,38 +360,67 @@ local function interface()
         key = 'protwarrior_settings',
         title = 'Protection Warrior - the REAL tank!',
         width = 250,
-        height = 380,
+        height = 420,
         resize = true,
         show = false,
         template = {
-            { type = 'header', text = 'Protection Warrior - the REAL tank!' },
+            { type = 'header', text = 'Protection Warrior - the REAL tank!', align= 'center' },
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
             { type = 'rule' },
-            { type = 'text', text = 'General Settings' },
-            { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
-            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %', default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
-            -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
+            { type = 'header', text = 'Interrupts', align = 'center' },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
-            { type = 'rule' },
-            { type = 'text', text = 'Interrupts' },
             { key = 'shoutInt', type = 'checkbox', text = 'Use shout as an interrupt', desc = '', default = true },
             { key = 'shockwaveInt', type = 'checkbox', text = 'Use shockwave as an interrupt', desc = '', default = true },
             { key = 'stormboltInt', type = 'checkbox', text = 'Use Storm Bolt as an interrupt', desc = '', default = true },
+            { type = 'rule' },
+             { type = 'header', text = 'General Settings', align = 'center' },
+            { key = 'autoTaunt', type = 'checkbox', text = 'Auto Taunt', desc = '', default = true },
+            { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
+            { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %', default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial', default = true },
+            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
             { type = 'rule' },
             { type = 'text', text = 'Traits that impact rotation - enable if you got them' },
             { key = 'deafeningCrash', type = 'checkbox', text = 'Deafening Crash', desc = '', default = true },
         }
     }
+    configWindowtwo = dark_addon.interface.builder.buildGUI(settings)
 
-    configWindow = dark_addon.interface.builder.buildGUI(settings)
+local utility = {
+        key = 'protwarrior_defensives',
+        title = 'Protection Warrior - the REAL tank!',
+        width = 250,
+        height = 390,
+        resize = true,
+        show = false,
+        template = {
+            { type = 'header', text = 'Protection Warrior - the REAL tank!', align= 'center' },
+            { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine.' },
+            { type = 'rule' },
+            { type = 'header', text = 'Defensives', align= 'center' },
+            { key = 'shieldblock', type = 'checkspin', text = 'Shieldblock', desc = 'Health % to Cast At', default_check = true, default_spin = 90, min = 5, max = 100, step = 5 },
+            { key = 'demoshout', type = 'checkspin', text = 'Demoralizing Shout', desc = 'Health % to Cast At', default_check = true, default_spin = 75, min = 5, max = 100, step = 5 },
+            { key = 'ignorepain', type = 'checkspin', text = 'Ignore Pain', desc = 'Health % to Cast At', default_check = true, default_spin = 85, min = 5, max = 100, step = 5 },
+            { key = 'laststand', type = 'checkspin', text = 'Last Stand', desc = 'Health % to Cast At', default_check = true, default_spin = 50, min = 5, max = 100, step = 5 },
+            { key = 'shieldwall', type = 'checkspin', text = 'Shield wall', desc = 'Health % to Cast At', default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
+
+
+        }
+    }
+
+
+
+
+  configWindow = dark_addon.interface.builder.buildGUI(utility)
+
+
 
     dark_addon.interface.buttons.add_toggle({
         name = 'autoTaunt',
         label = 'Taunt',
         on = {
             label = 'Taunt On',
-            color = dark_addon.interface.color.orange,
+            color = dark_addon.interface.color.brown,
             color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
@@ -340,17 +429,39 @@ local function interface()
             color2 = dark_addon.interface.color.dark_grey
         }
     })
-    dark_addon.interface.buttons.add_toggle({
+      dark_addon.interface.buttons.add_toggle({
         name = 'settings',
         label = 'Rotation Settings',
         font = 'dark_addon_icon',
         on = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.cyan,
-            color2 = dark_addon.interface.color.dark_cyan
+            color = dark_addon.interface.color.brown,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
         },
         off = {
             label = dark_addon.interface.icon('cog'),
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        },
+        callback = function(self)
+            if configWindowtwo.parent:IsShown() then
+                configWindowtwo.parent:Hide()
+            else
+                configWindowtwo.parent:Show()
+            end
+        end
+    })
+    dark_addon.interface.buttons.add_toggle({
+        name = 'settingstwo',
+        label = 'Defensive Settings',
+        font = 'dark_addon_icon',
+        on = {
+            label = dark_addon.interface.icon('shield'),
+            color = dark_addon.interface.color.brown,
+            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+        },
+        off = {
+            label = dark_addon.interface.icon('shield'),
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         },
@@ -362,6 +473,7 @@ local function interface()
             end
         end
     })
+    
 end
 
 dark_addon.rotation.register({
