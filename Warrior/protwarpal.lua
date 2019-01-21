@@ -232,8 +232,8 @@ local function combat()
             or (player.buff(SB.IgnorePain).up and player.health.percent < 60))
             and not talent(4, 3) and player.buff(SB.LastStand).up then
         return cast(SB.ShieldBlock)
-    elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and not talent(6, 1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6, 1) and -power.rage <= 60)) then
+    elseif  (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
+        if demoshout == true and UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and not talent(6, 1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6, 1) and -power.rage <= 60)) then
             return cast(SB.DemoralizingShout)
         elseif ignorepain and UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40
                 and (player.buff(SB.IgnorePain).down and player.health.percent < ignorepainpercent
@@ -424,8 +424,8 @@ local function interface()
         label = 'Taunt',
         on = {
             label = 'Taunt On',
-            color = dark_addon.interface.color.brown,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            color = dark_addon.interface.color.warrior_brown,
+            color2 = dark_addon.interface.color.warrior_brown
         },
         off = {
             label = 'Taunt Off',
@@ -439,13 +439,13 @@ local function interface()
         font = 'dark_addon_icon',
         on = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.brown,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            color = dark_addon.interface.color.warrior_brown,
+            color2 = dark_addon.interface.color.warrior_brown
         },
         off = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            color = dark_addon.interface.color.warrior_brown,
+            color2 = dark_addon.interface.color.warrior_brown
         },
         callback = function(self)
             if configWindowtwo.parent:IsShown() then
@@ -461,13 +461,13 @@ local function interface()
         font = 'dark_addon_icon',
         on = {
             label = dark_addon.interface.icon('shield'),
-            color = dark_addon.interface.color.brown,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            color = dark_addon.interface.color.warrior_brown,
+            color2 = dark_addon.interface.color.warrior_brown
         },
         off = {
             label = dark_addon.interface.icon('shield'),
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+            color = dark_addon.interface.color.warrior_brown,
+            color2 = dark_addon.interface.color.warrior_brown
         },
         callback = function(self)
             if configWindow.parent:IsShown() then
