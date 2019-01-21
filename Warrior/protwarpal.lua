@@ -444,8 +444,8 @@ local function interface()
         },
         off = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.warrior_brown,
-            color2 = dark_addon.interface.color.warrior_brown
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
         },
         callback = function(self)
             if configWindowtwo.parent:IsShown() then
@@ -466,8 +466,8 @@ local function interface()
         },
         off = {
             label = dark_addon.interface.icon('shield'),
-            color = dark_addon.interface.color.warrior_brown,
-            color2 = dark_addon.interface.color.warrior_brown
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
         },
         callback = function(self)
             if configWindow.parent:IsShown() then
