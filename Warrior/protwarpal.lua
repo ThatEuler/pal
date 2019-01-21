@@ -166,14 +166,14 @@ local function combat()
     --avatar - on CD, but dont pop if mobs almost ead or trash - cant wait up to 4 seconds to get shield slam in
     -- and badguy ~= "normal" and badguy ~= "minus"
     if toggle('cooldowns', false) and target.time_to_die > 8 then
-        if castable(SB.Avatar) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
+        if castable(SB.Avatar) and -power.rage <= 80 and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
             return cast(SB.Avatar)
         end
         --Intercept/charge  (always keep one charge for movement) ..might need to rethink this ..not sure ...might get us in trouble ;)
         if IsInRaid() == false and target.castable(SB.Intercept) and player.spell(SB.Intercept).count > 1 then
             return cast(SB.Intercept, target)
         end
-        if talent(6, 1) and castable(SB.DemoralizingShout) and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
+        if talent(6, 1) and castable(SB.DemoralizingShout) and -power.rage <= 60 and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
             return cast(SB.DemoralizingShout)
         end
     end
@@ -234,7 +234,7 @@ local function combat()
             and not talent(4, 3) and player.buff(SB.LastStand).up then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and demoshout == true and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash) then
+        if UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and not talent(6,1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6,1) and and -power.rage <= 60) then
             return cast(SB.DemoralizingShout)
         elseif ignorepain and UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40
                 and (player.buff(SB.IgnorePain).down and player.health.percent < ignorepainpercent
@@ -264,7 +264,7 @@ local function combat()
     --- single Target Standard Rotation
     -------------------------
     if enemyCount == 1 and target.enemy and target.distance <= 8 and not isCC("target") and UnitAffectingCombat("target") then
-        if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
+        if target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 and then
             return cast(SB.ShieldSlam, target)
         elseif castable(SB.Revenge) and -spell(SB.Revenge) == 0 and (player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) then
             return cast(SB.Revenge)
