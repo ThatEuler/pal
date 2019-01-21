@@ -215,11 +215,10 @@ local function combat()
         if IsSpellInRange('Taunt', 'target') and UnitAffectingCombat('target') and (isTanking == 0 or isTanking == nil) then
             return cast(SB.Taunt, target)
         end
-        for i = 1, 40 do
-            local isTanking = UnitThreatSituation("player", "mouseover")
-            if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
-                return cast(SB.Taunt, mouseover)
-            end
+    else
+        local isTanking = UnitThreatSituation("player", "mouseover")
+        if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
+            return cast(SB.Taunt, mouseover)
         end
     end
 
