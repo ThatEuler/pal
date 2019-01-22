@@ -147,21 +147,21 @@ local function combat()
     end
 
     -- Ok Lets start healing ourselves because we are taking a beating..
-    if -player.health < 60 and -spell(SB.LightoftheProtector) == 0 then
+    if -player.health < 60 and castable(SB.LightoftheProtector) and -spell(SB.LightoftheProtector) == 0 then
         return cast(SB.LightoftheProtector, 'player')
     end
 
-    if -player.health < 55 and -spell(SB.ArdentDefender) == 0 then
+    if -player.health < 55 and castable(SB.ArdentDefender) and -spell(SB.ArdentDefender) == 0 then
         return cast(SB.ArdentDefender, 'player')
     end
 
-    if -player.health < 45 and -spell(SB.ArdentDefender) > 0 and -spell(SB.GuardianofAncientKings) == 0 then
+    if -player.health < 45 and castable(SB.GuardianofAncientKings) and -spell(SB.ArdentDefender) > 0 and -spell(SB.GuardianofAncientKings) == 0 then
         return cast(SB.GuardianofAncientKings, 'player')
     end
 
     -- self-cleanse
     local dispellable_unit = player.removable('poison', 'disease')
-    if dispellable_unit then
+    if dispellable_unit and castable(SB.CleanseToxins) then
         return cast(SB.CleanseToxins, dispellable_unit)
     end
 
