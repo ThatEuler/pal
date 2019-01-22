@@ -139,7 +139,7 @@ function isCC(target)
     return false
 end
 
-local function GroupType()
+function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
 
