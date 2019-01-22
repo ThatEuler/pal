@@ -24,8 +24,10 @@ SB.MendingBuff = 41635
 SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
+local x = 0
+
 local function combat()
-     -----------------------------
+    -----------------------------
     --- Reading from settings
     -----------------------------
     if toggle('multitarget', false) then
@@ -34,12 +36,9 @@ local function combat()
         enemyCount = 1
     end
 
-
-
     local shift = dark_addon.settings.fetch('protwarrior_settings_shift', 'shift_leap')
     local alt = dark_addon.settings.fetch('protwarrior_settings_alt', 'alt_throw')
     local ctrl = dark_addon.settings.fetch('protwarrior_settings_ctrl', 'ctrl_shockwave')
-
 
     local shoutInt = dark_addon.settings.fetch('protwarrior_settings_shoutInt', true)
     local shockwaveInt = dark_addon.settings.fetch('protwarrior_settings_shockwaveInt', true)
@@ -62,16 +61,12 @@ local function combat()
     local shieldwall = dark_addon.settings.fetch('protwarrior_defensives_shieldwall.check', true)
     local shieldwallpercent = dark_addon.settings.fetch('protwarrior_defensives_shieldwall.spin', 35)
 
-
-
-
-
     -------------------------
     -------Modifiers---------
     -------------------------
-    if shift == "shift_leap"  then
+    if shift == "shift_leap" then
         if modifier.shift and castable(SB.HeroicLeap) then
-        return cast(SB.HeroicLeap, 'ground')
+            return cast(SB.HeroicLeap, 'ground')
         elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
@@ -80,7 +75,7 @@ local function combat()
         if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end    
+    end
     if shift == "shift_shockwave" then
         if modifier.shift and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
@@ -88,9 +83,9 @@ local function combat()
             return cast(SB.StormBolt, 'target')
         end
     end
-    if ctrl == "ctrl_leap"  then
+    if ctrl == "ctrl_leap" then
         if modifier.control and castable(SB.HeroicLeap) then
-        return cast(SB.HeroicLeap, 'ground')
+            return cast(SB.HeroicLeap, 'ground')
         elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
@@ -99,17 +94,17 @@ local function combat()
         if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end    
+    end
     if ctrl == "ctrl_shockwave" then
         if modifier.control and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
-    end    
-    if alt == "alt_leap"  then
+    end
+    if alt == "alt_leap" then
         if modifier.alt and castable(SB.HeroicLeap) then
-        return cast(SB.HeroicLeap, 'ground')
+            return cast(SB.HeroicLeap, 'ground')
         elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
@@ -118,7 +113,7 @@ local function combat()
         if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end    
+    end
     if alt == "alt_shockwave" then
         if modifier.alt and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
@@ -126,10 +121,6 @@ local function combat()
             return cast(SB.StormBolt, 'target')
         end
     end
-
-
-
-
 
     if not target.alive or not target.enemy then
         return
@@ -194,10 +185,10 @@ local function combat()
             macro('/use [@player] 14 ')
         end
         --touch of the void
-        if Trinket13 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and GetItemCooldown(128318) == 0 then
+        if Trinket13 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and target.distance <= 8 and GetItemCooldown(128318) == 0 then
             macro('/use 13')
         end
-        if Trinket14 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and GetItemCooldown(128318) == 0 then
+        if Trinket14 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and target.distance <= 8 and GetItemCooldown(128318) == 0 then
             macro('/use 14')
         end
     end
@@ -219,7 +210,7 @@ local function combat()
     --avatar - on CD, but dont pop if mobs almost ead or trash - cant wait up to 4 seconds to get shield slam in
     -- and badguy ~= "normal" and badguy ~= "minus"
     if toggle('cooldowns', false) and target.time_to_die > 8 then
-        if castable(SB.Avatar) and -power.rage <= 80 and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
+        if castable(SB.Avatar) and target.distance <= 8 and -power.rage <= 80 and (-spell(SB.ShieldSlam) == 0 or -spell(SB.ShieldSlam) > 4) then
             return cast(SB.Avatar)
         end
         --Intercept/charge  (always keep one charge for movement) ..might need to rethink this ..not sure ...might get us in trouble ;)
@@ -261,19 +252,37 @@ local function combat()
     -------Auto Taunt--------
     -------------------------
 
-
+    local taunt_unit
     local isTanking
+    local members = GetNumGroupMembers()
+    local group_type = GroupType()
+
     if toggle('autoTaunt', false) and -spell(SB.Taunt) == 0 then
         isTanking = UnitThreatSituation("player", "target")
-        if IsSpellInRange('Taunt', 'target') and UnitAffectingCombat('target') and (isTanking == 0 or isTanking == nil) then
+        if target.enemy and IsSpellInRange('Taunt', 'target') and UnitAffectingCombat('target') and (isTanking == 0 or isTanking == nil) then
             return cast(SB.Taunt, target)
         end
-    else
-        local isTanking = UnitThreatSituation("player", "mouseover")
-        if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
+
+        isTanking = UnitThreatSituation("player", "mouseover")
+        if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and mouseover.enemy and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
             return cast(SB.Taunt, mouseover)
         end
+
+        for i = 1, (members - 1) do
+            taunt_unit = group_type .. i .. "target"
+            print("Taunt Unit: " .. taunt_unit)
+            isTanking = UnitThreatSituation("player", "taunt_unit")
+            if UnitExists('taunt_unit') and IsSpellInRange('Taunt', 'taunt_unit') and UnitAffectingCombat('taunt_unit') and (isTanking == 0 or isTanking == nil) then
+                --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
+                print("attempting to taunt " .. taunt_unit)
+                return cast(SB.Taunt, taunt_unit)
+            end
+        end
     end
+
+
+
+
 
 
     -------------------------
@@ -283,9 +292,9 @@ local function combat()
     if shieldblock == true and -spell(SB.ShieldBlock) == 0 and -power.rage >= 30 and target.time_to_die > 6
             and ((player.buff(SB.IgnorePain).down and player.health.percent < shieldblockpercent)
             or (player.buff(SB.IgnorePain).up and player.health.percent < 60))
-            and not talent(4, 3) and player.buff(SB.LastStand).up then
+            and not (talent(4, 3) and player.buff(SB.LastStand).up) then
         return cast(SB.ShieldBlock)
-    elseif  (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
+    elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
         if demoshout == true and UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and not talent(6, 1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6, 1) and -power.rage <= 60)) then
             return cast(SB.DemoralizingShout)
         elseif ignorepain and UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40
@@ -348,6 +357,10 @@ local function combat()
 end
 
 local function resting()
+
+
+    x = x + 1
+
     -----------------------------
     --- Reading from settings
     -----------------------------
@@ -370,9 +383,9 @@ local function resting()
     -------Modifiers---------
     -------------------------
 
-    if shift == "shift_leap"  then
+    if shift == "shift_leap" then
         if modifier.shift and castable(SB.HeroicLeap) then
-        return cast(SB.HeroicLeap, 'ground')
+            return cast(SB.HeroicLeap, 'ground')
         elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
@@ -381,7 +394,7 @@ local function resting()
         if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end    
+    end
     if shift == "shift_shockwave" then
         if modifier.shift and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
@@ -389,9 +402,9 @@ local function resting()
             return cast(SB.StormBolt, 'target')
         end
     end
-    if ctrl == "ctrl_leap"  then
+    if ctrl == "ctrl_leap" then
         if modifier.control and castable(SB.HeroicLeap) then
-        return cast(SB.HeroicLeap, 'ground')
+            return cast(SB.HeroicLeap, 'ground')
         elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
@@ -400,17 +413,17 @@ local function resting()
         if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end    
+    end
     if ctrl == "ctrl_shockwave" then
         if modifier.control and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
-    end    
-    if alt == "alt_leap"  then
+    end
+    if alt == "alt_leap" then
         if modifier.alt and castable(SB.HeroicLeap) then
-        return cast(SB.HeroicLeap, 'ground')
+            return cast(SB.HeroicLeap, 'ground')
         elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
@@ -419,7 +432,7 @@ local function resting()
         if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end    
+    end
     if alt == "alt_shockwave" then
         if modifier.alt and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
@@ -459,7 +472,17 @@ local function resting()
         return cast(SB.BattleShout)
     end
 
+    if toggle('grind', false) then
+        if x >= math.random(10, 20) then
+            x = 0
+            print("Trying to pull ....")
+            macro('/target skel')
+            if target.enemy and target.castable(SB.HeroicThrow) then
+                return cast(SB.HeroicThrow, target)
+            end
 
+        end
+    end
 end
 local function interface()
     local settings = {
@@ -475,37 +498,37 @@ local function interface()
             { type = 'rule' },
             { type = 'header', text = 'Modifiers', align = 'center' },
             { key = 'shift', type = 'dropdown',
-            text = 'Shift Modifier',
-                desc = '',
-                default = 'shift_leap',
-                list = {
-                    { key = 'shift_leap', text = 'Leap/Intercept' },
-                    { key = 'shift_throw', text = 'Heroic Throw' },
-                    { key = 'shift_shockwave', text = 'Swave/Bolt' },
+              text = 'Shift Modifier',
+              desc = '',
+              default = 'shift_leap',
+              list = {
+                  { key = 'shift_leap', text = 'Leap/Intercept' },
+                  { key = 'shift_throw', text = 'Heroic Throw' },
+                  { key = 'shift_shockwave', text = 'Swave/Bolt' },
 
-                }
+              }
             },
             { key = 'alt', type = 'dropdown',
-                text = 'Alt Modifier',
-                desc = '',
-                default = 'alt_throw',
-                list = {
-                    { key = 'alt_leap', text = 'Leap/Intercept' },
-                    { key = 'alt_throw', text = 'Heroic Throw' },
-                    { key = 'alt_shockwave', text = 'Swave/Bolt' },
+              text = 'Alt Modifier',
+              desc = '',
+              default = 'alt_throw',
+              list = {
+                  { key = 'alt_leap', text = 'Leap/Intercept' },
+                  { key = 'alt_throw', text = 'Heroic Throw' },
+                  { key = 'alt_shockwave', text = 'Swave/Bolt' },
 
-                }
+              }
             },
             { key = 'ctrl', type = 'dropdown',
-                text = 'Ctrl Modifier',
-                desc = '',
-                default = 'ctrl_shockwave',
-                list = {
-                    { key = 'ctrl_leap', text = 'Leap/Intercept' },
-                    { key = 'ctrl_throw', text = 'Heroic Throw' },
-                    { key = 'ctrl_shockwave', text = 'Swave/Bolt' },
+              text = 'Ctrl Modifier',
+              desc = '',
+              default = 'ctrl_shockwave',
+              list = {
+                  { key = 'ctrl_leap', text = 'Leap/Intercept' },
+                  { key = 'ctrl_throw', text = 'Heroic Throw' },
+                  { key = 'ctrl_shockwave', text = 'Swave/Bolt' },
 
-                }
+              }
             },
 
             { type = 'rule' },
@@ -562,6 +585,20 @@ local function interface()
         },
         off = {
             label = 'Taunt Off',
+            color = dark_addon.interface.color.grey,
+            color2 = dark_addon.interface.color.dark_grey
+        }
+    })
+    dark_addon.interface.buttons.add_toggle({
+        name = 'grind',
+        label = 'grind',
+        on = {
+            label = 'Grind on ',
+            color = dark_addon.interface.color.warrior_brown,
+            color2 = dark_addon.interface.color.warrior_brown
+        },
+        off = {
+            label = 'Grind off',
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         }
