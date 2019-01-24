@@ -30,19 +30,9 @@ local Loot = 0
 local framebox = CreateFrame("FRAME");
 local function combat()
 
-    x = x + 1
+    --  x = x + 1
 
-    local frame = framebox
-    frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
-    frame:SetScript("OnEvent", function(self, event)
-        local _, type, _, _, _, _, _, _, _, _, _ = CombatLogGetCurrentEventInfo()
-        --determining if there are mobs to loot
-        if (type == "PARTY_KILL") then
-            Loot = Loot + 1
-            --print("Loot Counter: " .. Loot)
-            x = 0
-        end
-    end);
+
 
     -----------------------------
     --- Reading from settings
@@ -64,6 +54,8 @@ local function combat()
     local healthPoppercent = dark_addon.settings.fetch('protwarrior_settings_healthPop.spin', 35)
     local useTrinkets = dark_addon.settings.fetch('protwarrior_settings_useTrinkets', true)
     local deafeningCrash = dark_addon.settings.fetch('protwarrior_settings_deafeningCrash', false)
+    local autoLoot = dark_addon.settings.fetch('protwarrior_settings_autoLoot', true)
+
 
 
     --Defensives
@@ -169,6 +161,27 @@ local function combat()
         return cast(SB.BerserkerRage)
     end
 
+    if autoLoot == true then
+        local frame = framebox
+        frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
+        frame:SetScript("OnEvent", function(self, event)
+            local _, type, _, _, _, _, _, _, _, _, _ = CombatLogGetCurrentEventInfo()
+            --determining if there are mobs to loot
+            if (type == "PARTY_KILL") then
+                Loot = Loot + 1
+                --print("Loot Counter: " .. Loot)
+    --            x = 0
+            end
+        end);
+
+        -------------------------
+        --- Auto loot - requires loot-a-rang
+        -------------------------
+        if autoLoot == true and not player.moving and Loot >= 3 and GetItemCooldown(60854) == 0 then
+            Loot = 0
+            return macro('/cast Loot-a-rang')
+        end
+    end
     -------------------------
     --- Trinkets /Healthstones
     -------------------------
@@ -364,29 +377,17 @@ local function combat()
             return cast(SB.Devastate, target)
         end
     end
-    -------------------------
-    --- Auto loot - requires loot-a-rang
-    -------------------------
-    if not player.moving and Loot >= 1 and GetItemCooldown(60854) == 0 then
-        Loot = 0
-        return macro('/cast Loot-a-rang')
-    end
 
 end
 
 local function resting()
 
-    local group_type = GroupType()
+    x = x + 1
 
+    local group_type = GroupType()
     if player.alive then
 
-        -------------------------
-        --- Auto loot - requires loot-a-rang
-        -------------------------
-        if not player.moving and Loot >= 1 and GetItemCooldown(60854) == 0 then
-            Loot = 0
-            return macro('/cast Loot-a-rang')
-        end
+
         -------------------
         --- Reading from settings
         -----------------------------
@@ -400,10 +401,19 @@ local function resting()
         local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
         local bgstatus = GetBattlefieldStatus(1);
         local autojoin = dark_addon.settings.fetch('protwarrior_settings_autojoin', true)
+        local autoLoot = dark_addon.settings.fetch('protwarrior_settings_autoLoot', true)
 
         local shift = dark_addon.settings.fetch('protwarrior_settings_shift', 'shift_leap')
         local alt = dark_addon.settings.fetch('protwarrior_settings_alt', 'alt_throw')
         local ctrl = dark_addon.settings.fetch('protwarrior_settings_ctrl', 'ctrl_shockwave')
+
+        -------------------------
+        --- Auto loot - requires loot-a-rang
+        -------------------------
+        if autoLoot == true and not player.moving and Loot >= 1 and GetItemCooldown(60854) == 0 then
+            Loot = 0
+            return macro('/cast Loot-a-rang')
+        end
 
         -------------------------
         -------Modifiers---------
@@ -589,14 +599,14 @@ local function interface()
 
             { type = 'rule' },
             { type = 'header', text = 'Interrupts', align = 'center' },
-            { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
+            --        { key = 'intpercent', type = 'spinner', text = 'Interrupt %', desc = '% cast time to interrupt at', default = 50, min = 5, max = 100, step = 5 },
             { key = 'shoutInt', type = 'checkbox', text = 'Use shout as an interrupt', desc = '', default = true },
             { key = 'shockwaveInt', type = 'checkbox', text = 'Use shockwave as an interrupt', desc = '', default = true },
             { key = 'stormboltInt', type = 'checkbox', text = 'Use Storm Bolt as an interrupt', desc = '', default = true },
             { type = 'rule' },
             { type = 'header', text = 'General Settings', align = 'center' },
-            { key = 'autoTaunt', type = 'checkbox', text = 'Auto Taunt', desc = '', default = true },
             { key = 'useTrinkets', type = 'checkbox', text = 'Auto Trinket', desc = '', default = true },
+            { key = 'autoLoot', type = 'checkbox', text = 'Auto Loot (requires Loot-a-rang)', desc = '', default = true },
             { key = 'healthPop', type = 'checkspin', text = 'HealthsStone', desc = 'Auto use Healthstone/Healpot at health %', default_check = true, default_spin = 35, min = 5, max = 100, step = 5 },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial', default = true },
             { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
