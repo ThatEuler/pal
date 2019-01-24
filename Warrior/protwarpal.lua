@@ -34,21 +34,12 @@ local function combat()
     frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
     frame:SetScript("OnEvent", function(self, event)
 
-        local timestamp, type, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
-
+        local _, type, _, _, _, _, _, _, _, _, _ = CombatLogGetCurrentEventInfo()
         --determining if there are mobs to loot
         if (type == "PARTY_KILL") then
             Loot = Loot + 1
         end
-    --[[    if (type == "SPELL_DAMAGE") then
-            local spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = select(12, CombatLogGetCurrentEventInfo())
---print(spellName)
-            if (spellName == "Thunder Clap") then
-                -- "== 1" for clarity only.  Not needed.
-                print("Clap! - WOHOOO!")
-            end
-        end
-]]
+
     end);
 
     -----------------------------
@@ -287,17 +278,19 @@ local function combat()
         if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and mouseover.enemy and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
             return cast(SB.Taunt, mouseover)
         end
+        --[[
+                for i = 1, (members - 1) do
+                    taunt_unit = group_type .. i .. "target"
+                    print("Taunt Unit: " .. taunt_unit)
+                    isTanking = UnitThreatSituation("player", "taunt_unit")
+                    if UnitExists('taunt_unit') and IsSpellInRange('Taunt', 'taunt_unit') and UnitAffectingCombat('taunt_unit') and (isTanking == 0 or isTanking == nil) then
+                        --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
+                        print("attempting to taunt " .. taunt_unit)
+                        return cast(SB.Taunt, taunt_unit)
+                    end
 
-        for i = 1, (members - 1) do
-            taunt_unit = group_type .. i .. "target"
-            print("Taunt Unit: " .. taunt_unit)
-            isTanking = UnitThreatSituation("player", "taunt_unit")
-            if UnitExists('taunt_unit') and IsSpellInRange('Taunt', 'taunt_unit') and UnitAffectingCombat('taunt_unit') and (isTanking == 0 or isTanking == nil) then
-                --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
-                print("attempting to taunt " .. taunt_unit)
-                return cast(SB.Taunt, taunt_unit)
-            end
-        end
+                end
+           ]]
     end
 
 
@@ -369,7 +362,14 @@ local function combat()
             return cast(SB.Devastate, target)
         end
     end
-
+    -------------------------
+    --- Auto loot - requires loot-a-rang
+    -------------------------
+    if Loot >= 1 and GetItemCooldown(60854) == 0 then
+        Loot = 0
+        return macro('/cast Loot-a-rang')
+    end
+    --------
 
 end
 
@@ -377,136 +377,139 @@ local function resting()
 
     local group_type = GroupType()
     x = x + 1
-    -------------------------
-    --- Auto loot - requires loot-a-rang
-    -------------------------
-    if Loot >=1 and GetItemCooldown(60854) == 0 then
-        Loot = 0
-        return macro('/cast Loot-a-rang')
-    end
-    -----------------------------
-    --- Reading from settings
-    -----------------------------
 
-    local lfg = GetLFGProposal();
-    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
-    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
-    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
-    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
-    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
-    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
-    local bgstatus = GetBattlefieldStatus(1);
-    local autojoin = dark_addon.settings.fetch('protwarrior_settings_autojoin', true)
+    if player.alive then
 
-    local shift = dark_addon.settings.fetch('protwarrior_settings_shift', 'shift_leap')
-    local alt = dark_addon.settings.fetch('protwarrior_settings_alt', 'alt_throw')
-    local ctrl = dark_addon.settings.fetch('protwarrior_settings_ctrl', 'ctrl_shockwave')
+        -------------------------
+        --- Auto loot - requires loot-a-rang
+        -------------------------
+        if Loot >= 1 and GetItemCooldown(60854) == 0 then
+            Loot = 0
+            return macro('/cast Loot-a-rang')
+        end
+        -----------------------------
+        --- Reading from settings
+        -----------------------------
 
-    -------------------------
-    -------Modifiers---------
-    -------------------------
+        local lfg = GetLFGProposal();
+        local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+        local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+        local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+        local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+        local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+        local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+        local bgstatus = GetBattlefieldStatus(1);
+        local autojoin = dark_addon.settings.fetch('protwarrior_settings_autojoin', true)
 
-    if shift == "shift_leap" then
-        if modifier.shift and castable(SB.HeroicLeap) then
-            return cast(SB.HeroicLeap, 'ground')
-        elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
-            return cast(SB.Intercept, 'mouseover')
-        end
-    end
-    if shift == "shift_throw" then
-        if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
-            return cast(SB.HeroicThrow, 'mouseover')
-        end
-    end
-    if shift == "shift_shockwave" then
-        if modifier.shift and castable(SB.Shockwave) == 0 then
-            return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
-            return cast(SB.StormBolt, 'target')
-        end
-    end
-    if ctrl == "ctrl_leap" then
-        if modifier.control and castable(SB.HeroicLeap) then
-            return cast(SB.HeroicLeap, 'ground')
-        elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
-            return cast(SB.Intercept, 'mouseover')
-        end
-    end
-    if ctrl == "ctrl_throw" then
-        if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
-            return cast(SB.HeroicThrow, 'mouseover')
-        end
-    end
-    if ctrl == "ctrl_shockwave" then
-        if modifier.control and castable(SB.Shockwave) == 0 then
-            return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
-            return cast(SB.StormBolt, 'target')
-        end
-    end
-    if alt == "alt_leap" then
-        if modifier.alt and castable(SB.HeroicLeap) then
-            return cast(SB.HeroicLeap, 'ground')
-        elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
-            return cast(SB.Intercept, 'mouseover')
-        end
-    end
-    if alt == "alt_throw" then
-        if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
-            return cast(SB.HeroicThrow, 'mouseover')
-        end
-    end
-    if alt == "alt_shockwave" then
-        if modifier.alt and castable(SB.Shockwave) == 0 then
-            return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
-            return cast(SB.StormBolt, 'target')
-        end
-    end
+        local shift = dark_addon.settings.fetch('protwarrior_settings_shift', 'shift_leap')
+        local alt = dark_addon.settings.fetch('protwarrior_settings_alt', 'alt_throw')
+        local ctrl = dark_addon.settings.fetch('protwarrior_settings_ctrl', 'ctrl_shockwave')
 
+        -------------------------
+        -------Modifiers---------
+        -------------------------
 
-    -------------
-    --Auto Join--
-    -------------
-    if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
-        SetCVar("Sound_EnableSoundWhenGameIsInBG", 1)
-    elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
-        SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
-    end
-
-    if autojoin == true and lfg == true or bgstatus == "confirm" then
-        PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
-        lftime = lftime + 1
-    end
-
-    if lftime >= math.random(20, 35) then
-        SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
-        macro('/click LFGDungeonReadyDialogEnterDungeonButton')
-        lftime = 0
-    end
-
-    ------------
-    ----Buff----
-    ------------
-    local allies_without_my_buff = group.count(function(unit)
-        return unit.alive and unit.distance < 40 and unit.buff(SB.BattleShout).down
-    end)
-    if allies_without_my_buff >= 1 and castable(SB.BattleShout) then
-        return cast(SB.BattleShout)
-    end
---[[
-    if grind == 1 and group_type == 'solo' then
-        if x >= math.random(20, 30) then
-            x = 0
-            print("Trying to pull ....")
-            macro('/target skel')
-            if target.enemy and target.castable(SB.HeroicThrow) and target.distance > 8 and target.distance <= 30 then
-                return cast(SB.HeroicThrow, target)
-            elseif target.enemy and target.distance > 30 then
-                print("too far ....")
-                macro('/cleartarget')
+        if shift == "shift_leap" then
+            if modifier.shift and castable(SB.HeroicLeap) then
+                return cast(SB.HeroicLeap, 'ground')
+            elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+                return cast(SB.Intercept, 'mouseover')
             end
-]]--
+        end
+        if shift == "shift_throw" then
+            if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+                return cast(SB.HeroicThrow, 'mouseover')
+            end
+        end
+        if shift == "shift_shockwave" then
+            if modifier.shift and castable(SB.Shockwave) == 0 then
+                return cast(SB.Shockwave)
+            elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+                return cast(SB.StormBolt, 'target')
+            end
+        end
+        if ctrl == "ctrl_leap" then
+            if modifier.control and castable(SB.HeroicLeap) then
+                return cast(SB.HeroicLeap, 'ground')
+            elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+                return cast(SB.Intercept, 'mouseover')
+            end
+        end
+        if ctrl == "ctrl_throw" then
+            if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+                return cast(SB.HeroicThrow, 'mouseover')
+            end
+        end
+        if ctrl == "ctrl_shockwave" then
+            if modifier.control and castable(SB.Shockwave) == 0 then
+                return cast(SB.Shockwave)
+            elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+                return cast(SB.StormBolt, 'target')
+            end
+        end
+        if alt == "alt_leap" then
+            if modifier.alt and castable(SB.HeroicLeap) then
+                return cast(SB.HeroicLeap, 'ground')
+            elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
+                return cast(SB.Intercept, 'mouseover')
+            end
+        end
+        if alt == "alt_throw" then
+            if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
+                return cast(SB.HeroicThrow, 'mouseover')
+            end
+        end
+        if alt == "alt_shockwave" then
+            if modifier.alt and castable(SB.Shockwave) == 0 then
+                return cast(SB.Shockwave)
+            elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+                return cast(SB.StormBolt, 'target')
+            end
+        end
+
+
+        -------------
+        --Auto Join--
+        -------------
+        if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+            SetCVar("Sound_EnableSoundWhenGameIsInBG", 1)
+        elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+            SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
+        end
+
+        if autojoin == true and lfg == true or bgstatus == "confirm" then
+            PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
+            lftime = lftime + 1
+        end
+
+        if lftime >= math.random(20, 35) then
+            SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
+            macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+            lftime = 0
+        end
+
+        ------------
+        ----Buff----
+        ------------
+        local allies_without_my_buff = group.count(function(unit)
+            return unit.alive and unit.distance < 40 and unit.buff(SB.BattleShout).down
+        end)
+        if allies_without_my_buff >= 1 and castable(SB.BattleShout) then
+            return cast(SB.BattleShout)
+        end
+
+        if grind == 1 and group_type == 'solo' then
+            if x >= math.random(20, 30) then
+                x = 0
+                print("Trying to pull ....")
+                macro('/target skel')
+                if target.enemy and target.castable(SB.HeroicThrow) and target.distance > 8 and target.distance <= 30 then
+                    return cast(SB.HeroicThrow, target)
+                elseif target.enemy and target.distance > 30 then
+                    print("too far ....")
+                    macro('/cleartarget')
+                end
+            end
         end
     end
 end
