@@ -494,7 +494,7 @@ local function resting()
     if allies_without_my_buff >= 1 and castable(SB.BattleShout) then
         return cast(SB.BattleShout)
     end
-
+--[[
     if grind == 1 and group_type == 'solo' then
         if x >= math.random(20, 30) then
             x = 0
@@ -506,7 +506,7 @@ local function resting()
                 print("too far ....")
                 macro('/cleartarget')
             end
-
+]]--
         end
     end
 end
