@@ -100,19 +100,18 @@ local function combat()
             return cast(SB.StormBolt, 'target')
         end
     end
+
     if alt == "alt_leap" then
         if modifier.alt and castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
         elseif modifier.alt and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
-    end
-    if alt == "alt_throw" then
+    elseif alt == "alt_throw" then
         if modifier.alt and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end
-    if alt == "alt_shockwave" then
+    elseif alt == "alt_shockwave" then
         if modifier.alt and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
