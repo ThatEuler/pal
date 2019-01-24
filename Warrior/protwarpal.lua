@@ -25,11 +25,12 @@ SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
 local x = 0
-local grind = 1
+local grind = 0
 local Loot = 0
 
 local function combat()
 
+    --[[removing for now, hurts performance too much
     local frame = CreateFrame("FRAME");
     frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
     frame:SetScript("OnEvent", function(self, event)
@@ -41,6 +42,12 @@ local function combat()
         end
 
     end);
+]]
+
+    if not target.alive then
+        loot = Loot + 1
+        print(Loot)
+    end
 
     -----------------------------
     --- Reading from settings
