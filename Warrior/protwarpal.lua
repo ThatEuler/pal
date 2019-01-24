@@ -25,6 +25,7 @@ SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
 local x = 0
+local grind = 0
 
 local function combat()
     -----------------------------
@@ -70,32 +71,29 @@ local function combat()
         elseif modifier.shift and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
-    end
-    if shift == "shift_throw" then
+    elseif shift == "shift_throw" then
         if modifier.shift and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end
-    if shift == "shift_shockwave" then
+    elseif shift == "shift_shockwave" then
         if modifier.shift and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
     end
+
     if ctrl == "ctrl_leap" then
         if modifier.control and castable(SB.HeroicLeap) then
             return cast(SB.HeroicLeap, 'ground')
         elseif modifier.control and -spell(SB.Intercept) == 0 and mouseover.distance <= 25 then
             return cast(SB.Intercept, 'mouseover')
         end
-    end
-    if ctrl == "ctrl_throw" then
+    elseif ctrl == "ctrl_throw" then
         if modifier.control and castable(SB.HeroicThrow) and mouseover.enemy and mouseover.alive then
             return cast(SB.HeroicThrow, 'mouseover')
         end
-    end
-    if ctrl == "ctrl_shockwave" then
+    elseif ctrl == "ctrl_shockwave" then
         if modifier.control and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
         elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
@@ -242,7 +240,7 @@ local function combat()
         cast(SB.BloodFury)
     elseif race == "Troll" and -spell(SB.Berserking) == 0 then
         cast(SB.Berserking)
-    elseif race == "Mag'har Orc" and -spell(SB.AncestralCall) == 0 then
+    elseif race == "Mag'har Orc" and -spell(SB.AncestralCall) == 0 and target.distance < 8 then
         cast(SB.AncestralCall)
     elseif race == "LightforgedDraenei" and -spell(SB.LightsJudgement) == 0 then
         cast(SB.LightsJudgement)
@@ -472,13 +470,16 @@ local function resting()
         return cast(SB.BattleShout)
     end
 
-    if toggle('grind', false) then
-        if x >= math.random(10, 20) then
+    if grind == 1 then
+        if x >= math.random(20, 30) then
             x = 0
             print("Trying to pull ....")
             macro('/target skel')
-            if target.enemy and target.castable(SB.HeroicThrow) then
+            if target.enemy and target.castable(SB.HeroicThrow) and target.distance > 8 and target.distance <= 30 then
                 return cast(SB.HeroicThrow, target)
+            elseif target.enemy and target.distance > 30 then
+                print("too far ....")
+                macro('/cleartarget')
             end
 
         end
@@ -585,20 +586,6 @@ local function interface()
         },
         off = {
             label = 'Taunt Off',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        }
-    })
-    dark_addon.interface.buttons.add_toggle({
-        name = 'grind',
-        label = 'grind',
-        on = {
-            label = 'Grind on ',
-            color = dark_addon.interface.color.warrior_brown,
-            color2 = dark_addon.interface.color.warrior_brown
-        },
-        off = {
-            label = 'Grind off',
             color = dark_addon.interface.color.grey,
             color2 = dark_addon.interface.color.dark_grey
         }
