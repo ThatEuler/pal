@@ -40,17 +40,15 @@ local function combat()
         if (type == "PARTY_KILL") then
             Loot = Loot + 1
         end
-        if (type == "SPELL_DAMAGE") then
+    --[[    if (type == "SPELL_DAMAGE") then
             local spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = select(12, CombatLogGetCurrentEventInfo())
 --print(spellName)
- -[[           if (spellName == "Thunder Clap") then
+            if (spellName == "Thunder Clap") then
                 -- "== 1" for clarity only.  Not needed.
                 print("Clap! - WOHOOO!")
-
             end
-]]
         end
-
+]]
     end);
 
     -----------------------------
