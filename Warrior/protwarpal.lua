@@ -25,9 +25,34 @@ SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
 local x = 0
-local grind = 0
+local grind = 1
+local Loot = 0
 
 local function combat()
+
+    local frame = CreateFrame("FRAME");
+    frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
+    frame:SetScript("OnEvent", function(self, event)
+
+        local timestamp, type, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
+
+        --determining if there are mobs to loot
+        if (type == "PARTY_KILL") then
+            Loot = Loot + 1
+        end
+        if (type == "SPELL_DAMAGE") then
+            local spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = select(12, CombatLogGetCurrentEventInfo())
+--print(spellName)
+ -[[           if (spellName == "Thunder Clap") then
+                -- "== 1" for clarity only.  Not needed.
+                print("Clap! - WOHOOO!")
+
+            end
+]]
+        end
+
+    end);
+
     -----------------------------
     --- Reading from settings
     -----------------------------
@@ -278,10 +303,6 @@ local function combat()
     end
 
 
-
-
-
-
     -------------------------
     --- Damage mitigation
     -------------------------
@@ -304,6 +325,7 @@ local function combat()
             return cast(SB.ShieldWall)
         end
     end
+
 
     -------------------------
     --- Standard Rotation stuff
@@ -355,9 +377,15 @@ end
 
 local function resting()
 
-
+    local group_type = GroupType()
     x = x + 1
-
+    -------------------------
+    --- Auto loot - requires loot-a-rang
+    -------------------------
+    if Loot >=1 and GetItemCooldown(60854) == 0 then
+        Loot = 0
+        return macro('/cast Loot-a-rang')
+    end
     -----------------------------
     --- Reading from settings
     -----------------------------
@@ -469,7 +497,7 @@ local function resting()
         return cast(SB.BattleShout)
     end
 
-    if grind == 1 then
+    if grind == 1 and group_type == 'solo' then
         if x >= math.random(20, 30) then
             x = 0
             print("Trying to pull ....")
