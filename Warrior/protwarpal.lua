@@ -110,7 +110,7 @@ local function combat()
     elseif ctrl == "ctrl_shockwave" then
         if modifier.control and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+        elseif talent(5, 3) and target.castable(SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
     end
