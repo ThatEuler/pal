@@ -27,27 +27,22 @@ SB.LightsJudgement = 255647
 local x = 0
 local grind = 0
 local Loot = 0
-
+local framebox = CreateFrame("FRAME");
 local function combat()
 
-    --[[removing for now, hurts performance too much
-    local frame = CreateFrame("FRAME");
+    x = x + 1
+
+    local frame = framebox
     frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
     frame:SetScript("OnEvent", function(self, event)
-
         local _, type, _, _, _, _, _, _, _, _, _ = CombatLogGetCurrentEventInfo()
         --determining if there are mobs to loot
         if (type == "PARTY_KILL") then
             Loot = Loot + 1
+            --print("Loot Counter: " .. Loot)
+            x = 0
         end
-
     end);
-]]
-
-    if not target.alive then
-        loot = Loot + 1
-        print(Loot)
-    end
 
     -----------------------------
     --- Reading from settings
@@ -372,29 +367,27 @@ local function combat()
     -------------------------
     --- Auto loot - requires loot-a-rang
     -------------------------
-    if Loot >= 1 and GetItemCooldown(60854) == 0 then
+    if not player.moving and Loot >= 1 and GetItemCooldown(60854) == 0 then
         Loot = 0
         return macro('/cast Loot-a-rang')
     end
-    --------
 
 end
 
 local function resting()
 
     local group_type = GroupType()
-    x = x + 1
 
     if player.alive then
 
         -------------------------
         --- Auto loot - requires loot-a-rang
         -------------------------
-        if Loot >= 1 and GetItemCooldown(60854) == 0 then
+        if not player.moving and Loot >= 1 and GetItemCooldown(60854) == 0 then
             Loot = 0
             return macro('/cast Loot-a-rang')
         end
-        -----------------------------
+        -------------------
         --- Reading from settings
         -----------------------------
 
@@ -519,7 +512,34 @@ local function resting()
             end
         end
     end
+    --[[
+        for bag = 0, 4 do
+            for slot = 1, GetContainerNumSlots(bag) do
+                if not krups_found then
+                    name = GetContainerItemLink(bag, slot)
+
+                    --print("Krups:",name)
+
+                    if name then
+                        for _, armor_type in pairs(item_types) do
+                            if (itemType:find(armor_type) and quality == 2) then
+                                _, itemCount, _, _, _ = GetContainerItemInfo(bag, slot)
+                                if itemCount >= 1 then
+                                    CastSpellByName("Disenchant")
+                                    UseItemByName(name)
+                                    --    UseContainerItem(bag, slot)
+                                    --print (reforgeId)
+                                    --    print("Krups Disenchanted:",name)
+                                    krups_found = true
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end ]]
 end
+
 local function interface()
     local settings = {
         key = 'protwarrior_settings',
