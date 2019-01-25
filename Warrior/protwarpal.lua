@@ -173,8 +173,6 @@ local function combat()
     end
 
     if autoLoot == true then
-
-
         -------------------------
         --- Auto loot - requires loot-a-rang
         -------------------------
@@ -188,6 +186,7 @@ local function combat()
     -------------------------
     local Trinket13 = GetInventoryItemID("player", 13)
     local Trinket14 = GetInventoryItemID("player", 14)
+    local Neck2 = GetInventoryItemID("player", 2)
 
     if useTrinkets then
         --doomsfury trinket
@@ -217,6 +216,10 @@ local function combat()
         end
         if Trinket14 == 128318 and (target.time_to_die > 10 or enemyCount >= 3) and target.distance <= 8 and GetItemCooldown(128318) == 0 then
             macro('/use 14')
+        end
+        --heirloom neck piece
+        if Neck2 == 122662 and player.health.percent > 40 and GetItemCooldown(122662) == 0 then
+            macro('/use 2')
         end
     end
 
