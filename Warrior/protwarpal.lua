@@ -85,7 +85,7 @@ local function combat()
     elseif shift == "shift_shockwave" then
         if modifier.shift and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+        elseif talent(5, 3) and target.castable(SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
     end
@@ -103,7 +103,7 @@ local function combat()
     elseif ctrl == "ctrl_shockwave" then
         if modifier.control and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+        elseif talent(5, 3) and target.castable(SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
     end
@@ -121,7 +121,7 @@ local function combat()
     elseif alt == "alt_shockwave" then
         if modifier.alt and castable(SB.Shockwave) == 0 then
             return cast(SB.Shockwave)
-        elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+        elseif talent(5, 3) and target.castable(SB.StormBolt) then
             return cast(SB.StormBolt, 'target')
         end
     end
@@ -433,7 +433,7 @@ local function resting()
         if shift == "shift_shockwave" then
             if modifier.shift and castable(SB.Shockwave) == 0 then
                 return cast(SB.Shockwave)
-            elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            elseif talent(5, 3) and target.castable(SB.StormBolt) then
                 return cast(SB.StormBolt, 'target')
             end
         end
@@ -452,7 +452,7 @@ local function resting()
         if ctrl == "ctrl_shockwave" then
             if modifier.control and castable(SB.Shockwave) == 0 then
                 return cast(SB.Shockwave)
-            elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            elseif talent(5, 3) and target.castable(SB.StormBolt) then
                 return cast(SB.StormBolt, 'target')
             end
         end
@@ -471,7 +471,7 @@ local function resting()
         if alt == "alt_shockwave" then
             if modifier.alt and castable(SB.Shockwave) == 0 then
                 return cast(SB.Shockwave)
-            elseif talent(5, 3) and target.castable(SB.SB.StormBolt) then
+            elseif talent(5, 3) and target.castable(SB.StormBolt) then
                 return cast(SB.StormBolt, 'target')
             end
         end
