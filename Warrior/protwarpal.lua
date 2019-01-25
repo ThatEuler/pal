@@ -296,19 +296,19 @@ local function combat()
         if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and mouseover.enemy and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
             return cast(SB.Taunt, mouseover)
         end
+        if group_type ~= 'solo' then
+            for i = 1, (members - 1) do
+                taunt_unit = group_type .. i .. "target"
+                --print("Taunt Unit: " .. taunt_unit)
+                isTanking = UnitThreatSituation("player", taunt_unit)
+                if UnitExists(taunt_unit) and IsSpellInRange('Taunt', taunt_unit) and UnitAffectingCombat(taunt_unit) and (isTanking == 0 or isTanking == nil) then
+                    --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
+                    --print("attempting to taunt " .. taunt_unit)
+                    return cast(SB.Taunt, taunt_unit)
+                end
 
-        for i = 1, (members - 1) do
-            taunt_unit = group_type .. i .. "target"
-            --print("Taunt Unit: " .. taunt_unit)
-            isTanking = UnitThreatSituation("player", taunt_unit)
-            if UnitExists(taunt_unit) and IsSpellInRange('Taunt', taunt_unit) and UnitAffectingCombat(taunt_unit) and (isTanking == 0 or isTanking == nil) then
-                --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
-                --print("attempting to taunt " .. taunt_unit)
-                return cast(SB.Taunt, taunt_unit)
             end
-
         end
-
     end
 
 
@@ -322,7 +322,7 @@ local function combat()
             and not (talent(4, 3) and player.buff(SB.LastStand).up) then
         return cast(SB.ShieldBlock)
     elseif (player.buff(SB.ShieldBlockBuff).down or player.health.percent < 40) and target.time_to_die > 6 then
-        if demoshout == true and UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and target.distance <=8 and not talent(6, 1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6, 1) and -power.rage <= 60)) then
+        if demoshout == true and UnitLevel("player") >= 48 and -spell(SB.DemoralizingShout) == 0 and target.distance <= 8 and not talent(6, 1) and (enemyCount >= 3 or player.health.percent < demoshoutpercent or deafeningCrash or (talent(6, 1) and -power.rage <= 60)) then
             return cast(SB.DemoralizingShout)
         elseif ignorepain and UnitLevel("player") >= 36 and -spell(SB.IgnorePain) == 0 and -power.rage >= 40
                 and (player.buff(SB.IgnorePain).down and player.health.percent < ignorepainpercent
