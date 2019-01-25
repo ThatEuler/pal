@@ -184,6 +184,37 @@ function doBeacons(autoBeacon, tank1, tank2, SB)
     end
 end
 
-local function GroupType()
+function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
+end
+
+function hasBuff(unit, buff)
+    for i = 1, 40 do
+        local _, _, _, _, _, _, _, _, _, spell_id = UnitBuff(unit, i)
+        if spell_id == nil then
+            break
+        end
+        if spell_id == buff then
+            return true
+        end
+    end
+    return false
+end
+
+function castGroupBuff(buff, min)
+    local count = 0
+    local group_type = GroupType()
+    local members = GetNumGroupMembers()
+    if group_type == 'solo' then
+        return min == 1 and not hasBuff('player', buff)
+    end
+    for i = 1, (members - 1) do
+        if not hasBuff(group_type .. i, buff) then
+            count = count + 1
+            if (count >= min) then
+                return true
+            end
+        end
+    end
+    return false
 end
