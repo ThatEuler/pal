@@ -26,7 +26,19 @@ SB.LightsJudgement = 255647
 
 local x = 0
 local Loot = 0
-local framebox = CreateFrame("FRAME");
+local frame = CreateFrame("FRAME");
+--local frame = framebox
+frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
+frame:SetScript("OnEvent", function(self, event)
+    local _, type, _, _, _, _, _, _, _, _, _ = CombatLogGetCurrentEventInfo()
+    --determining if there are mobs to loot
+    if (type == "PARTY_KILL") then
+        Loot = Loot + 1
+        --print("Loot Counter: " .. Loot)
+        --            x = 0
+    end
+end);
+
 local function combat()
 
     --  x = x + 1
@@ -161,17 +173,7 @@ local function combat()
     end
 
     if autoLoot == true then
-        local frame = framebox
-        frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
-        frame:SetScript("OnEvent", function(self, event)
-            local _, type, _, _, _, _, _, _, _, _, _ = CombatLogGetCurrentEventInfo()
-            --determining if there are mobs to loot
-            if (type == "PARTY_KILL") then
-                Loot = Loot + 1
-                --print("Loot Counter: " .. Loot)
-                --            x = 0
-            end
-        end);
+
 
         -------------------------
         --- Auto loot - requires loot-a-rang
@@ -282,6 +284,8 @@ local function combat()
     local members = GetNumGroupMembers()
     local group_type = GroupType()
 
+    -- print(group_type .. members.."target")
+
     if toggle('autoTaunt', false) and -spell(SB.Taunt) == 0 then
         isTanking = UnitThreatSituation("player", "target")
         if target.enemy and IsSpellInRange('Taunt', 'target') and UnitAffectingCombat('target') and (isTanking == 0 or isTanking == nil) then
@@ -292,19 +296,19 @@ local function combat()
         if UnitExists('mouseover') and IsSpellInRange('Taunt', 'mouseover') and mouseover.enemy and UnitAffectingCombat('mouseover') and (isTanking == 0 or isTanking == nil) then
             return cast(SB.Taunt, mouseover)
         end
-        --[[
-                for i = 1, (members - 1) do
-                    taunt_unit = group_type .. i .. "target"
-                    print("Taunt Unit: " .. taunt_unit)
-                    isTanking = UnitThreatSituation("player", "taunt_unit")
-                    if UnitExists('taunt_unit') and IsSpellInRange('Taunt', 'taunt_unit') and UnitAffectingCombat('taunt_unit') and (isTanking == 0 or isTanking == nil) then
-                        --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
-                        print("attempting to taunt " .. taunt_unit)
-                        return cast(SB.Taunt, taunt_unit)
-                    end
 
-                end
-           ]]
+        for i = 1, (members - 1) do
+            taunt_unit = group_type .. i .. "target"
+            --print("Taunt Unit: " .. taunt_unit)
+            isTanking = UnitThreatSituation("player", taunt_unit)
+            if UnitExists(taunt_unit) and IsSpellInRange('Taunt', taunt_unit) and UnitAffectingCombat(taunt_unit) and (isTanking == 0 or isTanking == nil) then
+                --local taunttarget = dark_addon.environment.conditions.unit('nameplate' .. i)
+                --print("attempting to taunt " .. taunt_unit)
+                return cast(SB.Taunt, taunt_unit)
+            end
+
+        end
+
     end
 
 
@@ -500,15 +504,16 @@ local function resting()
         ------------
         ----Buff----
         ------------
-        local allies_without_my_buff = group.count(function(unit)
-            return unit.alive and unit.distance < 40 and unit.buff(SB.BattleShout).down
-        end)
-        if allies_without_my_buff >= 1 and castable(SB.BattleShout) then
+
+        if castGroupBuff(SB.BattleShout, 1) then
             return cast(SB.BattleShout)
         end
 
 
     end
+
+
+
     --[[
         for bag = 0, 4 do
             for slot = 1, GetContainerNumSlots(bag) do
