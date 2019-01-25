@@ -40,6 +40,7 @@ local y = 0 -- counter for opener
 local z = 0 -- time in combat
 local enemyCount
 local burst
+local autoDotCountCurrent = 0
 
 local function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
@@ -116,6 +117,9 @@ local function combat()
     local autoRune = dark_addon.settings.fetch('balpal_settings_autoRune', 'rune_a')
     local az_ss = dark_addon.settings.fetch('balpal_settings_az_ss', false)
     local az_ls = dark_addon.settings.fetch('balpal_settings_az_ls', false)
+    local autoDot = dark_addon.settings.fetch('protwarrior_defensives_autoDot.check', true)
+    local autoDotCount = dark_addon.settings.fetch('protwarrior_defensives_autoDot.spin', 3)
+
 
 
 
@@ -261,8 +265,15 @@ local function combat()
     end
 
 
+    -----------------------------
+    --- autoDot
+    -----------------------------
 
+    if autoDot and mouseover.castable(SB.Moonfire) and mouseover.alive and UnitAffectingCombat and mouseover.enemy and (not target.debuff(SB.MoonfireDebuff).exists or target.debuff(SB.MoonfireDebuff).remains < 6) then
+        autoDotCountCurrent = autoDotCountCurrent + 1
+        return cast(SB.Moonfire, 'mouseover')
 
+    end
     -----------------------------
     --- Rotation
     -----------------------------
@@ -706,6 +717,7 @@ local function interface()
             -- { key = 'input', type = 'input', text = 'TextBox', desc = 'Description of Textbox' },
             { key = 'usehealpot', type = 'checkbox', text = 'Healing Pot', desc = 'Use Coastal Healing Potion if HS on CD/none' },
             { key = 'intpercent', type = 'spinner', text = 'Interrupt %', default = '50', desc = '% cast time to interrupt at', min = 5, max = 100, step = 5 },
+            { key = 'autoDot', type = 'checkspin', text = 'Auto Dot', desc = 'Max dot targets', default_check = true, default_spin = 35, min = 1, max = 5, step = 1 },
             { type = 'rule' },
             { type = 'text', text = 'Utility' },
             { key = 'autoRacial', type = 'checkbox', text = 'Racial', desc = 'Use Racial on CD (Troll only)' },
