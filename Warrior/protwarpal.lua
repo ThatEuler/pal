@@ -25,7 +25,6 @@ SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
 local x = 0
-local grind = 0
 local Loot = 0
 local framebox = CreateFrame("FRAME");
 local function combat()
@@ -170,7 +169,7 @@ local function combat()
             if (type == "PARTY_KILL") then
                 Loot = Loot + 1
                 --print("Loot Counter: " .. Loot)
-    --            x = 0
+                --            x = 0
             end
         end);
 
@@ -508,19 +507,7 @@ local function resting()
             return cast(SB.BattleShout)
         end
 
-        if grind == 1 and group_type == 'solo' then
-            if x >= math.random(20, 30) then
-                x = 0
-                print("Trying to pull ....")
-                macro('/target skel')
-                if target.enemy and target.castable(SB.HeroicThrow) and target.distance > 8 and target.distance <= 30 then
-                    return cast(SB.HeroicThrow, target)
-                elseif target.enemy and target.distance > 30 then
-                    print("too far ....")
-                    macro('/cleartarget')
-                end
-            end
-        end
+
     end
     --[[
         for bag = 0, 4 do
