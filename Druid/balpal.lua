@@ -117,8 +117,8 @@ local function combat()
     local autoRune = dark_addon.settings.fetch('balpal_settings_autoRune', 'rune_a')
     local az_ss = dark_addon.settings.fetch('balpal_settings_az_ss', false)
     local az_ls = dark_addon.settings.fetch('balpal_settings_az_ls', false)
-    local autoDot = dark_addon.settings.fetch('protwarrior_defensives_autoDot.check', true)
-    local autoDotCount = dark_addon.settings.fetch('protwarrior_defensives_autoDot.spin', 3)
+    local autoDot = dark_addon.settings.fetch('balpal_settings_autoDot.check', true)
+    local autoDotCount = dark_addon.settings.fetch('balpal_settingss_autoDot.spin', 3)
 
 
 
@@ -269,8 +269,7 @@ local function combat()
     --- autoDot
     -----------------------------
 
-    if autoDot and mouseover.castable(SB.Moonfire) and mouseover.alive and UnitAffectingCombat and mouseover.enemy and (not target.debuff(SB.MoonfireDebuff).exists or target.debuff(SB.MoonfireDebuff).remains < 6) then
-        autoDotCountCurrent = autoDotCountCurrent + 1
+    if autoDot and mouseover.castable(SB.Moonfire) and mouseover.alive and UnitAffectingCombat('mouseover') and mouseover.enemy and (not target.debuff(SB.MoonfireDebuff).exists or target.debuff(SB.MoonfireDebuff).remains < 6) then
         return cast(SB.Moonfire, 'mouseover')
 
     end
@@ -488,7 +487,7 @@ local function combat()
     --- Treants
     -----------------------------
 
-    if talent(1, 3) and toggle('FON', false) and -spell(205636) == 0 and mouseover.alive and UnitAffectingCombat and mouseover.enemy and (player.buff(burst).remains > 10 or -spell(burst) > 30) then
+    if talent(1, 3) and toggle('FON', false) and -spell(205636) == 0 and mouseover.alive and UnitAffectingCombat('mouseover') and mouseover.enemy and (player.buff(burst).remains > 10 or -spell(burst) > 30) then
         return cast(SB.ForceofNature, 'ground')
     end
 
