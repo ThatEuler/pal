@@ -167,7 +167,7 @@ local function combat()
     end
 
     --regain control
-    if not HasFullControl() and castable(SB.BerserkerRage) then
+    if (not HasFullControl() or player.debuff(34940)) and castable(SB.BerserkerRage) then
         print("Berserk!")
         return cast(SB.BerserkerRage)
     end
