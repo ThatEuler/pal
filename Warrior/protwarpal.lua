@@ -507,11 +507,11 @@ local function resting()
         ------------
         ----Buff----
         ------------
-
-        if castGroupBuff(SB.BattleShout, 1) then
-            return cast(SB.BattleShout)
+        if x >= 40 then
+            if castGroupBuff(SB.BattleShout, 1) then
+                return cast(SB.BattleShout)
+            end
         end
-
 
     end
 
