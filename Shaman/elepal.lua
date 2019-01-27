@@ -59,7 +59,7 @@ local function combat()
     end
 
 
-    print(enemyCount)
+    --print(enemyCount)
 
     if talent(2, 3) and modifier.alt then
         return cast(SB.TotemMastery)
