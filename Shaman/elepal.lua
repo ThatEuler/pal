@@ -41,11 +41,25 @@ local function combat()
         maelstrom_pool = 120
     end
 
-    if toggle('multitarget', false) then
-        enemyCount = enemies.around(40)
+
+-----
+  --- how many in range
+  -----
+  local inRange = 0
+  for i = 1, 40 do
+    if UnitExists('nameplate' .. i) and IsSpellInRange('Wind Shear', 'nameplate' .. i) == 1 and UnitAffectingCombat('nameplate' .. i) then
+      inRange = inRange + 1
+    end
+  end
+  --print(inRange)
+        if toggle('multitarget', false) then
+        enemyCount = inRange
     elseif toggle('multitarget', true) then
         enemyCount = 1
     end
+
+
+    print(enemyCount)
 
     if talent(2, 3) and modifier.alt then
         return cast(SB.TotemMastery)
