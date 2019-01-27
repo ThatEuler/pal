@@ -1,3 +1,6 @@
+--support functions etc.
+local dark_addon = dark_interface
+dark_addon.support = {};
 function isCC(target)
     for i = 1, 40 do
         local name, _, _, count, debuff_type, _, _, _, _, spell_id = UnitDebuff(target, i)
