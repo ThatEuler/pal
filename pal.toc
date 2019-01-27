@@ -6,6 +6,8 @@
 ## Dependencies: dark_addon
 
 Support\Support.lua
+Demon Hunter\vengdhpal.lua
+Demon Hunter\havdhpal.lua
 Druid\balpal.lua
 Druid\respal.lua
 Druid\balanceEXP.lua
@@ -20,3 +22,5 @@ Shaman\ShamPalEle.lua
 Shaman\Elepal.lua
 Priest\holyPal.lua
 Warrior\protwarpal.lua
+Warrior\armswarpal.lua
+Warrior\furywarpal.lua
