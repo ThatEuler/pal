@@ -4,6 +4,7 @@
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.warrior
+local lftime = 0
 
 -- To Do
 
@@ -234,6 +235,38 @@ end
 end
 
 local function resting()
+  local lfg = GetLFGProposal();
+  local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+  local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+  local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+  local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+  local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+  local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+  local bgstatus = GetBattlefieldStatus(1);
+  local autojoin = dark_addon.settings.fetch('furywar_settings_autojoin', true)
+
+  -------------
+  --Auto Join--
+  -------------
+  if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+      SetCVar("Sound_EnableSoundWhenGameIsInBG", 1)
+  elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+      SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
+  end
+
+  if autojoin == true and lfg == true or bgstatus == "confirm" then
+      PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
+      lftime = lftime + 1
+  end
+
+  if lftime >= math.random(20, 35) then
+      SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
+      macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+      lftime = 0
+  end
+
+
+
 
   local enemyCount = enemies.around(8)
   dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
@@ -269,6 +302,8 @@ local function interface()
             { key = 'VRHealth', type = 'spinner', text = 'Victory Rush/Imp Victory at Health %', default = '80', desc = 'cast Victory Rush/Imp Victory at', min = 0, max = 100, step = 1 },
             { key = 'healthstone', type = 'checkspin', default = '20', text = 'Healthstone', desc = 'use Healthstone at health %', min = 1, max = 100, step = 1 },
             { key = 'GiftHealth', type = 'spinner', text = 'Gift of the Naaru at Health %', default = '20', desc = 'cast Gift of the Naaru at', min = 0, max = 100, step = 1 },
+            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
+
         }
     }
 

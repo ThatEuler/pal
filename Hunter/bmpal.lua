@@ -6,6 +6,7 @@
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.hunter
+local lftime = 0
 
 --Local Spells not in default spellbook
 SB.Bite = 17253
@@ -32,7 +33,7 @@ local function combat()
 
     if target.alive and target.enemy and not player.channeling() then
         auto_shot()
-        
+
         if usetraps and modifier.shift and not modifier.alt and castable(SB.FreezingTrap) then
             return cast(SB.FreezingTrap, 'ground')
         end
@@ -107,10 +108,19 @@ local function combat()
         if player.health.percent < 50 and not castable(SB.Exhilaration) then
             return cast(SB.AspectOfTheTurtle)
         end
-    end        
+    end
 end
 
 local function resting()
+    local lfg = GetLFGProposal();
+    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+    local bgstatus = GetBattlefieldStatus(1);
+    local autojoin = dark_addon.settings.fetch('bmpal_settings_autojoin', true)
     local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect')
     local petselection = dark_addon.settings.fetch('bmpal_settings_petselector')
 
@@ -150,6 +160,7 @@ function interface()
             { type = 'header', text = 'BM Pal Settings'},
             { type = 'rule'},
             { type = 'text', text = 'General Settings'},
+            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
             { key = 'traps', type = 'checkbox',
             text = 'Traps',
             desc = 'Auto use Traps',
@@ -188,7 +199,7 @@ function interface()
             color2 = dark_addon.interface.color.dark_grey
         }
     })
-    
+
     dark_addon.interface.buttons.add_toggle({
         name = 'settings',
         label = 'Rotation Settings',

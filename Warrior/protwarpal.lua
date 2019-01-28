@@ -18,6 +18,8 @@ SB.DeafeningCrash = 272824
 SB.ShieldBlockBuff = 132404
 SB.VictoryRushBuff = 32216
 SB.BattleShout = 6673
+SB.DragonsRoar = 118000
+SB.ImpendingVictory = 202168
 --racials
 SB.GiftOftheNaaru = 59544
 SB.MendingBuff = 41635
@@ -346,6 +348,8 @@ local function combat()
     if not isCC("target") and UnitAffectingCombat("target") then
         if player.buff(SB.VictoryRushBuff).up and -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
             return cast(SB.VictoryRush, target)
+        elseif target.castable(SB.ImpendingVictory) and -spell(SB.ImpendingVictory) == 0 and player.health.percent <= 80 then
+          return cast(SB.ImpendingVictory, target)
         elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
             return cast(SB.HeroicThrow, target)
         elseif target.castable(SB.StormBolt) then
@@ -362,6 +366,8 @@ local function combat()
             return cast(SB.Revenge)
         elseif castable(SB.ThunderClap) and target.distance <= 6 and -spell(SB.ThunderClap) == 0 then
             return cast(SB.ThunderClap)
+        elseif target.castable(SB.DragonsRoar) and target.distance <= 11 and -spell(SB.DragonsRoar) == 0 then
+            return cast(SB.DragonsRoar)
         elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then
             return cast(SB.Devastate, target)
         end
@@ -377,6 +383,8 @@ local function combat()
             return cast(SB.ThunderClap)
         elseif target.castable(SB.ShieldSlam) and -spell(SB.ShieldSlam) == 0 then
             return cast(SB.ShieldSlam, target)
+        elseif target.castable(SB.DragonsRoar) and target.distance <= 11 and -spell(SB.DragonsRoar) == 0 then
+          return cast(SB.DragonsRoar)
         elseif (player.health.percent >= 65 or player.buff(SB.RevengeProc).up or UnitLevel("player") < 36 or (-power.rage > 80 and -spell(SB.ShieldBlock) == 0)) and -spell(SB.Revenge) == 0 then
             return cast(SB.Revenge)
         elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then

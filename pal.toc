@@ -4,7 +4,7 @@
 ## LoadOnDemand: 0
 ## DefaultState: enabled
 ## Dependencies: dark_addon
-
+Support\Lists.lua
 Support\Support.lua
 Demon Hunter\vengdhpal.lua
 Demon Hunter\havdhpal.lua
