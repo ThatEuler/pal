@@ -149,17 +149,19 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         macro('/use Healthstone')
     end
 
-        --Multi-target
-        --Whirlwind allows Fury to cleave its normal single target rotation on up to 4 additional targets, although some setup is done to ensure larger Bladestorm burst on intermittent waves of adds.
+    --Multi-target
+    --Whirlwind allows Fury to cleave its normal single target rotation on up to 4 additional targets, although some setup is done to ensure larger Bladestorm burst on intermittent waves of adds.
 
-        --For general multitarget cleave
-        if enemyCount >= 2 or toggle('multitarget', false) then
-            -- Whirlwind to apply  Whirlwind whenever the buff is not up
-            if castable(SB.Whirlwind) and -spell(SB.Whirlwind) == 0 and player.buff(SB.Whirlwind).down then
-                return cast(SB.Whirlwind)
-            end
-        --Continue the single target rotation, and Whirlwind should be kept up naturally
-        --An example sequence might look like this:  Whirlwind -  Rampage -  Raging Blow -  Whirlwind -   Bloodthirst -  Raging Blow -  Whirlwind -  Bloodthirst -  Rampage -  Whirlwind...
+    --For general multitarget cleave
+    if enemyCount >= 2 or toggle('multitarget', false) then
+        -- Whirlwind to apply  Whirlwind whenever the buff is not up
+        if castable(SB.Whirlwind) and -spell(SB.Whirlwind) == 0 and player.buff(SB.Whirlwind).down then
+            return cast(SB.Whirlwind)
+        end
+    --Continue the single target rotation, and Whirlwind should be kept up naturally
+    --An example sequence might look like this:  Whirlwind -  Rampage -  Raging Blow -  Whirlwind -   Bloodthirst -  Raging Blow -  Whirlwind -  Bloodthirst -  Rampage -  Whirlwind...
+
+    end
 
     -- Single Target
     if enemyCount >= 1 then
@@ -226,8 +228,6 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
         --An example sequence with talents might look like this:  Siegebreaker -  Rampage -  Raging Blow -  Bloodthirst -  Dragon Roar -  Furious Slash -  Bloodthirst -  Rampage -  Raging Blow...
         --An example sequence without talents might look like this:  Rampage -  Raging Blow - Bloodthirst -  Raging Blow -  Whirlwind -  Bloodthirst -  Rampage -  Whirlwind...
-
-        end
 
     end
 
