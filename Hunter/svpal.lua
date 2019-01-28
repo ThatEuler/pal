@@ -4,7 +4,8 @@
 -- Shift = Freezing Trap
 
 local dark_addon = dark_interface
-local SB = dark_addon.rotation.spellbooks.hunter 
+local SB = dark_addon.rotation.spellbooks.hunter
+local lftime = 0
 
 --Local Spells not in default spellbook
 SB.Bite = 17253
@@ -16,11 +17,11 @@ local function GroupType()
 end
 
 local function combat()
-    local usetraps = dark_addon.settings.fetch('spicysv_settings_traps')
-    local usemisdirect = dark_addon.settings.fetch('spicysv_settings_misdirect')
+    local usetraps = dark_addon.settings.fetch('svpal_settings_traps')
+    local usemisdirect = dark_addon.settings.fetch('svpal_settings_misdirect')
     local race = UnitRace('player')
     local group_type = GroupType()
-    
+
     if target.alive and target.enemy and not player.channeling() then
 
         -- Traps
@@ -40,7 +41,7 @@ local function combat()
         if toggle('cooldowns', false) and castable(SB.CoordinatedAssault) and -spell(SB.CoordinatedAssault) == 0 then
             return cast(SB.CoordinatedAssault)
         end
-        
+
         -- Standard Abilities
         if castable(SB.SerpentSting) and (not target.debuff(SB.SerpentSting).exists or target.debuff(SB.SerpentSting).remains < 2) then
             return cast(SB.SerpentSting, 'target')
@@ -68,12 +69,20 @@ local function combat()
         if player.health.percent < 50 and not castable(SB.Exhilaration) then
             return cast(SB.AspectOfTheTurtle)
         end
-    end        
+    end
 end
 
 local function resting()
-    --resting
-    local petselection = dark_addon.settings.fetch('spicysv_settings_petselector')
+    local lfg = GetLFGProposal();
+    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+    local bgstatus = GetBattlefieldStatus(1);
+    local autojoin = dark_addon.settings.fetch('svpal_settings_autojoin', true)
+    local petselection = dark_addon.settings.fetch('svpal_settings_petselector')
     local group_type = GroupType()
 
     if not pet.exists then
@@ -104,6 +113,8 @@ function interface()
             { type = 'header', text = 'SV Pal Settings'},
             { type = 'rule'},
             { type = 'text', text = 'General Settings'},
+            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
+
             { key = 'traps', type = 'checkbox',
             text = 'Traps',
             desc = 'Auto use Traps',
@@ -144,7 +155,7 @@ function interface()
             color2 = dark_addon.interface.color.dark_grey
         }
     })
-    
+
     dark_addon.interface.buttons.add_toggle({
         name = 'settings',
         label = 'Rotation Settings',
