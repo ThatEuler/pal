@@ -346,9 +346,9 @@ local function combat()
     -------------------------
 
     if not isCC("target") and UnitAffectingCombat("target") then
-        if player.buff(SB.VictoryRushBuff).up and -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
+        if not talent(1, 3) and player.buff(SB.VictoryRushBuff).up and -spell(SB.VictoryRush) == 0 and target.castable(SB.VictoryRush) and player.health.percent < 95 then
             return cast(SB.VictoryRush, target)
-        elseif target.castable(SB.ImpendingVictory) and -spell(SB.ImpendingVictory) == 0 and player.health.percent <= 80 then
+        elseif talent(1, 3) and target.castable(SB.ImpendingVictory) and -spell(SB.ImpendingVictory) == 0 and player.health.percent <= 80 then
           return cast(SB.ImpendingVictory, target)
         elseif target.castable(SB.HeroicThrow) and -spell(SB.HeroicThrow) == 0 and target.enemy and (target.distance > 8 and target.distance <= 30) then
             return cast(SB.HeroicThrow, target)
@@ -366,7 +366,7 @@ local function combat()
             return cast(SB.Revenge)
         elseif castable(SB.ThunderClap) and target.distance <= 6 and -spell(SB.ThunderClap) == 0 then
             return cast(SB.ThunderClap)
-        elseif target.castable(SB.DragonsRoar) and target.distance <= 11 and -spell(SB.DragonsRoar) == 0 then
+        elseif talent(3, 3) and target.castable(SB.DragonsRoar) and target.distance <= 11 and -spell(SB.DragonsRoar) == 0 then
             return cast(SB.DragonsRoar)
         elseif target.castable(SB.Devastate) and -spell(SB.Devastate) == 0 then
             return cast(SB.Devastate, target)
