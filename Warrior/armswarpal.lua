@@ -4,6 +4,7 @@
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.warrior
+local lftime = 0
 
 -- To do
 
@@ -91,7 +92,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         return cast(SB.GiftoftheNaaru)
       end
     end
-    
+
   -- Auto Attack
   if target.enemy and target.alive and target.distance < 8 then
     auto_attack()
@@ -125,7 +126,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
             return cast(SB.Avatar)
         end
     end
-  
+
   -- Defensive Spells
       -- Defensive Stance
         if castable(SB.DefensiveStance) and talent(4,3) and toggle('defensivestance', false) and DefStance == 0 then
@@ -145,18 +146,18 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
           print('Heal @ ' .. -player.health)
             return cast(SB.DiebytheSword)
         end
-  
+
   -- Healing
     if castable(SB.VictoryRush) and -buff(SB.Victorious) and -player.health <= VRHealth then
       print('Heal @ ' .. -player.health)
   		return cast(SB.VictoryRush)
   	end
-    
+
     if castable(SB.ImpendingVictory) and -player.health <= VRHealth and talent(2,2) then
       print('Heal @ ' .. -player.health)
   		return cast(SB.ImpendingVictory)
-  	end    
-  
+  	end
+
     -- Healthstone
     if Hstonecheck == true and -player.health < Hstonepercent and GetItemCount(5512) >= 1 and GetItemCooldown(5512) == 0 then
         macro('/use Healthstone')
@@ -168,48 +169,48 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
       -- Single Target - non-Execute phase
       if -target.health >= 20 or (talent(3,1) and -target.health >= 35) then
           print'ST non Execute phase'
-          
+
         -- Cast Rend if less than 4 seconds remains, outside of Colossus Smash
         if castable(SB.Rend, 'target') and target.debuff(SB.Rend).remains < 4 and not -target.debuff(SB.ColossusSmashDebuff) and -power.rage > 30 and talent(3,3) then
           return cast(SB.Rend)
-        end  
-          
-        -- Cast Skullsplitter when less than 60 Rage, when Bladestorm is not about to be used.  
+        end
+
+        -- Cast Skullsplitter when less than 60 Rage, when Bladestorm is not about to be used.
         if castable(SB.Skullsplitter, 'target') and -spell(SB.Skullsplitter) == 0 and -spell(SB.Bladestorm) > 12 and -power.rage < 60 and talent(1,3) then
           return cast(SB.Skullsplitter)
         end
-        
+
 --[[        -- Cast Avatar prior to Colossus Smash
-        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then 
+        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then
           print'ST NE'
           return cast(SB.Avatar)
         end]]
-        
-        -- Cast Ravager immediately prior to Colossus Smash    
+
+        -- Cast Ravager immediately prior to Colossus Smash
         if castable(SB.Ravager, 'target') and -spell(SB.Ravager) == 0 and -spell(SB.ColossusSmash) == 0 and talent(7,3) then
           return cast(SB.Ravager, 'player')
         end
-        
+
         -- Cast Colossus Smash
         if castable(SB.ColossusSmash, 'target') and -spell(SB.ColossusSmash) == 0 then
           return cast(SB.ColossusSmash)
         end
-            
+
         -- Cast Warbreaker
         if castable(SB.Warbreaker, 'target') and -spell(SB.Warbreaker) == 0 and talent(5,2) then
           return cast(SB.Warbreaker)
         end
-            
-        -- Cast Deadly Calm           
+
+        -- Cast Deadly Calm
         if castable(SB.DeadlyCalm, 'target') and -spell(SB.DeadlyCalm) == 0 and talent(6,3) then
           return cast(SB.DeadlyCalm)
         end
-            
+
         -- Cast Execute with Sudden Death proc
         if castable(SB.Execute, 'target') and -buff(SB.SuddenDeath) and -power.rage >= 20 then
           return cast(SB.Execute)
         end
-         
+
         -- Cast Overpower to buff Mortal Strike
         if castable(SB.Overpower, 'target') and -spell(SB.Overpower) == 0 and -power.rage >= 10 then
           return cast(SB.Overpower)
@@ -224,240 +225,272 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         if castable(SB.Bladestorm, 'target') and -spell(SB.Bladestorm) == 0 and -target.debuff(SB.ColossusSmashDebuff) then
           return cast(SB.Bladestorm)
         end
-         
+
         -- Cast Whirlwind
         if castable(SB.Whirlwind, 'target') and -spell(SB.Whirlwind) == 0 and -power.rage >= 30 then
           return cast(SB.Whirlwind)
         end
-      end  
-        
+      end
+
       -- Single Target - Execute phase
       if -target.health < 20 or (talent(3,1) and -target.health < 35) then
           print'ST Execute phase'
-          
+
         -- Cast Skullsplitter when less than 60 Rage
         if castable(SB.Skullsplitter, 'target') and -spell(SB.Skullsplitter) == 0 and -power.rage < 60 and talent(1,3) then
           return cast(SB.Skullsplitter)
         end
-        
+
 --[[        -- Cast Avatar prior to Colossus Smash
-        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then 
+        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then
           print'ST Execute'
           return cast(SB.Avatar)
         end]]
-        
-        -- Cast Ravager immediately prior to Colossus Smash    
+
+        -- Cast Ravager immediately prior to Colossus Smash
         if castable(SB.Ravager, 'target') and -spell(SB.Ravager) == 0 and -spell(SB.ColossusSmash) == 0 and talent(7,3) then
           return cast(SB.Ravager, 'player')
-        end        
+        end
 
         -- Cast Colossus Smash
         if castable(SB.ColossusSmash, 'target') and -spell(SB.ColossusSmash) == 0 then
           return cast(SB.ColossusSmash)
         end
-            
+
         -- Cast Warbreaker
         if castable(SB.Warbreaker, 'target') and -spell(SB.Warbreaker) == 0 and talent(5,2) then
           return cast(SB.Warbreaker)
-        end            
-        
+        end
+
         -- Cast Bladestorm when under 30 Rage.
         if castable(SB.Bladestorm, 'target') and -spell(SB.Bladestorm) == 0 and -power.rage < 30 then
           return cast(SB.Bladestorm)
         end
-            
-        -- Cast Deadly Calm           
+
+        -- Cast Deadly Calm
         if castable(SB.DeadlyCalm, 'target') and -spell(SB.DeadlyCalm) == 0 and talent(6,3) then
           return cast(SB.DeadlyCalm)
-        end            
-        
-        -- Cast Mortal Strike with 2 stacks of Overpower and Dreadnaught talented.        
+        end
+
+        -- Cast Mortal Strike with 2 stacks of Overpower and Dreadnaught talented.
         if castable(SB.MortalStrike, 'target') and -spell(SB.MortalStrike) == 0 and buff(SB.Overpower).count == 2 and talent(7,2) and -power.rage >= 30 then
           return cast(SB.MortalStrike)
         end
-            
-        -- Cast Overpower 
+
+        -- Cast Overpower
         if castable(SB.Overpower, 'target') and -spell(SB.Overpower) == 0 and -power.rage >= 10 then
           return cast(SB.Overpower)
         end
-            
+
         -- Cast Execute
         if castable(SB.Execute, 'target') and -power.rage >= 20 then
           return cast(SB.Execute)
         end
-        
+
       end
-    
+
     end
-    
+
     -- Multiple Target - 2 to 3
     if enemyCount == 2 or enemyCount == 3 then
         print'MultiTarget 2-3'
- 
+
         -- Cast Sweeping Strikes if you are not about to use Bladestorm
         if castable(SB.SweepingStrikes, 'target') and -spell(SB.SweepingStrikes) == 0 and -spell(SB.Bladestorm) > 12 then
           return cast(SB.SweepingStrikes)
         end
-        
+
         -- Cast Rend if less than 4 seconds remains, outside of Colossus Smash
         if castable(SB.Rend, 'target') and target.debuff(SB.Rend).remains < 4 and not -target.debuff(SB.ColossusSmashDebuff) and -power.rage > 30 and talent(3,3) then
           return cast(SB.Rend)
-        end       
-        
-        -- Cast Skullsplitter when less than 60 Rage, when Bladestorm is not about to be used.  
+        end
+
+        -- Cast Skullsplitter when less than 60 Rage, when Bladestorm is not about to be used.
         if castable(SB.Skullsplitter, 'target') and -spell(SB.Skullsplitter) == 0 and -spell(SB.Bladestorm) > 12 and -power.rage < 60 and talent(1,3) then
           return cast(SB.Skullsplitter)
         end
-        
+
 --[[        -- Cast Avatar prior to Colossus Smash
-        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then 
+        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then
           print'MT 2-3'
           return cast(SB.Avatar)
         end]]
-        
-        -- Cast Ravager immediately prior to Colossus Smash    
+
+        -- Cast Ravager immediately prior to Colossus Smash
         if castable(SB.Ravager, 'target') and -spell(SB.Ravager) == 0 and -spell(SB.ColossusSmash) == 0 and talent(7,3) then
           return cast(SB.Ravager, 'player')
-        end         
+        end
 
         -- Cast Colossus Smash
         if castable(SB.ColossusSmash, 'target') and -spell(SB.ColossusSmash) == 0 then
           return cast(SB.ColossusSmash)
         end
-        
+
         -- Cast Warbreaker
         if castable(SB.Warbreaker, 'target') and -spell(SB.Warbreaker) == 0 and talent(5,2) then
           return cast(SB.Warbreaker)
-        end         
-        
+        end
+
         -- Cast Bladestorm during the Colossus Smash debuff
         if castable(SB.Bladestorm, 'target') and -spell(SB.Bladestorm) == 0 and -target.debuff(SB.ColossusSmashDebuff) then
           return cast(SB.Bladestorm)
         end
-        
-        -- Cast Deadly Calm           
+
+        -- Cast Deadly Calm
         if castable(SB.DeadlyCalm, 'target') and -spell(SB.DeadlyCalm) == 0 and talent(6,3) then
           return cast(SB.DeadlyCalm)
-        end        
-        
+        end
+
         -- Cast Cleave to maintain Deep Wounds
         if castable(SB.Cleave, 'target') and -spell(SB.Cleave) == 0 and -power.rage >= 20 and talent(5,3) then
           return cast(SB.Cleave)
         end
-        
+
         -- Cast Mortal Strike with 2 stacks of Overpower and Dreadnaught talented
         if castable(SB.MortalStrike, 'target') and -spell(SB.MortalStrike) == 0 and buff(SB.Overpower).count == 2 and talent(7,2) and -power.rage >= 30 then
           return cast(SB.MortalStrike)
         end
-        
-        -- Cast Execute 
+
+        -- Cast Execute
         if castable(SB.Execute, 'target') and -power.rage >= 20 then
           return cast(SB.Execute)
         end
-        
-        -- Cast Overpower 
-         if castable(SB.Overpower, 'target') and -spell(SB.Overpower) == 0 and -power.rage >= 10 then
-          return cast(SB.Overpower)
-        end
-        
-        -- Cast Mortal Strike 
-        if castable(SB.MortalStrike, 'target') and -spell(SB.MortalStrike) == 0 and -power.rage >= 30 then
-          return cast(SB.MortalStrike)
-        end
-        
-        -- Cast Slam during Sweeping Strikes
-        if castable(SB.Slam, 'target') and -spell(SB.Slam) == 0 and -power.rage >= 20 and -buff(SB.SweepingStrikes) then
-          return cast(SB.Slam)
-        end
-        
-        -- Cast Whirlwind 
-        if castable(SB.Whirlwind, 'target') and -spell(SB.Whirlwind) == 0 and -power.rage >= 30 then
-          return cast(SB.Whirlwind)
-        end
-        
-    end  
-    
-    -- Multiple Target - 4+
-    if enemyCount >= 4 then
-        print'MultiTarget 4+'
-      
-        -- Cast Sweeping Strikes if you are not about to use Bladestorm
-        if castable(SB.SweepingStrikes, 'target') and -spell(SB.SweepingStrikes) == 0 and -spell(SB.Bladestorm) > 12 then
-          return cast(SB.SweepingStrikes)
-        end
-        
-        -- Cast Skullsplitter when less than 60 Rage, when Bladestorm is not about to be used.  
-        if castable(SB.Skullsplitter, 'target') and -spell(SB.Skullsplitter) == 0 and -spell(SB.Bladestorm) > 12 and -power.rage < 60 and talent(1,3) then
-          return cast(SB.Skullsplitter)
-        end
-        
---[[        -- Cast Avatar prior to Colossus Smash
-        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then 
-          print'MT 4+'
-          return cast(SB.Avatar)
-        end]]
-        
-        -- Cast Ravager immediately prior to Colossus Smash    
-        if castable(SB.Ravager, 'target') and -spell(SB.Ravager) == 0 and -spell(SB.ColossusSmash) == 0 and talent(7,3) then
-          return cast(SB.Ravager, 'player')
-        end         
-        
-        -- Cast Colossus Smash
-        if castable(SB.ColossusSmash, 'target') and -spell(SB.ColossusSmash) == 0 then
-          return cast(SB.ColossusSmash)
-        end
-        
-        -- Cast Warbreaker
-        if castable(SB.Warbreaker, 'target') and -spell(SB.Warbreaker) == 0 and talent(5,2) then
-          return cast(SB.Warbreaker)
-        end         
-        
-        -- Cast Bladestorm during the Colossus Smash debuff
-        if castable(SB.Bladestorm, 'target') and -spell(SB.Bladestorm) == 0 and -target.debuff(SB.ColossusSmashDebuff) then
-          return cast(SB.Bladestorm)
-        end
-        
-        -- Cast Deadly Calm           
-        if castable(SB.DeadlyCalm, 'target') and -spell(SB.DeadlyCalm) == 0 and talent(6,3) then
-          return cast(SB.DeadlyCalm)
-        end        
-        
-        -- Cast Cleave to maintain Deep Wounds
-        if castable(SB.Cleave, 'target') and -spell(SB.Cleave) == 0 and -power.rage >= 20 and talent(5,3) then
-          return cast(SB.Cleave)
-        end
-        
-        -- Cast Execute during Sweeping Strikes
-         if castable(SB.Execute, 'target') and -spell(SB.Execute) == 0 and -power.rage >= 20 and -buff(SB.SweepingStrikes) then
-          return cast(SB.Execute)
-        end
-        
-        -- Cast Mortal Strike during Sweeping Strikes
-         if castable(SB.MortalStrike, 'target') and -spell(SB.MortalStrike) == 0 and -power.rage >= 30 and -buff(SB.SweepingStrikes) then
-          return cast(SB.MortalStrike)
-        end
-        
-        -- Cast Whirlwind during Colossus Smash
-         if castable(SB.Whirlwind, 'target') and -spell(SB.Whirlwind) == 0 and -power.rage >= 30 and -target.debuff(SB.ColossusSmashDebuff) then
-          return cast(SB.Whirlwind)
-        end
-        
+
         -- Cast Overpower
          if castable(SB.Overpower, 'target') and -spell(SB.Overpower) == 0 and -power.rage >= 10 then
           return cast(SB.Overpower)
         end
-        
+
+        -- Cast Mortal Strike
+        if castable(SB.MortalStrike, 'target') and -spell(SB.MortalStrike) == 0 and -power.rage >= 30 then
+          return cast(SB.MortalStrike)
+        end
+
+        -- Cast Slam during Sweeping Strikes
+        if castable(SB.Slam, 'target') and -spell(SB.Slam) == 0 and -power.rage >= 20 and -buff(SB.SweepingStrikes) then
+          return cast(SB.Slam)
+        end
+
+        -- Cast Whirlwind
+        if castable(SB.Whirlwind, 'target') and -spell(SB.Whirlwind) == 0 and -power.rage >= 30 then
+          return cast(SB.Whirlwind)
+        end
+
+    end
+
+    -- Multiple Target - 4+
+    if enemyCount >= 4 then
+        print'MultiTarget 4+'
+
+        -- Cast Sweeping Strikes if you are not about to use Bladestorm
+        if castable(SB.SweepingStrikes, 'target') and -spell(SB.SweepingStrikes) == 0 and -spell(SB.Bladestorm) > 12 then
+          return cast(SB.SweepingStrikes)
+        end
+
+        -- Cast Skullsplitter when less than 60 Rage, when Bladestorm is not about to be used.
+        if castable(SB.Skullsplitter, 'target') and -spell(SB.Skullsplitter) == 0 and -spell(SB.Bladestorm) > 12 and -power.rage < 60 and talent(1,3) then
+          return cast(SB.Skullsplitter)
+        end
+
+--[[        -- Cast Avatar prior to Colossus Smash
+        if castable(SB.Avatar, 'target') and -spell(SB.Avatar) == 0 and -spell(SB.ColossusSmash) == 0 and talent(6,2) then
+          print'MT 4+'
+          return cast(SB.Avatar)
+        end]]
+
+        -- Cast Ravager immediately prior to Colossus Smash
+        if castable(SB.Ravager, 'target') and -spell(SB.Ravager) == 0 and -spell(SB.ColossusSmash) == 0 and talent(7,3) then
+          return cast(SB.Ravager, 'player')
+        end
+
+        -- Cast Colossus Smash
+        if castable(SB.ColossusSmash, 'target') and -spell(SB.ColossusSmash) == 0 then
+          return cast(SB.ColossusSmash)
+        end
+
+        -- Cast Warbreaker
+        if castable(SB.Warbreaker, 'target') and -spell(SB.Warbreaker) == 0 and talent(5,2) then
+          return cast(SB.Warbreaker)
+        end
+
+        -- Cast Bladestorm during the Colossus Smash debuff
+        if castable(SB.Bladestorm, 'target') and -spell(SB.Bladestorm) == 0 and -target.debuff(SB.ColossusSmashDebuff) then
+          return cast(SB.Bladestorm)
+        end
+
+        -- Cast Deadly Calm
+        if castable(SB.DeadlyCalm, 'target') and -spell(SB.DeadlyCalm) == 0 and talent(6,3) then
+          return cast(SB.DeadlyCalm)
+        end
+
+        -- Cast Cleave to maintain Deep Wounds
+        if castable(SB.Cleave, 'target') and -spell(SB.Cleave) == 0 and -power.rage >= 20 and talent(5,3) then
+          return cast(SB.Cleave)
+        end
+
+        -- Cast Execute during Sweeping Strikes
+         if castable(SB.Execute, 'target') and -spell(SB.Execute) == 0 and -power.rage >= 20 and -buff(SB.SweepingStrikes) then
+          return cast(SB.Execute)
+        end
+
+        -- Cast Mortal Strike during Sweeping Strikes
+         if castable(SB.MortalStrike, 'target') and -spell(SB.MortalStrike) == 0 and -power.rage >= 30 and -buff(SB.SweepingStrikes) then
+          return cast(SB.MortalStrike)
+        end
+
+        -- Cast Whirlwind during Colossus Smash
+         if castable(SB.Whirlwind, 'target') and -spell(SB.Whirlwind) == 0 and -power.rage >= 30 and -target.debuff(SB.ColossusSmashDebuff) then
+          return cast(SB.Whirlwind)
+        end
+
+        -- Cast Overpower
+         if castable(SB.Overpower, 'target') and -spell(SB.Overpower) == 0 and -power.rage >= 10 then
+          return cast(SB.Overpower)
+        end
+
         -- Cast Whirlwind
          if castable(SB.Whirlwind, 'target') and -spell(SB.Whirlwind) == 0 and -power.rage >= 30 then
           return cast(SB.Whirlwind)
         end
-        
-    end     
+
+    end
 
 end
 end
 
 local function resting()
+  local lfg = GetLFGProposal();
+  local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
+  local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
+  local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
+  local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
+  local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
+  local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
+  local bgstatus = GetBattlefieldStatus(1);
+  local autojoin = dark_addon.settings.fetch('armswar_settings_autojoin', true)
+
+
+  -------------
+  --Auto Join--
+  -------------
+  if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
+      SetCVar("Sound_EnableSoundWhenGameIsInBG", 1)
+  elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
+      SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
+  end
+
+  if autojoin == true and lfg == true or bgstatus == "confirm" then
+      PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
+      lftime = lftime + 1
+  end
+
+  if lftime >= math.random(20, 35) then
+      SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
+      macro('/click LFGDungeonReadyDialogEnterDungeonButton')
+      lftime = 0
+  end
+
+
 
   local enemyCount = enemies.around(8)
   dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
@@ -496,6 +529,8 @@ local function interface()
             { key = 'VRHealth', type = 'spinner', text = 'Victory Rush/Imp Victory at Health %', default = '80', desc = 'cast Victory Rush/Imp Victory at', min = 0, max = 100, step = 1 },
             { key = 'healthstone', type = 'checkspin', default = '20', text = 'Healthstone', desc = 'use Healthstone at health %', min = 1, max = 100, step = 1 },
             { key = 'GiftHealth', type = 'spinner', text = 'Gift of the Naaru at Health %', default = '20', desc = 'cast Gift of the Naaru at', min = 0, max = 100, step = 1 },
+            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
+
         }
     }
 
