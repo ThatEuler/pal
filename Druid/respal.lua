@@ -193,8 +193,9 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
 
 -- Use Wild Growth, when at least 4/6 members of the group/raid are damaged.
 
-    if lowest.castable(SB.WildGrowth) and not player.moving and group.under(wildgrowthpercent, 30, true) >= wildgrowthnumber then
-        return cast(SB.WildGrowth, lowest)
+    if (lowest.castable(SB.WildGrowth) and not player.moving and group.under(wildgrowthpercent, 30, true) >= wildgrowthnumber) or
+       (player.buff(SB.Innervate).up and lowest.castable(SB.WildGrowth) and not player.moving )then
+		return cast(SB.WildGrowth, lowest)
     end
 -- Use Swiftmend on a player that just took heavy damage. If not in immediate danger, use Rejuvenation first.
     if lowest.castable(SB.Swiftmend)
@@ -207,19 +208,24 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
 
 -- Use Regrowth as an emergency heal.
     if not IsInRaid() then
-        if tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 70 then
-            return cast(SB.Regrowth, tank)
+        if (tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 70) or
+	   (player.buff(SB.Innervate).up and tank.castable(SB.Regrowth) and not player.moving) then
+           	return cast(SB.Regrowth, tank)
         end
-        if lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 50 then
-            return cast(SB.Regrowth, lowest)
-        elseif IsInRaid() then
-            if tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 50 then
-                return cast(SB.Regrowth, tank)
-            end
-            if lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 40 then
-                return cast(SB.Regrowth, lowest)
-            end
+        if (lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 50) or
+	   (player.buff(SB.Innervate).up and lowest.castable(SB.Regrowth) and not player.moving) then
+           	return cast(SB.Regrowth, lowest)
+	end
+    elseif IsInRaid() then
+        if (tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 50) or
+	   (player.buff(SB.Innervate).up and tank.castable(SB.Regrowth) and not player.moving) then
+            	return cast(SB.Regrowth, tank)
         end
+        if (lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 40) or
+	   (player.buff(SB.Innervate).up and lowest.castable(SB.Regrowth) and not player.moving) then
+           	return cast(SB.Regrowth, lowest)
+        end
+    end
     end
 
 -------------
