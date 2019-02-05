@@ -136,9 +136,9 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
         end
 
 -- Keep Lifebloom on an active tank, or on self if talent(7,1)
-        if talent(7,1) and group.under(50, 30, true) and player.castable(SB.Lifebloom) and player.buff(SB.Lifebloom).down then
-            return cast(SB.Lifebloom, player)
-        end
+        --if talent(7,1) and group.under(50, 30, true) and player.castable(SB.Lifebloom) and player.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
+            --return cast(SB.Lifebloom, player)
+        --end
         if tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
             return cast(SB.Lifebloom, tank)
         end
@@ -215,7 +215,7 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
         if (lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 50) or
 	   (player.buff(SB.Innervate).up and lowest.castable(SB.Regrowth) and not player.moving) then
            	return cast(SB.Regrowth, lowest)
-	end
+			
     elseif IsInRaid() then
         if (tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 50) or
 	   (player.buff(SB.Innervate).up and tank.castable(SB.Regrowth) and not player.moving) then
