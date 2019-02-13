@@ -20,6 +20,7 @@ Paladin\retpal.lua
 Shaman\ShamPalRest.lua
 Shaman\ShamPalEle.lua
 Shaman\Elepal.lua
+Shaman\ShamPalEnh.lua
 Priest\holyPal.lua
 Warrior\protwarpal.lua
 Warrior\armswarpal.lua
