@@ -53,18 +53,6 @@ local healthstonepercent = dark_addon.settings.fetch('respal_settings_healthston
 local ironbarkpercent = dark_addon.settings.fetch('respal_settings_ironbarkpercent', 66)
 local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishpercent', 75)
 
-
---[[    Trinket use
-    healing totem trink
-       if GetItemCooldown(158320) == 0 and tank.health.percent < 80 then
-       macro('/use [help] 14; [@targettarget] 14')
-     end
-
-    first mate spyglass
-    if GetItemCooldown(158163) == 0 and tank.health.percent < 80 then
-      macro('/use 13')
-    end
-]]--
 -------------
 ---Utility---
 -------------
@@ -82,6 +70,18 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
     if player.castable(SB.Barkskin) and player.health.percent < barkskinpercent then
         return cast(SB.Barkskin, player)
     end
+    
+--Trinket Use
+    --trinket slot 1
+    local GearSlot13 = GetInventoryItemID("player", 13)
+	if IsUsableItem(GearSlot13) and GetItemCooldown(GearSlot13) == 0 and tank.health.percent < 70 and tank.distance < 40 then
+        macro('/use [help] 13; [@targettarget] 13')
+    end
+    -- trinket slot 2
+    local GearSlot14 = GetInventoryItemID("player", 14)
+    if IsUsableItem(GearSlot14) and GetItemCooldown(GearSlot14) == 0 and tank.health.percent < 70 and tank.distance < 40 then
+	    macro('/use [help] 14; [@targettarget] 14')
+	end
 
 -------------
 --Modifiers--
@@ -135,7 +135,10 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
             return cast(SB.Flourish)
         end
 
--- Keep Lifebloom, on an active tank.
+-- Keep Lifebloom on an active tank, or on self if talent(7,1)
+        --if talent(7,1) and group.under(50, 30, true) and player.castable(SB.Lifebloom) and player.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
+            --return cast(SB.Lifebloom, player)
+        --end
         if tank.castable(SB.Lifebloom) and tank.buff(SB.Lifebloom).down and not lastcast(SB.Lifebloom) then
             return cast(SB.Lifebloom, tank)
         end
@@ -154,14 +157,14 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
 
 --- Decurse
     if toggle('dispell', false) then
-        local dispellable_unit = group.removable('curse', 'magic', 'poison')
-        if dispellable_unit and spell(SB.NaturesCure).cooldown == 0 then
-            return cast(SB.NaturesCure, dispellable_unit)
-        end
         -- self-cleanse
-        local dispellable_unit = player.removable('curse', 'magic', 'poison')
-        if dispellable_unit and spell(SB.NaturesCure).cooldown == 0 then
-            return cast(SB.NaturesCure, dispellable_unit)
+        if castable(SB.NaturesCure) and player.dispellable(SB.NaturesCure) then
+            return cast(SB.NaturesCure, player)
+        end
+        -- group cleanse
+        local unit = group.dispellable(SB.NaturesCure)
+        if unit and unit.castable(SB.NaturesCure) then
+            return cast(SB.NaturesCure, unit)
         end
     end
 
@@ -190,8 +193,9 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
 
 -- Use Wild Growth, when at least 4/6 members of the group/raid are damaged.
 
-    if lowest.castable(SB.WildGrowth) and not player.moving and group.under(wildgrowthpercent, 30, true) >= wildgrowthnumber then
-        return cast(SB.WildGrowth, lowest)
+    if (lowest.castable(SB.WildGrowth) and not player.moving and group.under(wildgrowthpercent, 30, true) >= wildgrowthnumber) or
+       (player.buff(SB.Innervate).up and lowest.castable(SB.WildGrowth) and not player.moving )then
+		return cast(SB.WildGrowth, lowest)
     end
 -- Use Swiftmend on a player that just took heavy damage. If not in immediate danger, use Rejuvenation first.
     if lowest.castable(SB.Swiftmend)
@@ -204,19 +208,24 @@ local flourishpercent = dark_addon.settings.fetch('respal_settings_flourishperce
 
 -- Use Regrowth as an emergency heal.
     if not IsInRaid() then
-        if tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 70 then
-            return cast(SB.Regrowth, tank)
+        if (tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 70) or
+	   (player.buff(SB.Innervate).up and tank.castable(SB.Regrowth) and not player.moving) then
+           	return cast(SB.Regrowth, tank)
         end
-        if lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 50 then
-            return cast(SB.Regrowth, lowest)
-        elseif IsInRaid() then
-            if tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 50 then
-                return cast(SB.Regrowth, tank)
-            end
-            if lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 40 then
-                return cast(SB.Regrowth, lowest)
-            end
+        if (lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 50) or
+	   (player.buff(SB.Innervate).up and lowest.castable(SB.Regrowth) and not player.moving) then
+           	return cast(SB.Regrowth, lowest)
+			
+    elseif IsInRaid() then
+        if (tank.castable(SB.Regrowth) and not player.moving and tank.health.percent <= 50) or
+	   (player.buff(SB.Innervate).up and tank.castable(SB.Regrowth) and not player.moving) then
+            	return cast(SB.Regrowth, tank)
         end
+        if (lowest.castable(SB.Regrowth) and not player.moving and lowest.health.percent <= 40) or
+	   (player.buff(SB.Innervate).up and lowest.castable(SB.Regrowth) and not player.moving) then
+           	return cast(SB.Regrowth, lowest)
+        end
+    end
     end
 
 -------------

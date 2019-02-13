@@ -20,11 +20,11 @@ local function combat()
     --- Reading from settings
     -----------------------------
 
-    local autoStun = dark_addon.settings.fetch('holypal_settings_autoStun', true)
-    local usehealthstone = dark_addon.settings.fetch('holypal_settings_healthstone.check', true)
-    local healthstonepercent = dark_addon.settings.fetch('holypal_settings_healthstone.spin', 35)
-    local autoRacial = dark_addon.settings.fetch('holypal_settings_autoRacial', true)
-    local useTrinkets = dark_addon.settings.fetch('holypal_settings_useTrinkets', true)
+    local autoStun = dark_addon.settings.fetch('protpal_settings_autoStun', true)
+    local usehealthstone = dark_addon.settings.fetch('protpal_settings_healthstone.check', true)
+    local healthstonepercent = dark_addon.settings.fetch('protpal_settings_healthstone.spin', 35)
+    local autoRacial = dark_addon.settings.fetch('protpal_settings_autoRacial', true)
+    local useTrinkets = dark_addon.settings.fetch('protpal_settings_useTrinkets', true)
 
     if not target.alive or not target.enemy then
         return
