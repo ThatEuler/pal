@@ -45,6 +45,7 @@ SB.TailwindTotem = 262400
 SB.LightningShield = 192106
 SB.EarthShield = 974
 SB.FeralLunge = 196884
+SB.AstralShift = 108271
 
 
 local function combat()
@@ -56,6 +57,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 	local primalprimerbuild = dark_addon.settings.fetch('enhsha_settings_primalprimerbuild')
 	local stormstrikebuild = dark_addon.settings.fetch('enhsha_settings_stormstrikebuild')
     local HSHealth = dark_addon.settings.fetch('enhsha_settings_HSHealth',60)
+    local ASHealth = dark_addon.settings.fetch('enhsha_settings_ASHealth',20)
     local GiftHealth = dark_addon.settings.fetch('enhsha_settings_GiftHealth',20)
     local Hstonecheck = dark_addon.settings.fetch('enhsha_settings_healthstone.check',true)
     local Hstonepercent = dark_addon.settings.fetch('enhsha_settings_healthstone.spin',20)
@@ -108,6 +110,12 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     if castable(SB.HealingSurge) and -player.health <= HSHealth then
         print('Healing Surge @ ' .. HSHealth)
         return cast(SB.HealingSurge)
+    end
+
+	-- Defensives
+    if castable(SB.AstralShift) and -player.health <= ASHealth then
+        print('Astral Shift @ ' .. ASHealth)
+        return cast(SB.AstralShift)
     end
 
     -- Healthstone
@@ -234,7 +242,7 @@ if stormstrikebuild == true then
         end
 
     --Cast Ascendance (with Ascendance talent)
-        if castable(SB.Ascendance) and -spell(SB.Ascendance) == 0 and talent(7,3) then
+        if toggle('cooldowns', false) and castable(SB.Ascendance) and -spell(SB.Ascendance) == 0 and talent(7,3) then
             return cast(SB.Ascendance)
         end
 
@@ -330,12 +338,12 @@ local function resting()
 
   --Lightning Shield OOC
   if castable(SB.LightningShield) and -spell(SB.LightningShield) == 0 and not player.buff(SB.LightningShield).up and talent(1,3) then
-    return cast(SB.LightningShield)
+    return cast(SB.LightningShield, 'player')
   end
 
   --Earth Shield OOC
   if castable(SB.EarthShield) and -spell(SB.EarthShield) == 0 and not player.buff(SB.EarthShield).up and talent(3,2) then
-    return cast(SB.EarthShield)
+    return cast(SB.EarthShield, 'player')
   end
 
   -- FeralLunge OOC
@@ -358,9 +366,10 @@ local function interface()
             { type = 'header', text = "            Rex's Enhancement Shaman Settings" },
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine' },
             { type = 'text', text = 'Stormstrike Rotation is flexible with talents' },
+            { type = 'text', text = 'Under Stormstrike Rotation, Ascendance is activated by Cooldowns toggle' },
             { type = 'text', text = 'For Primal Primer Rotation you must use 2 (2 or 3) 2 2 2 3 1' },
             { type = 'text', text = 'If you want automatic AOE then please remember to turn on EnemyNamePlates in WoW (V key)' },
-            { type = 'text', text = 'Shift Modifier used for Heroic Leap' },
+            { type = 'text', text = 'Shift Modifier used for Feral Lunge' },
             { type = 'rule' },
             { type = 'text', text = 'Interrupt Settings' },
             { key = 'intpercentlow', type = 'spinner', text = 'Interrupt Low %', default = '50', desc = 'low% cast time to interrupt at', min = 5, max = 50, step = 1 },
@@ -370,6 +379,7 @@ local function interface()
 			{ key = 'stormstrikebuild', type = 'checkbox', text = 'Stormstrike', desc = 'Use Stormstrike Rotation' },
             { type = 'text', text = 'Defensive Settings' },
             { key = 'HSHealth', type = 'spinner', text = 'Healing Surge at Health %', default = '60', desc = 'cast Healing Surge at', min = 0, max = 100, step = 1 },
+			{ key = 'ASHealth', type = 'spinner', text = 'Astral Shift at Health %', default = '20', desc = 'cast Astral Shift at', min = 0, max = 100, step = 1 },
             { key = 'healthstone', type = 'checkspin', default = '20', text = 'Healthstone', desc = 'use Healthstone at health %', min = 1, max = 100, step = 1 },
             { key = 'GiftHealth', type = 'spinner', text = 'Gift of the Naaru at Health %', default = '20', desc = 'cast Gift of the Naaru at', min = 0, max = 100, step = 1 },
         }
@@ -399,21 +409,21 @@ local function interface()
             end
         end
     })
-    dark_addon.interface.buttons.add_toggle({
-        name = 'useracials',
-        label = 'Use Racials',
-        font = 'dark_addon_icon',
-        on = {
-            label = dark_addon.interface.icon('toggle-on'),
-            color = dark_addon.interface.color.cyan,
-            color2 = dark_addon.interface.color.dark_cyan
-        },
-        off = {
-            label = dark_addon.interface.icon('toggle-off'),
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        }
-    })
+--    dark_addon.interface.buttons.add_toggle({
+--        name = 'useracials',
+--        label = 'Use Racials',
+--        font = 'dark_addon_icon',
+--        on = {
+--            label = dark_addon.interface.icon('toggle-on'),
+--            color = dark_addon.interface.color.cyan,
+--            color2 = dark_addon.interface.color.dark_cyan
+--        },
+--        off = {
+--            label = dark_addon.interface.icon('toggle-off'),
+--            color = dark_addon.interface.color.grey,
+--            color2 = dark_addon.interface.color.dark_grey
+--        }
+--    })
 
 end
 
