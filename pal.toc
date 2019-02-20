@@ -10,6 +10,7 @@ Demon Hunter\vengdhpal.lua
 Demon Hunter\havdhpal.lua
 Druid\balpal.lua
 Druid\guadrupal.lua
+Druid\ferdrupal.lua
 Druid\respal.lua
 Druid\balanceEXP.lua
 Hunter\bmpal.lua
