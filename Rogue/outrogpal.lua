@@ -49,6 +49,7 @@ SB.CheatDeath = 31230
 SB.CrimsonVial = 185311
 SB.Riposte = 199754
 SB.Stealth = 1784
+SB.Kick = 1766
 
 local function combat()
 if target.alive and target.enemy and player.alive and not player.channeling() then
