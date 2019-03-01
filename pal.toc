@@ -9,6 +9,8 @@ Support\Support.lua
 Demon Hunter\vengdhpal.lua
 Demon Hunter\havdhpal.lua
 Druid\balpal.lua
+Druid\guadrupal.lua
+Druid\ferdrupal.lua
 Druid\respal.lua
 Druid\balanceEXP.lua
 Hunter\bmpal.lua
@@ -17,6 +19,7 @@ Hunter\svpal.lua
 Paladin\protpal.lua
 Paladin\holypal.lua
 Paladin\retpal.lua
+Rogue\outrogpal.lua
 Shaman\ShamPalRest.lua
 Shaman\ShamPalEle.lua
 Shaman\Elepal.lua
