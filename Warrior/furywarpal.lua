@@ -1,10 +1,9 @@
 -- Fury Warrior for 8.1 by Rex
--- version 1.3 - 26th Jan 2019
+-- version 1.4 - 2nd Mar 2019
 -- Holding Shift = Heroic Leap to cursor
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.warrior
-local lftime = 0
 
 -- To Do
 
@@ -59,13 +58,14 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     local intpercenthigh = dark_addon.settings.fetch('furywar_settings_intpercenthigh',65)
     local ERHealth = dark_addon.settings.fetch('furywar_settings_ERHealth',60)
     local VRHealth = dark_addon.settings.fetch('furywar_settings_VRHealth',80)
-    local GiftHealth = dark_addon.settings.fetch('armswar_settings_GiftHealth',20)
+    local GiftHealth = dark_addon.settings.fetch('furywar_settings_GiftHealth',20)
     local Hstonecheck = dark_addon.settings.fetch('furywar_settings_healthstone.check',true)
     local Hstonepercent = dark_addon.settings.fetch('furywar_settings_healthstone.spin',20)
     local race = UnitRace('player')
 
     -- Targets in range check
     local enemyCount = enemies.around(8)
+    if enemyCount == 0 then enemyCount = 1 end
     dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
 
   -- Use Racials
@@ -76,7 +76,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
       if race == "Troll" and castabe(SB.Berserking) then
         return cast(SB.Berserking)
       end
-      if race == "Mag'har Orc" and castable(SB.AncestralCall) then
+      if castable(SB.AncestralCall) then
         return cast(SB.AncestralCall)
       end
       if race == "LightforgedDraenei" and castable(SB.LightsJudgement) then
@@ -95,11 +95,6 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     -- Heroic Leap IC
     if modifier.shift and castable(SB.HeroicLeap) then
         return cast(SB.HeroicLeap, 'ground')
-    end
-
-    -- Charge
-    if castable(SB.Charge) and target.distance > 8 and target.distance < 25 then
-        return cast(SB.Charge)
     end
 
     -- Interrupts
@@ -153,7 +148,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     --Whirlwind allows Fury to cleave its normal single target rotation on up to 4 additional targets, although some setup is done to ensure larger Bladestorm burst on intermittent waves of adds.
 
     --For general multitarget cleave
-    if enemyCount >= 2 or toggle('multitarget', false) then
+    if enemyCount >= 2 or toggle('multitarget', false) and target.distance <= 8 then
         -- Whirlwind to apply  Whirlwind whenever the buff is not up
         if castable(SB.Whirlwind) and -spell(SB.Whirlwind) == 0 and player.buff(SB.Whirlwind).down then
             return cast(SB.Whirlwind)
@@ -161,10 +156,11 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     --Continue the single target rotation, and Whirlwind should be kept up naturally
     --An example sequence might look like this:  Whirlwind -  Rampage -  Raging Blow -  Whirlwind -   Bloodthirst -  Raging Blow -  Whirlwind -  Bloodthirst -  Rampage -  Whirlwind...
 
-    end
+    end    
+
 
     -- Single Target
-    if enemyCount >= 1 then
+    if enemyCount >= 1 and target.distance <= 8 then
     -- Top talents: Endless Rage, Furious Slash, Carnage, Dragon Roar, Siegebreaker
         -- Furious Slash until 3 stacks, or to keep the buff from falling
         if castable(SB.FuriousSlash) and -spell(SB.FuriousSlash) == 0 and player.buff(SB.FuriousSlash).count < 3 and talent(3,3) then
@@ -222,51 +218,18 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Whirlwind
-        if castable(SB.Whirlwind) and -spell(SB.Whirlwind) == 0 then
+        if castable(SB.Whirlwind) then
             return cast(SB.Whirlwind)
         end
 
         --An example sequence with talents might look like this:  Siegebreaker -  Rampage -  Raging Blow -  Bloodthirst -  Dragon Roar -  Furious Slash -  Bloodthirst -  Rampage -  Raging Blow...
         --An example sequence without talents might look like this:  Rampage -  Raging Blow - Bloodthirst -  Raging Blow -  Whirlwind -  Bloodthirst -  Rampage -  Whirlwind...
-
     end
 
 end
 end
 
 local function resting()
-  local lfg = GetLFGProposal();
-  local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
-  local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
-  local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
-  local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
-  local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
-  local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
-  local bgstatus = GetBattlefieldStatus(1);
-  local autojoin = dark_addon.settings.fetch('furywar_settings_autojoin', true)
-
-  -------------
-  --Auto Join--
-  -------------
-  if autojoin == true and hasData == true or hasData2 == true or hasData4 == true or hasData5 == true or hasData6 == true or bgstatus == "queued" then
-      SetCVar("Sound_EnableSoundWhenGameIsInBG", 1)
-  elseif autojoin == false and hasdata == nil or hasData2 == nil or hasData3 == nil or hasData4 == nil or hasData5 == nil or hasData6 == nil or bgstatus == "none" then
-      SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
-  end
-
-  if autojoin == true and lfg == true or bgstatus == "confirm" then
-      PlaySound(SOUNDKIT.IG_PLAYER_INVITE, "Dialog");
-      lftime = lftime + 1
-  end
-
-  if lftime >= math.random(20, 35) then
-      SetCVar("Sound_EnableSoundWhenGameIsInBG", 0)
-      macro('/click LFGDungeonReadyDialogEnterDungeonButton')
-      lftime = 0
-  end
-
-
-
 
   local enemyCount = enemies.around(8)
   dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
@@ -302,8 +265,6 @@ local function interface()
             { key = 'VRHealth', type = 'spinner', text = 'Victory Rush/Imp Victory at Health %', default = '80', desc = 'cast Victory Rush/Imp Victory at', min = 0, max = 100, step = 1 },
             { key = 'healthstone', type = 'checkspin', default = '20', text = 'Healthstone', desc = 'use Healthstone at health %', min = 1, max = 100, step = 1 },
             { key = 'GiftHealth', type = 'spinner', text = 'Gift of the Naaru at Health %', default = '20', desc = 'cast Gift of the Naaru at', min = 0, max = 100, step = 1 },
-            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
-
         }
     }
 
@@ -315,8 +276,8 @@ local function interface()
         font = 'dark_addon_icon',
         on = {
             label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.warrior_brown,
-            color2 = dark_addon.interface.color.warrior_brown
+            color = dark_addon.interface.color.cyan,
+            color2 = dark_addon.interface.color.dark_cyan
         },
         off = {
             label = dark_addon.interface.icon('cog'),
