@@ -65,6 +65,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
     -- Targets in range check
     local enemyCount = enemies.around(8)
+    if enemyCount == 0 then enemyCount = 1 end
     dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
 
   -- Use Racials
@@ -430,7 +431,7 @@ end
 -- This is what actually tells DR about your custom rotation
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.shaman.enhancement,
-    name = 'RexEnhSha',
+    name = 'ShamPalEnh',
     label = 'Rex Enhancement Shaman',
     combat = combat,
     resting = resting,

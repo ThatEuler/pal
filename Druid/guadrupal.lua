@@ -425,7 +425,7 @@ end
 -- This is what actually tells DR about your custom rotation
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.druid.guardian,
-    name = 'RexGuDr',
+    name = 'guadrupal',
     label = 'Rex Guardian Druid',
     combat = combat,
     resting = resting,

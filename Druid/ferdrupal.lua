@@ -64,6 +64,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
   -- Targets in range check
     local enemyCount = enemies.around(8)
+    if enemyCount == 0 then enemyCount = 1 end
     dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
   
   -- Auto Attack
@@ -294,7 +295,7 @@ end
 -- This is what actually tells DR about your custom rotation
 dark_addon.rotation.register({
   spec = dark_addon.rotation.classes.druid.feral,
-  name = 'RexFerDru',
+  name = 'ferdrupal',
   label = 'Rex Feral Druid',
   combat = combat,
   resting = resting,
