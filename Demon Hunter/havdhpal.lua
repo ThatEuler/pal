@@ -429,7 +429,7 @@ local function interface()
             { type = 'text', text = 'Suggested Talents - 1 3 1 1 2 1 1' },
             { type = 'text', text = 'If you want AOE DPS then please remember to turn on Multitarget on the interface' },
             { type = 'text', text = 'Metamorphosis and Nemesis are both controlled by the Cooldowns toggle on the interface' },
-            { type = 'text', text = 'Eye Beam is cast using the SHIFT key modifier },
+            { type = 'text', text = 'Eye Beam is cast using the SHIFT key modifier' },
             { type = 'rule' },
             { type = 'text', text = 'Interrupt Settings' },
             { key = 'intpercentlow', type = 'spinner', text = 'Interrupt Low %', default = '50', desc = 'low% cast time to interrupt at', min = 5, max = 50, step = 1 },
