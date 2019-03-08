@@ -1,6 +1,3 @@
--- Havoc Demon Hunter for 8.1 by Rex
--- version 1.1 - 22nd Jan 2019
-
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.demonhunter
 
@@ -55,6 +52,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
     -- Targets in range function
     local enemyCount = enemies.around(8)
+    if enemyCount == 0 then enemyCount = 1 end
     dark_addon.interface.status_extra('T#:' .. enemyCount .. ' D:' .. target.distance)
 
     -- Auto Attack
@@ -107,7 +105,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
         -- Blade Dance if  First Blood is talented or  Blade Dance will hit 2+ targets while  Trail of Ruin is talented. and  Metamorphosis is not ready.
         if castable(SB.BladeDance, 'target') and -spell(SB.BladeDance) == 0 and (talent(5,2) or (talent(3,1) and (enemyCount >= 2 or toggle('multitarget'))))
-                and -spell(SB.Metamorphosis) > 0 then
+                and -spell(SB.Metamorphosis) > 0 and target.distance < 8 then
             return cast(SB.BladeDance, 'target')
         end
 
@@ -122,7 +120,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam if not talented into  Blind Fury or your fury deficit is >= 50 and you cannot extended Metamorphosis again.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and (not talent(1,1) or (not player.buff(SB.Metamorphosis).up and power.fury.actual <= 50)) then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and (not talent(1,1) or (not player.buff(SB.Metamorphosis).up and power.fury.actual <= 50)) then
             return cast(SB.EyeBeam)
         end
 
@@ -173,7 +171,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 then
             return cast(SB.EyeBeam)
         end
 
@@ -183,7 +181,8 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Blade Dance if  First Blood is talented or  Blade Dance will hit 2+ targets while  Trail of Ruin is talented.
-        if castable(SB.BladeDance, 'target') and -spell(SB.BladeDance) == 0 and (talent(5,2) or (talent(3,1) and (enemyCount >= 2 or toggle('multitarget')))) then
+        if castable(SB.BladeDance, 'target') and -spell(SB.BladeDance) == 0 and (talent(5,2) or (talent(3,1) and (enemyCount >= 2 or toggle('multitarget')))) 
+        and target.distance < 8 then
             return cast(SB.BladeDance, 'target')
         end
 
@@ -193,7 +192,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam if  Blind Fury is not talented and  Dark Slash is not talented and if  First Blood is talented your fury is >= 45.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and not talent(1,1) and not talent(5,3) and (talent(5,2) and power.fury.actual >= 45) then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and not talent(1,1) and not talent(5,3) and (talent(5,2) and power.fury.actual >= 45) then
             return cast(SB.EyeBeam)
         end
 
@@ -210,7 +209,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam if talented into  Blind Fury.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and talent(1,1) then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and talent(1,1) then
             return cast(SB.EyeBeam)
         end
 
@@ -254,7 +253,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam if  Momentum is active.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and player.buff(SB.Momentum).up then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and player.buff(SB.Momentum).up then
             return cast(SB.EyeBeam)
         end
 
@@ -264,7 +263,8 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Blade Dance if  First Blood is talented or  Blade Dance will hit 2+ targets while  Trail of Ruin is talented.
-        if castable(SB.BladeDance, 'target') and -spell(SB.BladeDance) == 0 and (talent(5,2) or (talent(3,1) and (enemyCount >= 2 or toggle('multitarget')))) then
+        if castable(SB.BladeDance, 'target') and -spell(SB.BladeDance) == 0 and (talent(5,2) or (talent(3,1) and (enemyCount >= 2 or toggle('multitarget')))) 
+        and target.distance < 8 then
             return cast(SB.BladeDance, 'target')
         end
 
@@ -274,7 +274,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam if  Blind Fury is not talented and  Dark Slash is not talented and if  First Blood is talented your fury is >= 45.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and not talent(1,1) and not talent(5,3) and (talent(5,2) and power.fury.actual >= 45) then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and not talent(1,1) and not talent(5,3) and (talent(5,2) and power.fury.actual >= 45) then
             return cast(SB.EyeBeam)
         end
 
@@ -291,7 +291,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         end
 
         -- Eye Beam if talented into  Blind Fury.
-        if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and talent(1,1) then
+        if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 and talent(1,1) then
             return cast(SB.EyeBeam)
         end
 
@@ -343,7 +343,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     end
 
     -- Eye Beam.
-    if castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 then
+    if modifier.shift and castable(SB.EyeBeam, 'target') and -spell(SB.EyeBeam) == 0 then
         return cast(SB.EyeBeam)
     end
 
@@ -354,7 +354,7 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
     -- Blade Dance if  First Blood is talented or on multiple targets (2+ with  Trail of Ruin 3+ otherwise. and  Metamorphosis is not ready.
     if castable(SB.BladeDance, 'target') and -spell(SB.BladeDance) == 0 and (talent(5,2) or (talent(3,1) and (enemyCount >= 2 or toggle('multitarget'))))
-            and -spell(SB.Metamorphosis) > 0 then
+            and -spell(SB.Metamorphosis) > 0 and target.distance < 8 then
         return cast(SB.BladeDance, 'target')
     end
 
@@ -429,6 +429,7 @@ local function interface()
             { type = 'text', text = 'Suggested Talents - 1 3 1 1 2 1 1' },
             { type = 'text', text = 'If you want AOE DPS then please remember to turn on Multitarget on the interface' },
             { type = 'text', text = 'Metamorphosis and Nemesis are both controlled by the Cooldowns toggle on the interface' },
+            { type = 'text', text = 'Eye Beam is cast using the SHIFT key modifier },
             { type = 'rule' },
             { type = 'text', text = 'Interrupt Settings' },
             { key = 'intpercentlow', type = 'spinner', text = 'Interrupt Low %', default = '50', desc = 'low% cast time to interrupt at', min = 5, max = 50, step = 1 },
@@ -473,7 +474,7 @@ end
 dark_addon.rotation.register({
     spec = dark_addon.rotation.classes.demonhunter.havoc,
     name = 'havdhpal',
-    label = 'Pal Project: Havoc Demon Hunter',
+    label = 'Rex Havoc Demon Hunter',
     combat = combat,
     resting = resting,
     interface = interface
