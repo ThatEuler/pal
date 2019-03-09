@@ -32,7 +32,7 @@ local function combat()
         end
 
         -- Cooldowns
-        if castable(SB.DoubleTap) and spell(SB.AimedShot).chargeds >= 1 then
+        if castable(SB.DoubleTap) and spell(SB.AimedShot).charges >= 1 then
             return cast(SB.DoubleTap)
         end
         if castable(SB.Trueshot) and -buff(SB.CarefulAim) and -spell(SB.Trueshot) == 0 then
