@@ -6,6 +6,7 @@
 ## Dependencies: dark_addon
 Support\Lists.lua
 Support\Support.lua
+Death Knight\blooddkpal.lua
 Demon Hunter\vengdhpal.lua
 Demon Hunter\havdhpal.lua
 Druid\balpal.lua
