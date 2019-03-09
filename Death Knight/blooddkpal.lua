@@ -31,6 +31,10 @@ SB.RaiseDead = 46584
 SB.Claw = 47468
 SB.MindFreeze = 47528
 SB.Asphyxiate = 221562
+SB.Consumption = 274156
+SB.Tombstone = 219809
+SB.MarkofBlood = 206940
+SB.Bonestorm = 194844
 
 
 local function combat()
@@ -40,6 +44,8 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     local intpercentlow = dark_addon.settings.fetch('blooddk_settings_intpercentlow',50)
     local intpercenthigh = dark_addon.settings.fetch('blooddk_settings_intpercenthigh',65)
     local DSHealth = dark_addon.settings.fetch('blooddk_settings_DSHealth',80)
+    local MOBHealth = dark_addon.settings.fetch('blooddk_settings_MOBHealth',75)    
+    local RTHealth = dark_addon.settings.fetch('blooddk_settings_RTHealth',70)    
     local AMSHealth = dark_addon.settings.fetch('blooddk_settings_AMSHealth',60)
     local VBHealth = dark_addon.settings.fetch('blooddk_settings_VBHealth',40)
     local IFHealth = dark_addon.settings.fetch('blooddk_settings_IFHealth',20)
@@ -97,12 +103,34 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
         return cast(SB.IceboundFortitude)
     end
 
+--Rune Tap    
+    if castable(SB.RuneTap) and -player.health <= RTHealth and player.power.runes.count >= 2 and talent(4,3) then
+        print('Rune Tap @ ' .. RTHealth)
+        return cast(SB.RuneTap)
+    end
+
+--Mark of Blood    
+    if castable(SB.MarkofBlood) and -player.health <= MOBHealth and talent(6,3) then
+        print('Mark of Blood @ ' .. MOBHealth)
+        return cast(SB.MarkofBlood)
+    end
+
 --Rotation
+--actions+=/tombstone,if=buff.bone_shield.stack>=7
+    if castable(SB.Tombstone) and -spell(SB.Tombstone) == 0 and player.buff(SB.BoneShield).count >= 7 and talent(3,3) then
+        return cast(SB.Tombstone, 'target')
+    end
+
 --Use Marrowrend if your Bone Shield is close to expiring (3 seconds or less),
     -- or if you will not be in range of a target before your Bone Shield will expire.
 	if castable(SB.Marrowrend) and -spell(SB.Marrowrend) == 0 and player.buff(SB.BoneShield).remains <= 3 and player.power.runes.count >= 2 then
 		return cast(SB.Marrowrend, 'target')
 	end
+
+--Bonestorm
+    if toggle('cooldowns', false) and castable(SB.Bonestorm, 'target') and -spell(SB.Bonestorm) == 0 and talent(7,3) then
+      return cast(SB.Bonestorm, 'target')
+    end 
 
 --Use Death Strike, if any of these conditions is true.
     -- Immediately after taking a threatening hit, or if you are in an optimal damage window to maximize its healing.
@@ -119,6 +147,9 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
 
 --Use Blooddrinker, if you are using this talent, and Dancing Rune Weapon is not up. If Dancing Rune Weapon and Blooddrinker
     -- become available at the same time, use Blooddrinker first before activiting Dancing Rune Weapon.
+    if castable(SB.Blooddrinker) and -spell(SB.Blooddrinker) == 0 and player.buff(SB.DancingRuneWeapon).down and talent(1,2) then
+        return cast(SB.Blooddrinker, 'player')
+    end
 
 --Use Blood Boil if any nearby enemies do not have your Blood Plague disease, or if you have two charges of Blood Boil.
 	if castable(SB.BloodBoil) and -spell(SB.BloodBoil) == 0 and (spell(SB.BloodBoil).charges == 2 or not -target.debuff(SB.BloodPlague)) then
@@ -140,6 +171,9 @@ if target.alive and target.enemy and player.alive and not player.channeling() th
     end
 
 --Use Rune Strike, if using this talent, if you have 2 charges and have 3 or fewer runes.
+    if castable(SB.RuneStrike) and -spell(SB.RuneStrike) == 0 and talent(1,3) and spell(SB.RuneStrike).charges == 2 and player.power.runes.count <= 3 then
+        return cast(SB.RuneStrike, 'target')
+    end
 
 if player.power.runes.count >= 3 then
 --Dump runes to keep 3 runes on recharge at all times. Use the following priority list any time you have 3 or more runes:
@@ -153,6 +187,7 @@ if player.power.runes.count >= 3 then
 	if castable(SB.HeartStrike) and -spell(SB.HeartStrike) == 0 and player.buff(SB.BoneShield).count >= 5 then
 		return cast(SB.HeartStrike, 'target')
 	end
+end
 
     --Use Blood Boil if Dancing Rune Weapon is up.
 	if castable(SB.BloodBoil) and -spell(SB.BloodBoil) == 0 and player.buff(SB.DancingRuneWeapon).up then
@@ -164,14 +199,20 @@ if player.power.runes.count >= 3 then
 		return cast(SB.DeathandDecay, 'player')
 	end
 
+    --Consumption
+    if castable(SB.Consumption) and -spell(SB.Consumption) == 0 and talent(2,3) then
+        return cast(SB.Consumption, 'target')
+    end
+
     --Use Blood Boil.
 	if castable(SB.BloodBoil) and -spell(SB.BloodBoil) == 0 then
 		return cast(SB.BloodBoil, 'target')
 	end
 
     --Use Rune Strike, if you are using this talent.
-
-end
+    if castable(SB.RuneStrike) and -spell(SB.RuneStrike) == 0 and talent(1,3) then
+        return cast(SB.RuneStrike, 'target')
+    end
 
 end
 end
@@ -194,13 +235,15 @@ local function interface()
             { type = 'text', text = 'Everything on the screen is LIVE.  As you make changes, they are being fed to the engine' },
             { type = 'text', text = 'Suggested talents 1 2 2 1 1 2 2' },
             { type = 'text', text = 'Both Mind Freeze and Asphyxiate are used as Interrupts' }, 
-            { type = 'text', text = 'Dancing Rune Weapon is the only spell to use the Cooldowns toggle' },                                   
+            { type = 'text', text = 'Bonestorm and Dancing Rune Weapon both use the Cooldowns toggle' },                                   
             { type = 'rule' },
             { type = 'text', text = 'Interrupt Settings' },
             { key = 'intpercentlow', type = 'spinner', text = 'Interrupt Low %', default = '50', desc = 'low% cast time to interrupt at', min = 5, max = 50, step = 1 },
             { key = 'intpercenthigh', type = 'spinner', text = 'Interrupt High %', default = '65', desc = 'high% cast time to interrupt at', min = 51, max = 100, step = 1 },
             { type = 'text', text = 'Defensive Settings' },
             { key = 'DSHealth', type = 'spinner', text = 'Death Strike at Health %', default = '80', desc = 'cast Death Strike at', min = 0, max = 100, step = 1 },
+            { key = 'MOBHealth', type = 'spinner', text = 'Mark of Blood at Health %', default = '75', desc = 'cast Mark of Blood at', min = 0, max = 100, step = 1 },            
+            { key = 'RTHealth', type = 'spinner', text = 'Rune Tap at Health %', default = '70', desc = 'cast Rune Tap at', min = 0, max = 100, step = 1 },            
             { key = 'AMSHealth', type = 'spinner', text = 'Anti Magic Shell at Health %', default = '60', desc = 'cast Anti Magic Shell at', min = 0, max = 100, step = 1 },
             { key = 'VBHealth', type = 'spinner', text = 'Vampiric Blood at Health %', default = '40', desc = 'cast Vampiric Blood at', min = 0, max = 100, step = 1 },
             { key = 'IFHealth', type = 'spinner', text = 'Icebound Fortitude at Health %', default = '20', desc = 'cast Icebound Fortitude at', min = 0, max = 100, step = 1 },
