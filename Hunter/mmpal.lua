@@ -8,7 +8,7 @@ local SB = dark_addon.rotation.spellbooks.hunter
 
 --Local Spells not in default spellbook
 SB.CarefulAim = 260228
-
+SB.DoubleTap = 260402
 local function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
