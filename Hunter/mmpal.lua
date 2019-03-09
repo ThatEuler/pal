@@ -8,7 +8,7 @@ local SB = dark_addon.rotation.spellbooks.hunter
 
 --Local Spells not in default spellbook
 SB.CarefulAim = 260228
-
+SB.DoubleTap = 260402
 local function GroupType()
     return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
 end
@@ -32,7 +32,7 @@ local function combat()
         end
 
         -- Cooldowns
-        if castable(SB.DoubleTap) and spell(SB.AimedShot).chargeds >= 1 then
+        if castable(SB.DoubleTap) and spell(SB.AimedShot).charges >= 1 then
             return cast(SB.DoubleTap)
         end
         if castable(SB.Trueshot) and -buff(SB.CarefulAim) and -spell(SB.Trueshot) == 0 then
@@ -40,7 +40,7 @@ local function combat()
         end
 
         -- Standard Abilities
-        if spell(SB.AimedShot).chargeds >= 1 and not -buff(SB.PreciseShots) then
+        if spell(SB.AimedShot).charges >= 1 and not -buff(SB.PreciseShots) then
             return cast(SB.AimedShot)
         end
         if -buff(SB.PreciseShots) then
