@@ -40,7 +40,7 @@ local function combat()
         end
 
         -- Standard Abilities
-        if spell(SB.AimedShot).chargeds >= 1 and not -buff(SB.PreciseShots) then
+        if spell(SB.AimedShot).charges >= 1 and not -buff(SB.PreciseShots) then
             return cast(SB.AimedShot)
         end
         if -buff(SB.PreciseShots) then
