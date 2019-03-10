@@ -73,6 +73,18 @@ local function combat()
     if player.buff(SB.BuriedTreasure).up then rtbcount = rtbcount + 1 end
     if player.buff(SB.TrueBearing).up then rtbcount = rtbcount + 1 end
 
+    local function hasazeritetrait(powerid)
+    local isSelected        
+    for _, itemLocation in AzeriteUtil.EnumerateEquipedAzeriteEmpoweredItems() do
+        isSelected = C_AzeriteEmpoweredItem.IsPowerSelected(itemLocation, powerid)
+        if isSelected then return true end
+    end
+    return false
+    end
+
+    local deadshottrait = hasazeritetrait(129)
+    local aceupyoursleevetrait = hasazeritetrait(411)
+
     --Targets in range check
     local enemyCount = enemies.around(8)
     if enemyCount == 0 then enemyCount = 1 end
@@ -167,7 +179,7 @@ if enemyCount == 1 then
 
     --Cast Between the Eyes at 5 Combo Points if you have a Ruthless Precision proc, or Ace Up Your Sleeve , or Deadshot
     if castable(SB.BetweentheEyes) and -spell(SB.BetweentheEyes) == 0 and player.power.combopoints.actual >= 5 
-    and (player.buff(SB.RuthlessPrecision).up or player.buff(SB.AceUpYourSleeve).up or player.buff(SB.Deadshot).up)then
+    and (player.buff(SB.RuthlessPrecision).up or aceupyoursleevetrait or deadshottrait) then
       return cast(SB.BetweentheEyes, 'target')
     end
 
@@ -177,7 +189,8 @@ if enemyCount == 1 then
     end
 
     --Cast Pistol Shot if you have an Opportunity proc and you have 4 or less Combo Points (and will not Energy cap during the global cooldown).
-    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and player.power.combopoints.actual <= 4 and player.buff(SB.Opportunity).up then
+    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and player.buff(SB.Opportunity).up 
+    and (player.power.combopoints.actual <= 4 or (player.power.combopoints.actual <= 4 and talent(1,1))) then
       return cast(SB.PistolShot, 'target')
     end
 
@@ -190,7 +203,7 @@ end
 --Multi Target Rotation
 if enemyCount >= 2 then
     --Cast Blade Flurry if there are 2+ targets.
-    if castable(SB.BladeFlurry) and -spell(SB.BladeFlurry) == 0 then
+    if castable(SB.BladeFlurry) and -spell(SB.BladeFlurry) == 0 and target.time_to_die > 6 then
       return cast(SB.BladeFlurry, 'target')
     end
 
@@ -229,7 +242,7 @@ if enemyCount >= 2 then
 
     --Cast Between the Eyes at 5 Combo Points if you have a Ruthless Precision proc, or Ace Up Your Sleeve , or Deadshot
     if castable(SB.BetweentheEyes) and -spell(SB.BetweentheEyes) == 0 and player.power.combopoints.actual >= 5 
-    and (player.buff(SB.RuthlessPrecision).up or player.buff(SB.AceUpYourSleeve).up or player.buff(SB.Deadshot).up)then
+    and (player.buff(SB.RuthlessPrecision).up or aceupyoursleevetrait or deadshottrait) then
       return cast(SB.BetweentheEyes, 'target')
     end
 
@@ -239,7 +252,8 @@ if enemyCount >= 2 then
     end
 
     --Cast Pistol Shot if you have an Opportunity proc and you have 4 or less Combo Points (and will not Energy cap during the global cooldown).
-    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and player.power.combopoints.actual <= 4 and player.buff(SB.Opportunity).up then
+    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and player.buff(SB.Opportunity).up 
+    and (player.power.combopoints.actual <= 4 or (player.power.combopoints.actual <= 4 and talent(1,1))) then
       return cast(SB.PistolShot, 'target')
     end
 
