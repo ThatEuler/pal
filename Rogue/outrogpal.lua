@@ -79,7 +79,7 @@ local function combat()
         isSelected = C_AzeriteEmpoweredItem.IsPowerSelected(itemLocation, powerid)
         if isSelected then return true end
     end
-    return false
+        return false
     end
 
     local deadshottrait = hasazeritetrait(129)
@@ -146,11 +146,22 @@ local function combat()
 
 --Single Target Rotation
 if enemyCount == 1 then
-    --Cast 4-5 Combo Point Roll the Bones (see dedicated Roll the Bones section for details).
-    if castable(SB.RolltheBones) and -spell(SB.RolltheBones) == 0 and player.power.combopoints.actual >= 4 and not talent(6,3) 
-    and (rtbcount < 2 and (player.buff(SB.LoadedDice).up or (player.buff(SB.GrandMelee).down and player.buff(SB.RuthlessPrecision).down))) then
-      return cast(SB.RolltheBones, 'target')
-    end
+
+    if not deadshottrait and not aceupyoursleevetrait then
+        --Cast 4-5 Combo Point Roll the Bones (see dedicated Roll the Bones section for details).
+        if castable(SB.RolltheBones) and -spell(SB.RolltheBones) == 0 and player.power.combopoints.actual >= 4 and not talent(6,3) 
+        and (rtbcount < 2 and (player.buff(SB.LoadedDice).up or (player.buff(SB.GrandMelee).down and player.buff(SB.RuthlessPrecision).down))) then
+          return cast(SB.RolltheBones, 'target')
+        end
+    end   
+    
+    if deadshottrait or aceupyoursleevetrait then
+        --Cast 4-5 Combo Point Roll the Bones (see dedicated Roll the Bones section for details).
+        if castable(SB.RolltheBones) and -spell(SB.RolltheBones) == 0 and player.power.combopoints.actual >= 4 and not talent(6,3) 
+        and (rtbcount < 2 and (player.buff(SB.LoadedDice).up or player.buff(SB.RuthlessPrecision).down)) then
+          return cast(SB.RolltheBones, 'target')
+        end
+    end 
 
     --Cast Ghostly Strike (if talented) on cooldown, unless you will over-cap Combo Points from it.
     if castable(SB.GhostlyStrike) and -spell(SB.GhostlyStrike) == 0 and player.power.combopoints.actual <= 4 and talent(1,3) then
@@ -189,7 +200,7 @@ if enemyCount == 1 then
     end
 
     --Cast Pistol Shot if you have an Opportunity proc and you have 4 or less Combo Points (and will not Energy cap during the global cooldown).
-    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and player.buff(SB.Opportunity).up 
+    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and (player.buff(SB.Opportunity).up or player.spell(SB.BetweentheEyes).lastcast)
     and (player.power.combopoints.actual <= 4 or (player.power.combopoints.actual <= 4 and talent(1,1))) then
       return cast(SB.PistolShot, 'target')
     end
@@ -207,11 +218,21 @@ if enemyCount >= 2 then
       return cast(SB.BladeFlurry, 'target')
     end
 
-    --Cast 4-5 Combo Point Roll the Bones (see dedicated Roll the Bones section for details).
-    if castable(SB.RolltheBones) and -spell(SB.RolltheBones) == 0 and player.power.combopoints.actual >= 4 and not talent(6,3) 
-    and (rtbcount < 2 and (player.buff(SB.LoadedDice).up or (player.buff(SB.GrandMelee).down and player.buff(SB.RuthlessPrecision).down))) then
-      return cast(SB.RolltheBones, 'target')
-    end
+    if not deadshottrait and not aceupyoursleevetrait then
+        --Cast 4-5 Combo Point Roll the Bones (see dedicated Roll the Bones section for details).
+        if castable(SB.RolltheBones) and -spell(SB.RolltheBones) == 0 and player.power.combopoints.actual >= 4 and not talent(6,3) 
+        and (rtbcount < 2 and (player.buff(SB.LoadedDice).up or (player.buff(SB.GrandMelee).down and player.buff(SB.RuthlessPrecision).down))) then
+          return cast(SB.RolltheBones, 'target')
+        end
+    end   
+    
+    if deadshottrait or aceupyoursleevetrait then
+        --Cast 4-5 Combo Point Roll the Bones (see dedicated Roll the Bones section for details).
+        if castable(SB.RolltheBones) and -spell(SB.RolltheBones) == 0 and player.power.combopoints.actual >= 4 and not talent(6,3) 
+        and (rtbcount < 2 and (player.buff(SB.LoadedDice).up or player.buff(SB.RuthlessPrecision).down)) then
+          return cast(SB.RolltheBones, 'target')
+        end
+    end 
 
     --Cast Ghostly Strike (if talented) on cooldown, in sync with Blade Flurry unless you will over-cap Combo Points from it.
     if castable(SB.GhostlyStrike) and -spell(SB.GhostlyStrike) == 0 and player.power.combopoints.actual <= 4 
@@ -252,7 +273,7 @@ if enemyCount >= 2 then
     end
 
     --Cast Pistol Shot if you have an Opportunity proc and you have 4 or less Combo Points (and will not Energy cap during the global cooldown).
-    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and player.buff(SB.Opportunity).up 
+    if castable(SB.PistolShot) and -spell(SB.PistolShot) == 0 and (player.buff(SB.Opportunity).up or player.spell(SB.BetweentheEyes).lastcast)
     and (player.power.combopoints.actual <= 4 or (player.power.combopoints.actual <= 4 and talent(1,1))) then
       return cast(SB.PistolShot, 'target')
     end
