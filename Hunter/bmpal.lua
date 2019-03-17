@@ -63,6 +63,13 @@ local function combat()
                 cast(SB.LightsJudgement)
             end
         end
+		-- Pet Management
+        if pet.exists and not pet.alive then
+            return cast (SB.RevivePet)
+        end
+        if pet.alive and pet.health.percent <= 70 and castable(SB.MendPet) then
+            return cast(SB.MendPet)
+        end		
         if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
             return cast(SB.BarbedShot, 'target')
         end
@@ -72,7 +79,7 @@ local function combat()
         if talent(4,3) and castable(SB.AMurderOfCrows) then
             return cast(SB.AMurderOfCrows, 'target')
         end
-        if talent(6,3) and castable(SB.Stampede) and buff(SB.AspectOfTheWild).up and buff(SB.BeastialWrath).up or target.time_to_die < 15 then
+        if talent(6,3) and castable(SB.Stampede) and buff(SB.AspectOfTheWild).up and (buff(SB.BeastialWrath).up or target.time_to_die < 15) then
             return cast(SB.Stampede)
         end
         if toggle('multitarget', false) and enemies.around(40) > 2 and target.castable(SB.MultiShot) then
@@ -93,14 +100,6 @@ local function combat()
         if -power.focus >=80 and castable(SB.CobraShot) and -spell(SB.KillCommand) >= 2.5 then
             return cast(SB.CobraShot, 'target')
         end
-        -- Pet Management
-        if pet.exists and not pet.alive then
-            return cast (SB.RevivePet)
-        end
-        if pet.alive and pet.health.percent <= 70 and castable(SB.MendPet) then
-            return cast(SB.MendPet)
-        end
-
         -- Defensives
         if (player.health.percent <= 50 or pet.health.percent <= 20) and castable(SB.Exhilaration) then
             return cast(SB.Exhilaration)
