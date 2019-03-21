@@ -246,15 +246,6 @@ local function combat()
             end
 
 
-            --frost shock
-            if target.castable(SB.FrostShock) then
-                if talent(6, 3) and player.buff(SB.Icefury).up and
-                        (player.buff(SB.Icefury).remains < current_gcd * 4 * player.buff(SB.Icefury).count)
-                        or player.moving then
-                    return cast(SB.FrostShock, target)
-                end
-            end
-
             --lightning bolt
             if target.castable(SB.Lightningbolt) then
                 if player.buff(SB.StormKeeper).up
@@ -305,6 +296,18 @@ earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled
                 end
 
             end
+
+
+
+            --frost shock
+            if target.castable(SB.FrostShock) then
+                if talent(6, 3) and player.buff(SB.Icefury).up and -spell(SB.Lavaburst) > 0 and
+                        (player.buff(SB.Icefury).remains < current_gcd * 4 * player.buff(SB.Icefury).count)
+                        or player.moving then
+                    return cast(SB.FrostShock, target)
+                end
+            end
+
 
             --lightningbolt - round2
             if talent(4, 2) and target.castable(SB.Lightningbolt) and -spell(SB.Stormelemental) > 120 then

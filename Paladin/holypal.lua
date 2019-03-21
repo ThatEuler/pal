@@ -160,7 +160,7 @@ local function combat()
        elseif IsUsableItem(trinket13) and GetItemCooldown(trinket13) == 0 and tank.health.percent < 50 and tank.distance < 40 then
             macro('/use 13')
         elseif IsUsableItem(trinket14) and GetItemCooldown(trinket14) == 0 and tank.health.percent < 50 and tank.distance < 40 then
-            macro('/use 1414')
+            macro('/use 14')
         end
     end
     -- Modifiers
