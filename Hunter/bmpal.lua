@@ -1,13 +1,14 @@
--- Rotation: bmpal
--- Author: mPixels
--- Class: Hunter
--- Spec: Beastmastery
--- Talents:
--- Modifiers:
-    -- Ctrl    =
-    -- Alt     = TarTrap
-    -- Shift   = Freezing Trap
-
+--[[
+Rotation: bmpal
+Author: mPixels
+Class: Hunter
+Spec: Beastmastery
+Talents:
+Modifiers:
+    Ctrl    =
+    Alt     = TarTrap
+    Shift   = Freezing Trap
+]]
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.hunter
 local lftime = 0
