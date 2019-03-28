@@ -1,8 +1,12 @@
--- Beastmastery Hunter for 8.1 by Pixels 12/2018
--- Talents: All  - except Camouflage / Binding Shot / Barrage / Stampede / Spitting Cobra
--- Alt = Tar Trap
--- Shift = Freezing Trap
--- RShift = MultiShot
+-- Rotation: bmpal
+-- Author: mPixels
+-- Class: Hunter
+-- Spec: Beastmastery
+-- Talents:
+-- Modifiers:
+    -- Ctrl    =
+    -- Alt     = TarTrap
+    -- Shift   = Freezing Trap
 
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.hunter
@@ -34,19 +38,19 @@ local function combat()
     if target.alive and target.enemy and not player.channeling() then
         auto_shot()
 
-        if usetraps and modifier.shift and not modifier.alt and castable(SB.FreezingTrap) then
+        if usetraps and modifier.shift and -spell(SB.FreezingTrap) == 0 then
             return cast(SB.FreezingTrap, 'ground')
         end
-        if usetraps and modifier.alt and not modifier.shift and castable(SB.TarTrap) then
+        if usetraps and modifier.alt and -spell(SB.TarTrap) == 0 then
             return cast(SB.TarTrap, 'ground')
         end
-        if toggle('interrupts') and castable(SB.CounterShot) and target.interrupt(50) then
+        if toggle('interrupts') and target.interrupt(50) and -spell(SB.CounterShot) == 0 then
             return cast(SB.CounterShot)
         end
-        if toggle('cooldowns', false) and castable(SB.AspectOfTheWild) then
+        if toggle('cooldowns', false) and -spell(SB.AspectOfTheWild) == 0 then
             return cast(SB.AspectOfTheWild)
         end
-        if toggle('cooldowns', false) and castable(SB.BeastialWrath) and (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15) then
+        if toggle('cooldowns', false) and -spell(SB.BeastialWrath) == 0 and (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15) then
             return cast(SB.BeastialWrath)
         end
         if toggle('racial', false) and -spell(SB.BeastialWrath) > 30 then
@@ -63,48 +67,47 @@ local function combat()
                 cast(SB.LightsJudgement)
             end
         end
-		-- Pet Management
         if pet.exists and not pet.alive then
             return cast (SB.RevivePet)
         end
-        if pet.alive and pet.health.percent <= 70 and castable(SB.MendPet) then
+        if pet.alive and pet.health.percent <= 70 and -spell(SB.MendPet) == 0 then
             return cast(SB.MendPet)
         end		
         if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
             return cast(SB.BarbedShot, 'target')
         end
-        if talent(7,3) and castable(SB.SpittingCobra) then
+        if talent(7,3) and -spell(SB.SpittingCobra) == 0 then
             return cast(SB.SpittingCobra)
         end
-        if talent(4,3) and castable(SB.AMurderOfCrows) then
+        if talent(4,3) and -spell(SB.AMurderOfCrows) == 0 then
             return cast(SB.AMurderOfCrows, 'target')
         end
-        if talent(6,3) and castable(SB.Stampede) and buff(SB.AspectOfTheWild).up and (buff(SB.BeastialWrath).up or target.time_to_die < 15) then
+        if talent(6,3) and -spell(SB.Stampede) == 0 and buff(SB.AspectOfTheWild).up and (buff(SB.BeastialWrath).up or target.time_to_die < 15) then
             return cast(SB.Stampede)
         end
-        if toggle('multitarget', false) and enemies.around(40) > 2 and target.castable(SB.MultiShot) then
+        if toggle('multitarget', false) and enemies.around(40) > 2 and -spell(SB.MultiShot) == 0 then
             return cast(SB.MultiShot)
         end
-        if toggle('multitarget', false) and talent(6,2) and enemies.around(40) > 2 and castable(SB.Barrage) then
+        if toggle('multitarget', false) and talent(6,2) and enemies.around(40) > 2 and -spell(SB.Barrage) == 0 then
             return cast(SB.Barrage)
         end
-        if talent(2,3) and -power.focus < 90 and castable(SB.ChimaeraShot) then
+        if talent(2,3) and -power.focus < 90 and -spell(SB.ChimaeraShot) == 0 then
             return cast(SB.ChimaeraShot, 'target')
         end
         if -power.focus >= 30 and castable(SB.KillCommand) then
             return cast(SB.KillCommand, 'target')
         end
-        if talent(1,3) and castable(SB.DireBeast) then
+        if talent(1,3) and -spell(SB.DireBeast) == 0 then
             return cast(SB.DireBeast, 'target')
         end
-        if -power.focus >=80 and castable(SB.CobraShot) and -spell(SB.KillCommand) >= 2.5 then
+        if -power.focus >=80 and -spell(SB.CobraShot) == 0 and -spell(SB.KillCommand) >= 2.5 then
             return cast(SB.CobraShot, 'target')
         end
         -- Defensives
-        if (player.health.percent <= 50 or pet.health.percent <= 20) and castable(SB.Exhilaration) then
+        if (player.health.percent <= 50 or pet.health.percent <= 20) and -spell(SB.Exhilaration) == 0 then
             return cast(SB.Exhilaration)
         end
-        if player.health.percent < 50 and not castable(SB.Exhilaration) then
+        if player.health.percent < 50 and not -spell(SB.Exhilaration) == 0 then
             return cast(SB.AspectOfTheTurtle)
         end
     end
@@ -142,11 +145,9 @@ local function resting()
     if pet.alive and pet.health.percent <= 70 and -spell(SB.MendPet) == 0 then
         return cast(SB.MendPet)
     end
-
 end
 
 function interface()
-
     local settings = {
         key = 'bmpal_settings',
         title = 'Beastmaster Pal',
@@ -181,7 +182,6 @@ function interface()
             }
         }
     }
-
     configWindow = dark_addon.interface.builder.buildGUI(settings)
 
     dark_addon.interface.buttons.add_toggle({
