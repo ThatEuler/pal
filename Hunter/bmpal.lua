@@ -1,14 +1,3 @@
---[[
-Rotation: bmpal
-Author: mPixels
-Class: Hunter
-Spec: Beastmastery
-Talents:
-Modifiers:
-    Ctrl    =
-    Alt     = TarTrap
-    Shift   = Freezing Trap
-]]
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.hunter
 local lftime = 0
@@ -26,13 +15,13 @@ SB.Berserking = 26297
 SB.LightsJudgement = 247427
 
 local function GroupType()
-   return IsInRaid() and 'raid' or IsInGroup() and 'party' or 'solo'
+    return IsInRaid() and "raid" or IsInGroup() and "party" or "solo"
 end
 
 local function combat()
-    local usetraps = dark_addon.settings.fetch('bmpal_settings_traps', false)
-    local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect', false)
-    local race = UnitRace('player')
+    local usetraps = dark_addon.settings.fetch("bmpal_settings_traps", false)
+    local usemisdirect = dark_addon.settings.fetch("bmpal_settings_misdirect", false)
+    local race = UnitRace("player")
     local group_type = GroupType()
     local opener = 0
 
@@ -40,21 +29,24 @@ local function combat()
         auto_shot()
 
         if usetraps and modifier.shift and -spell(SB.FreezingTrap) == 0 then
-            return cast(SB.FreezingTrap, 'ground')
+            return cast(SB.FreezingTrap, "ground")
         end
         if usetraps and modifier.alt and -spell(SB.TarTrap) == 0 then
-            return cast(SB.TarTrap, 'ground')
+            return cast(SB.TarTrap, "ground")
         end
-        if toggle('interrupts') and target.interrupt(50) and -spell(SB.CounterShot) == 0 then
+        if toggle("interrupts") and target.interrupt(50) and -spell(SB.CounterShot) == 0 then
             return cast(SB.CounterShot)
         end
-        if toggle('cooldowns', false) and -spell(SB.AspectOfTheWild) == 0 then
+        if toggle("cooldowns", false) and -spell(SB.AspectOfTheWild) == 0 then
             return cast(SB.AspectOfTheWild)
         end
-        if toggle('cooldowns', false) and -spell(SB.BeastialWrath) == 0 and (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15) then
+        if
+            toggle("cooldowns", false) and -spell(SB.BeastialWrath) == 0 and
+                (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15)
+         then
             return cast(SB.BeastialWrath)
         end
-        if toggle('racial', false) and -spell(SB.BeastialWrath) > 30 then
+        if toggle("racial", false) and -spell(SB.BeastialWrath) > 30 then
             if race == "Orc" and castable(SB.BloodFury) then
                 cast(SB.BloodFury)
             end
@@ -69,79 +61,82 @@ local function combat()
             end
         end
         if pet.exists and not pet.alive then
-            return cast (SB.RevivePet)
+            return cast(SB.RevivePet)
         end
         if pet.alive and pet.health.percent <= 70 and -spell(SB.MendPet) == 0 then
             return cast(SB.MendPet)
-        end		
-        if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
-            return cast(SB.BarbedShot, 'target')
         end
-        if talent(7,3) and -spell(SB.SpittingCobra) == 0 then
+        if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
+            return cast(SB.BarbedShot, "target")
+        end
+        if talent(7, 3) and -spell(SB.SpittingCobra) == 0 then
             return cast(SB.SpittingCobra)
         end
-        if talent(4,3) and -spell(SB.AMurderOfCrows) == 0 then
-            return cast(SB.AMurderOfCrows, 'target')
+        if talent(4, 3) and -spell(SB.AMurderOfCrows) == 0 then
+            return cast(SB.AMurderOfCrows, "target")
         end
-        if talent(6,3) and -spell(SB.Stampede) == 0 and buff(SB.AspectOfTheWild).up and (buff(SB.BeastialWrath).up or target.time_to_die < 15) then
+        if
+            talent(6, 3) and -spell(SB.Stampede) == 0 and buff(SB.AspectOfTheWild).up and
+                (buff(SB.BeastialWrath).up or target.time_to_die < 15)
+         then
             return cast(SB.Stampede)
         end
-        if toggle('multitarget', false) and enemies.around(40) > 2 and -spell(SB.MultiShot) == 0 then
+        if toggle("multitarget", false) and enemies.around(40) > 2 and -spell(SB.MultiShot) == 0 then
             return cast(SB.MultiShot)
         end
-        if toggle('multitarget', false) and talent(6,2) and enemies.around(40) > 2 and -spell(SB.Barrage) == 0 then
+        if toggle("multitarget", false) and talent(6, 2) and enemies.around(40) > 2 and -spell(SB.Barrage) == 0 then
             return cast(SB.Barrage)
         end
-        if talent(2,3) and -power.focus < 90 and -spell(SB.ChimaeraShot) == 0 then
-            return cast(SB.ChimaeraShot, 'target')
+        if talent(2, 3) and -power.focus < 90 and -spell(SB.ChimaeraShot) == 0 then
+            return cast(SB.ChimaeraShot, "target")
         end
         if -power.focus >= 30 and castable(SB.KillCommand) then
-            return cast(SB.KillCommand, 'target')
+            return cast(SB.KillCommand, "target")
         end
-        if talent(1,3) and -spell(SB.DireBeast) == 0 then
-            return cast(SB.DireBeast, 'target')
+        if talent(1, 3) and -spell(SB.DireBeast) == 0 then
+            return cast(SB.DireBeast, "target")
         end
-        if -power.focus >=80 and -spell(SB.CobraShot) == 0 and -spell(SB.KillCommand) >= 2.5 then
-            return cast(SB.CobraShot, 'target')
+        if -power.focus >= 80 and -spell(SB.CobraShot) == 0 and -spell(SB.KillCommand) >= 2.5 then
+            return cast(SB.CobraShot, "target")
         end
         -- Defensives
         if (player.health.percent <= 50 or pet.health.percent <= 20) and -spell(SB.Exhilaration) == 0 then
             return cast(SB.Exhilaration)
         end
-        if player.health.percent < 50 and not -spell(SB.Exhilaration) == 0 then
+        if player.health.percent < 50 and not (-spell(SB.Exhilaration)) == 0 then
             return cast(SB.AspectOfTheTurtle)
         end
     end
 end
 
 local function resting()
-    local lfg = GetLFGProposal();
-    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD);
-    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR);
-    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF);
-    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO);
-    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID);
-    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP);
-    local bgstatus = GetBattlefieldStatus(1);
-    local autojoin = dark_addon.settings.fetch('bmpal_settings_autojoin', true)
-    local usemisdirect = dark_addon.settings.fetch('bmpal_settings_misdirect')
-    local petselection = dark_addon.settings.fetch('bmpal_settings_petselector')
+    local lfg = GetLFGProposal()
+    local hasData = GetLFGQueueStats(LE_LFG_CATEGORY_LFD)
+    local hasData2 = GetLFGQueueStats(LE_LFG_CATEGORY_LFR)
+    local hasData3 = GetLFGQueueStats(LE_LFG_CATEGORY_RF)
+    local hasData4 = GetLFGQueueStats(LE_LFG_CATEGORY_SCENARIO)
+    local hasData5 = GetLFGQueueStats(LE_LFG_CATEGORY_FLEXRAID)
+    local hasData6 = GetLFGQueueStats(LE_LFG_CATEGORY_WORLDPVP)
+    local bgstatus = GetBattlefieldStatus(1)
+    local autojoin = dark_addon.settings.fetch("bmpal_settings_autojoin", true)
+    local usemisdirect = dark_addon.settings.fetch("bmpal_settings_misdirect")
+    local petselection = dark_addon.settings.fetch("bmpal_settings_petselector")
 
     if not pet.exists then
-        if petselection == 'key_1' then
+        if petselection == "key_1" then
             return cast(SB.CallPet1)
-        elseif petselection == 'key_2' then
+        elseif petselection == "key_2" then
             return cast(SB.CallPet2)
-        elseif petselection == 'key_3' then
+        elseif petselection == "key_3" then
             return cast(SB.CallPet3)
-        elseif petselection == 'key_4' then
+        elseif petselection == "key_4" then
             return cast(SB.CallPet4)
-        elseif petselection == 'key_5' then
+        elseif petselection == "key_5" then
             return cast(SB.CallPet5)
         end
     end
     if pet.exists and not pet.alive then
-        return cast (SB.RevivePet)
+        return cast(SB.RevivePet)
     end
     if pet.alive and pet.health.percent <= 70 and -spell(SB.MendPet) == 0 then
         return cast(SB.MendPet)
@@ -150,85 +145,108 @@ end
 
 function interface()
     local settings = {
-        key = 'bmpal_settings',
-        title = 'Beastmaster Pal',
+        key = "bmpal_settings",
+        title = "Beastmaster Pal",
         width = 250,
         height = 380,
         fontheight = 10,
         resize = true,
         show = false,
         template = {
-            { type = 'header', text = 'BM Pal Settings'},
-            { type = 'rule'},
-            { type = 'text', text = 'General Settings'},
-            { key = 'autojoin', type = 'checkbox', text = 'Auto Join', desc = 'Automatically accept Dungeon/Battleground Invites', default = true },
-            { key = 'traps', type = 'checkbox',
-            text = 'Traps',
-            desc = 'Auto use Traps',
-            default = false
+            {type = "header", text = "Pal Settings"},
+            {type = "text", text = "Author: mPixels"},
+            {type = "text", text = "Version: 8.1.5.12"},
+            {type = "text", text = "Rotation: palbm"},
+            {type = "text", text = "Class: Hunter"},
+            {type = "text", text = "Spec: Beastmastery"},
+            {type = "text", text = "Suggested Build: 1|1|3|2|3|2"},
+            {type = "rule"},
+            {type = "text", text = "General Settings"},
+            {
+                key = "autojoin",
+                type = "checkbox",
+                text = "Auto Join",
+                desc = "Automatically accept Dungeon/Battleground Invites",
+                default = true
             },
-            { type = 'rule'},
-            { type = 'text', text = 'Pet Management'},
-            { key = 'petselector', type = 'dropdown',
-                text = 'Pet Selector',
-                desc = 'select your active pet',
-                default = 'key_3',
+            {type = "rule"},
+            {
+                key = "traps",
+                type = "checkbox",
+                text = "Traps",
+                desc = "Auto use Traps",
+                default = false
+            },
+            {type = "rule"},
+            {type = "text", text = "Pet Management"},
+            {
+                key = "petselector",
+                type = "dropdown",
+                text = "Pet Selector",
+                desc = "select your active pet",
+                default = "key_3",
                 list = {
-                    { key = 'key_1', text = 'Pet 1'},
-                    { key = 'key_2', text = 'Pet 2'},
-                    { key = 'key_3', text = 'Pet 3'},
-                    { key = 'key_4', text = 'Pet 4'},
-                    { key = 'key_5', text = 'Pet 5'}
-                },
+                    {key = "key_1", text = "Pet 1"},
+                    {key = "key_2", text = "Pet 2"},
+                    {key = "key_3", text = "Pet 3"},
+                    {key = "key_4", text = "Pet 4"},
+                    {key = "key_5", text = "Pet 5"}
+                }
             }
         }
     }
     configWindow = dark_addon.interface.builder.buildGUI(settings)
 
-    dark_addon.interface.buttons.add_toggle({
-        name = 'racial',
-        label = 'Use Racial',
-        on = {
-            label = 'Racial',
-            color = dark_addon.interface.color.orange,
-            color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
-        },
-        off = {
-            label = 'Racial',
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
+    dark_addon.interface.buttons.add_toggle(
+        {
+            name = "racial",
+            label = "Use Racial",
+            on = {
+                label = "Racial",
+                color = dark_addon.interface.color.orange,
+                color2 = dark_addon.interface.color.ratio(dark_addon.interface.color.dark_orange, 0.7)
+            },
+            off = {
+                label = "Racial",
+                color = dark_addon.interface.color.grey,
+                color2 = dark_addon.interface.color.dark_grey
+            }
         }
-    })
+    )
 
-    dark_addon.interface.buttons.add_toggle({
-        name = 'settings',
-        label = 'Rotation Settings',
-        font = 'dark_addon_icon',
-        on = {
-            label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.cyan,
-            color2 = dark_addon.interface.color.dark_cyan
-        },
-        off = {
-            label = dark_addon.interface.icon('cog'),
-            color = dark_addon.interface.color.grey,
-            color2 = dark_addon.interface.color.dark_grey
-        },
-        callback = function(self)
-            if configWindow.parent:IsShown() then
-                configWindow.parent:Hide()
-            else
-                configWindow.parent:Show()
+    dark_addon.interface.buttons.add_toggle(
+        {
+            name = "settings",
+            label = "Rotation Settings",
+            font = "dark_addon_icon",
+            on = {
+                label = dark_addon.interface.icon("cog"),
+                color = dark_addon.interface.color.cyan,
+                color2 = dark_addon.interface.color.dark_cyan
+            },
+            off = {
+                label = dark_addon.interface.icon("cog"),
+                color = dark_addon.interface.color.grey,
+                color2 = dark_addon.interface.color.dark_grey
+            },
+            callback = function(self)
+                if configWindow.parent:IsShown() then
+                    configWindow.parent:Hide()
+                else
+                    configWindow.parent:Show()
+                end
             end
-        end
-    })
+        }
+    )
 end
 
-dark_addon.rotation.register({
-    spec = dark_addon.rotation.classes.hunter.beastmastery,
-    name = 'bmpal',
-    label = 'PAL: Beastmastery Hunter',
-    combat = combat,
-    resting = resting,
-    interface = interface,
-})
+dark_addon.rotation.register(
+    {
+        spec = dark_addon.rotation.classes.hunter.beastmastery,
+        name = "bmpal",
+        label = "PAL: Beastmastery Hunter",
+        combat = combat,
+        resting = resting,
+        interface = interface
+    }
+)
