@@ -1,8 +1,3 @@
--- Survival Hunter for 8.1 by Pixels 12/2018
--- Talents: Work In Progress
--- Alt = Tar Trap
--- Shift = Freezing Trap
-
 local dark_addon = dark_interface
 local SB = dark_addon.rotation.spellbooks.hunter
 local lftime = 0
@@ -23,25 +18,18 @@ local function combat()
   local group_type = GroupType()
 
   if target.alive and target.enemy and not player.channeling() then
-    -- Traps
     if usetraps and modifier.shift and not modifier.alt and -spell(SB.FreezingTrap) == 0 then
       return cast(SB.FreezingTrap, "ground")
     end
     if usetraps and modifier.alt and not modifier.shift and -spell(SB.TarTrap) == 0 then
       return cast(SB.TarTrap, "ground")
     end
-
-    -- Interrupts
     if toggle("interrupts") and castable(SB.CounterShot) and target.interrupt(50) then
       return cast(SB.CounterShot)
     end
-
-    -- Cooldowns
     if toggle("cooldowns", false) and castable(SB.CoordinatedAssault) and -spell(SB.CoordinatedAssault) == 0 then
       return cast(SB.CoordinatedAssault)
     end
-
-    -- Standard Abilities
     if
       castable(SB.SerpentSting) and
         (not target.debuff(SB.SerpentSting).exists or target.debuff(SB.SerpentSting).remains < 2)
@@ -57,8 +45,6 @@ local function combat()
     if not player.buff(SB.MongooseFury).exists or buff(SB.MongooseFury).count == 5 and castable(SB.MongooseBite) then
       return cast(SB.MongooseBite, "target")
     end
-
-    -- Pet Management
     if pet.exists and not pet.alive then
       return cast(SB.RevivePet)
     end
@@ -108,15 +94,19 @@ end
 function interface()
   local settings = {
     key = "svpal_settings",
-    title = "Survival Hunter",
-    width = 250,
+    title = "Survival Hunter by Pal Team",
+    width = 300,
     height = 380,
+    fontheight = 10,
     resize = true,
     show = false,
     template = {
-      {type = "header", text = "SV Pal Settings"},
+      {type = "header", text = "Pal Settings"},
       {type = "rule"},
-      {type = "text", text = "General Settings"},
+      {type = "text", text = "Rotation: svpal    Author: mPixels    Version: 81501"},
+      {type = "text", text = "Class: Hunter    Spec: Survival    Build: 1221222"},
+      {type = "rule"},
+      {type = "header", text = "General Settings"},
       {
         key = "autojoin",
         type = "checkbox",
@@ -124,6 +114,7 @@ function interface()
         desc = "Automatically accept Dungeon/Battleground Invites",
         default = true
       },
+      {type = "rule"},
       {
         key = "traps",
         type = "checkbox",
@@ -132,9 +123,7 @@ function interface()
         default = false
       },
       {type = "rule"},
-      {type = "text", text = "Talents"},
-      {type = "rule"},
-      {type = "text", text = "Pet Management"},
+      {type = "header", text = "Pet Management"},
       {
         key = "petselector",
         type = "dropdown",
@@ -201,7 +190,7 @@ dark_addon.rotation.register(
   {
     spec = dark_addon.rotation.classes.hunter.survival,
     name = "svpal",
-    label = "PAL: Survival Hunter",
+    label = "Survival Hunter by Pal Team",
     combat = combat,
     resting = resting,
     interface = interface

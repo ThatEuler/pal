@@ -21,26 +21,25 @@ local function combat()
 
   if target.alive and target.enemy and not player.channeling() then
     auto_shot()
-
-    if usetraps and modifier.shift and -spell(SB.FreezingTrap) == 0 then
+    if usetraps and modifier.shift and castable(SB.FreezingTrap) and spell(SB.FreezingTrap).cooldown == 0 then
       return cast(SB.FreezingTrap, "ground")
     end
-    if usetraps and modifier.alt and -spell(SB.TarTrap) == 0 then
+    if usetraps and modifier.alt and castable(SB.TarTrap) and spell(SB.TarTrap).cooldown == 0 then
       return cast(SB.TarTrap, "ground")
     end
-    if toggle("interrupts") and target.interrupt(50) and -spell(SB.CounterShot) == 0 then
-      return cast(SB.CounterShot)
+    if toggle("interrupts") and target.interrupt(50) and castable(SB.CounterShot) and spell(SB.CounterShot).cooldown == 0 then
+      return cast(SB.CounterShot, "target")
     end
-    if toggle("cooldowns", false) and -spell(SB.AspectOfTheWild) == 0 then
+    if toggle("cooldowns", false) and castable(SB.AspectOfTheWild) and spell(SB.AspectOfTheWild).cooldown == 0 then
       return cast(SB.AspectOfTheWild)
     end
     if
-      toggle("cooldowns", false) and -spell(SB.BeastialWrath) == 0 and
+      toggle("cooldowns", false) and castable(SB > BeastialWrath) and spell(SB.BeastialWrath).cooldown == 0 and
         (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15)
      then
       return cast(SB.BeastialWrath)
     end
-    if toggle("racial", false) and -spell(SB.BeastialWrath) > 30 then
+    if toggle("racial", false) and castable(SB > BeastialWrath) and spell(SB.BeastialWrath).cooldown > 30 then
       if race == "Orc" and castable(SB.BloodFury) then
         cast(SB.BloodFury)
       end
@@ -57,46 +56,50 @@ local function combat()
     if pet.exists and not pet.alive then
       return cast(SB.RevivePet)
     end
-    if pet.alive and pet.health.percent <= 70 and -spell(SB.MendPet) == 0 then
+    if pet.alive and pet.health.percent <= 70 and castable(SB.MendPet) and spell(SB.MendPet).cooldown == 0 then
       return cast(SB.MendPet)
     end
-    if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 then
+    if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 and
+        castable(SB.BarbedShot) and spell(SB.BarbedShot).cooldown ==0 then
       return cast(SB.BarbedShot, "target")
     end
-    if talent(7, 3) and -spell(SB.SpittingCobra) == 0 then
+    if talent(7, 3) and castable(SB.SpittingCobra) and spell(SB.SpittingCobra).cooldown == 0 then
       return cast(SB.SpittingCobra)
     end
-    if talent(4, 3) and -spell(SB.AMurderOfCrows) == 0 then
+    if talent(4, 3) and castable(SB.AMurderOfCrows) and spell(SB.AMurderOfCrows).cooldown == 0 then
       return cast(SB.AMurderOfCrows, "target")
     end
     if
-      talent(6, 3) and -spell(SB.Stampede) == 0 and buff(SB.AspectOfTheWild).up and
+      talent(6, 3) and castable(SB.Stampede) and spell(SB.Stampede).cooldown == 0 and buff(SB.AspectOfTheWild).up and
         (buff(SB.BeastialWrath).up or target.time_to_die < 15)
      then
       return cast(SB.Stampede)
     end
-    if toggle("multitarget", false) and enemies.around(40) > 2 and -spell(SB.MultiShot) == 0 then
-      return cast(SB.MultiShot)
+    if toggle("multitarget", false) and enemies.around(40) > 2 and castable(SB.MultiShot) and spell(SB.MultiShot).cooldown == 0 then
+      return cast(SB.MultiShot, "target")
     end
-    if toggle("multitarget", false) and talent(6, 2) and enemies.around(40) > 2 and -spell(SB.Barrage) == 0 then
+    if toggle("multitarget", false) and talent(6, 2) and enemies.around(40) > 2 and spell(SB.Barrage).cooldown == 0 then
       return cast(SB.Barrage)
     end
-    if talent(2, 3) and -power.focus < 90 and -spell(SB.ChimaeraShot) == 0 then
+    if talent(2, 3) and castable(SB.ChimaeraShot) and -power.focus < 90 and spell(SB.ChimaeraShot).cooldown == 0 then
       return cast(SB.ChimaeraShot, "target")
     end
-    if -power.focus >= 30 and castable(SB.KillCommand) then
+    if -power.focus >= 30 and castable(SB.KillCommand) and spell(SB.KillCommand).cooldown == 0 then
       return cast(SB.KillCommand, "target")
     end
-    if talent(1, 3) and -spell(SB.DireBeast) == 0 then
+    if talent(1, 3) and castable(SB.DireBeast) and spell(SB.DireBeast).cooldown == 0 then
       return cast(SB.DireBeast, "target")
     end
-    if -power.focus >= 80 and -spell(SB.CobraShot) == 0 and -spell(SB.KillCommand) >= 2.5 then
+    if -power.focus >= 80 and castable(SB.CobraShot) and spell(SB.CobraShot).cooldown == 0 and spell(SB.KillCommand).cooldown >= 2.5 then
       return cast(SB.CobraShot, "target")
     end
-    if (player.health.percent <= 50 or pet.health.percent <= 20) and -spell(SB.Exhilaration) == 0 then
+    if
+      (player.health.percent <= 50 or pet.health.percent <= 20) and castable(SB.Exhilaration) and
+        spell(SB.Exhilaration).cooldown == 0
+     then
       return cast(SB.Exhilaration)
     end
-    if player.health.percent < 50 and not (-spell(SB.Exhilaration)) == 0 then
+    if player.health.percent < 50 and castable(SB.AspectOfTheTurtle) and not spell(SB.Exhilaration).cooldown == 0 then
       return cast(SB.AspectOfTheTurtle)
     end
   end
@@ -128,10 +131,10 @@ local function resting()
       return cast(SB.CallPet5)
     end
   end
-  if pet.exists and not pet.alive then
+  if pet.exists and not pet.alive and castable(SB.RevivePet) and spell(SB.RevivePet).cooldown == 0 then
     return cast(SB.RevivePet)
   end
-  if pet.alive and pet.health.percent <= 70 and -spell(SB.MendPet) == 0 then
+  if pet.alive and pet.health.percent <= 70 and spell(SB.MendPet).cooldown == 0 then
     return cast(SB.MendPet)
   end
 end
