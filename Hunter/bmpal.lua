@@ -14,16 +14,10 @@ SB.BloodFury = 20572
 SB.Berserking = 26297
 SB.LightsJudgement = 247427
 
-local function GroupType()
-    return IsInRaid() and "raid" or IsInGroup() and "party" or "solo"
-end
-
 local function combat()
     local usetraps = dark_addon.settings.fetch("bmpal_settings_traps", false)
     local usemisdirect = dark_addon.settings.fetch("bmpal_settings_misdirect", false)
     local race = UnitRace("player")
-    local group_type = GroupType()
-    local opener = 0
 
     if target.alive and target.enemy and not player.channeling() then
         auto_shot()
@@ -147,21 +141,18 @@ function interface()
     local settings = {
         key = "bmpal_settings",
         title = "Beastmaster Pal",
-        width = 250,
+        width = 300,
         height = 380,
         fontheight = 10,
         resize = true,
         show = false,
         template = {
             {type = "header", text = "Pal Settings"},
-            {type = "text", text = "Author: mPixels"},
-            {type = "text", text = "Version: 8.1.5.12"},
-            {type = "text", text = "Rotation: palbm"},
-            {type = "text", text = "Class: Hunter"},
-            {type = "text", text = "Spec: Beastmastery"},
-            {type = "text", text = "Suggested Build: 1|1|3|2|3|2"},
+			{type = "rule"},
+            {type = "text", text = "Rotation: bmpal    Author: mPixels    Version: 8.1.5.12"},
+            {type = "text", text = "Class: Hunter    Spec: Beastmastery    Build: 1323211"},
             {type = "rule"},
-            {type = "text", text = "General Settings"},
+            {type = "header", text = "General Settings"},
             {
                 key = "autojoin",
                 type = "checkbox",
@@ -178,7 +169,7 @@ function interface()
                 default = false
             },
             {type = "rule"},
-            {type = "text", text = "Pet Management"},
+            {type = "header", text = "Pet Management"},
             {
                 key = "petselector",
                 type = "dropdown",
@@ -244,7 +235,7 @@ dark_addon.rotation.register(
     {
         spec = dark_addon.rotation.classes.hunter.beastmastery,
         name = "bmpal",
-        label = "PAL: Beastmastery Hunter",
+        label = "Beastmastery Hunter by Pal Team",
         combat = combat,
         resting = resting,
         interface = interface
