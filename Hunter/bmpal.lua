@@ -27,14 +27,16 @@ local function combat()
     if usetraps and modifier.alt and castable(SB.TarTrap) and spell(SB.TarTrap).cooldown == 0 then
       return cast(SB.TarTrap, "ground")
     end
-    if toggle("interrupts") and target.interrupt(50) and castable(SB.CounterShot) and spell(SB.CounterShot).cooldown == 0 then
+    if
+      toggle("interrupts") and target.interrupt(50) and castable(SB.CounterShot) and spell(SB.CounterShot).cooldown == 0
+     then
       return cast(SB.CounterShot, "target")
     end
     if toggle("cooldowns", false) and castable(SB.AspectOfTheWild) and spell(SB.AspectOfTheWild).cooldown == 0 then
       return cast(SB.AspectOfTheWild)
     end
     if
-      toggle("cooldowns", false) and castable(SB > BeastialWrath) and spell(SB.BeastialWrath).cooldown == 0 and
+      toggle("cooldowns", false) and castable(SB.BeastialWrath) and spell(SB.BeastialWrath).cooldown == 0 and
         (-spell(SB.AspectOfTheWild) > 20 or target.time_to_die < 15)
      then
       return cast(SB.BeastialWrath)
@@ -59,8 +61,10 @@ local function combat()
     if pet.alive and pet.health.percent <= 70 and castable(SB.MendPet) and spell(SB.MendPet).cooldown == 0 then
       return cast(SB.MendPet)
     end
-    if spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 and
-        castable(SB.BarbedShot) and spell(SB.BarbedShot).cooldown ==0 then
+    if
+      spell(SB.BarbedShot).charges >= 1 and pet.buff(SB.PetFrenzy).remains <= 1.75 and castable(SB.BarbedShot) and
+        spell(SB.BarbedShot).cooldown == 0
+     then
       return cast(SB.BarbedShot, "target")
     end
     if talent(7, 3) and castable(SB.SpittingCobra) and spell(SB.SpittingCobra).cooldown == 0 then
@@ -75,7 +79,10 @@ local function combat()
      then
       return cast(SB.Stampede)
     end
-    if toggle("multitarget", false) and enemies.around(40) > 2 and castable(SB.MultiShot) and spell(SB.MultiShot).cooldown == 0 then
+    if
+      toggle("multitarget", false) and enemies.around(40) > 2 and castable(SB.MultiShot) and
+        spell(SB.MultiShot).cooldown == 0
+     then
       return cast(SB.MultiShot, "target")
     end
     if toggle("multitarget", false) and talent(6, 2) and enemies.around(40) > 2 and spell(SB.Barrage).cooldown == 0 then
@@ -90,7 +97,10 @@ local function combat()
     if talent(1, 3) and castable(SB.DireBeast) and spell(SB.DireBeast).cooldown == 0 then
       return cast(SB.DireBeast, "target")
     end
-    if -power.focus >= 80 and castable(SB.CobraShot) and spell(SB.CobraShot).cooldown == 0 and spell(SB.KillCommand).cooldown >= 2.5 then
+    if
+      -power.focus >= 80 and castable(SB.CobraShot) and spell(SB.CobraShot).cooldown == 0 and
+        spell(SB.KillCommand).cooldown >= 2.5
+     then
       return cast(SB.CobraShot, "target")
     end
     if
