@@ -675,7 +675,7 @@ local function combat()
         ((player.buff(SB.WarriorOfElune).up or player.buff(SB.LunarEmpowerment).up or
           enemyCount >= 2 and player.buff(SB.SolarEmpowerment).down) and
           (not az_ss or player.buff(burst).down or
-            (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player(SB.SolarWrath).lastcast)) or
+            (not player.spell(SB.LunarStrike).lastcast and not talent(5, 3) or player.spell(SB.SolarWrath).lastcast)) or
           az_ss and player.buff(burst).up and player.spell(SB.SolarWrath).lastcast)
      then
       return cast(SB.LunarStrike, "target")
