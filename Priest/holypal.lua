@@ -15,6 +15,22 @@ SB.MendingBuff = 41635
 SB.AncestralCall = 274738
 SB.LightsJudgement = 255647
 
+local function findDead()
+  local members = GetNumGroupMembers()
+  local group_type = GroupType()
+
+  if group_type ~= "solo" then
+    for i = 1, (members - 1) do
+      local unit = group_type .. i
+
+      if UnitIsDeadOrGhost(unit) then
+        return unit
+      end
+    end
+  end
+  return nil
+end
+
 local function combat()
   -------------
   ----Fetch----
@@ -131,9 +147,25 @@ local function combat()
         return cast(SB.HolyWordSerenity, tank)
       end
     end
+
+    -- instant cast dps
+    if toggle("dps", false) and not isCC("target") then
+      if castable(SB.HolyWordChastise) and target.enemy and target.alive then
+        return cast(SB.HolyWordChastise, target)
+      end
+      if castable(SB.HolyFire) and target.enemy and target.alive then
+        return cast(SB.HolyFire, target)
+      end
+    end
+
     -------------
     ----Heal-----
     -------------
+    -- holy nova
+    if castable(SB.HolyNova) then
+      return cast(SB.HolyNova)
+    end
+
     --Prayer of Mending
     if castable(SB.PrayerofMending) and lowest.health.effective <= mendingpercent then
       return cast(SB.PrayerofMending, lowest)
@@ -168,6 +200,11 @@ local function combat()
       return cast(SB.Halo)
     end
 
+    --Desperate Prayer
+    if player.health.effective < desperateprayerpercent and castable(SB.DesperatePrayer) then
+      return cast(SB.DesperatePrayer, player)
+    end
+
     --Renew
     if movingrenews == "renew_always" then
       if
@@ -199,9 +236,9 @@ local function combat()
     end
 
     --Flash Heal
-    if lowest.castable(SB.FlashHeal) and lowest.health.effective <= flashheallowest then
+    if lowest.castable(SB.FlashHeal) and lowest.health.effective <= flashheallowest and not player.moving then
       return cast(SB.FlashHeal, lowest)
-    elseif castable(SB.FlashHeal) and tank.health.effective <= flashheallowest then
+    elseif castable(SB.FlashHeal) and tank.health.effective <= flashheallowest and not player.moving then
       return cast(SB.FlashHeal, tank)
     end
     if
@@ -235,11 +272,6 @@ local function combat()
       return cast(SB.Heal, tank)
     end
 
-    --Desperate Prayer
-    if player.health.effective < desperateprayerpercent and castable(SB.DesperatePrayer) then
-      return cast(SB.DesperatePrayer, player)
-    end
-
     -------------
     ---Utility---
     -------------
@@ -251,10 +283,7 @@ local function combat()
   -----DPS-----
   -------------
   if toggle("dps", false) and not isCC("target") then
-    if castable(SB.HolyWordChastise) and target.enemy and target.alive then
-      return cast(SB.HolyWordChastise, target)
-    end
-    if target.enemy and target.alive then
+    if target.enemy and target.alive and not player.moving then
       return cast(SB.Smite, target)
     end
   end
@@ -326,6 +355,15 @@ local function resting()
   if castable(SB.PrayerofHealing) and group.under(prayerofhealingpercent, 40, true) >= prayerofhealingnumberofplayer then
     return cast(SB.PrayerofHealing, player)
   end
+
+  -- Resurrection
+  if castable(SB.Resurrection) then
+    dead = findDead()
+    if dead ~= nil and dead.distance < 40 then
+      return cast(SB.Resurrection, dead)
+    end
+  end
+
   -------------
   --Levitate---
   -------------
