@@ -150,6 +150,12 @@ local function combat()
 
     -- instant cast dps
     if toggle("dps", false) and not isCC("target") then
+      if enemies.around(12) >= 3 then
+        -- holy nova
+        if castable(SB.HolyNova) then
+          return cast(SB.HolyNova)
+        end
+      end
       if castable(SB.HolyWordChastise) and target.enemy and target.alive then
         return cast(SB.HolyWordChastise, target)
       end
@@ -161,10 +167,6 @@ local function combat()
     -------------
     ----Heal-----
     -------------
-    -- holy nova
-    if castable(SB.HolyNova) then
-      return cast(SB.HolyNova)
-    end
 
     --Prayer of Mending
     if castable(SB.PrayerofMending) and lowest.health.effective <= mendingpercent then
@@ -286,6 +288,25 @@ local function combat()
     if target.enemy and target.alive and not player.moving then
       return cast(SB.Smite, target)
     end
+    local inRange = 0
+    for i = 1, 40 do
+      if UnitExists('nameplate' .. i) then
+        print("unit nameplate", i, " exists. unitname is ", (UnitName('nameplate' .. i)))
+        if IsSpellInRange(SB.HolyNova, "spell", 'nameplate' .. i) then
+          print("is in range")
+          inRange = inRange + 1
+        else
+          print("spell isn't in range")
+        end
+      end
+    end
+    print("baddies ", inRange)
+    if inRange >= 1 then
+      -- holy nova
+      if castable(SB.HolyNova) then
+        return cast(SB.HolyNova)
+      end
+    end
   end
 end
 local function resting()
@@ -356,11 +377,19 @@ local function resting()
     return cast(SB.PrayerofHealing, player)
   end
 
+  -- holy nova
+  if player.moving and castable(SB.HolyNova) and group.under(80, 12, false) >= 1 then
+    return cast(SB.HolyNova)
+  end
+
   -- Resurrection
-  if castable(SB.Resurrection) then
+  if not player.moving and castable(SB.Resurrection) then
     dead = findDead()
-    if dead ~= nil and dead.distance < 40 then
-      return cast(SB.Resurrection, dead)
+    if dead ~= nil then
+      distanceSquared, checkedDistance = UnitDistanceSquared(dead)
+      if checkedDistance and (distanceSquared ^ 0.5) < 40 then
+        return cast(SB.Resurrection, dead)
+      end
     end
   end
 
@@ -375,7 +404,7 @@ local function resting()
     falltime = 0
   end
 
-  if falltime >= 20 and levitate == true then
+  if falltime >= 10 and levitate == true and not buff(SB.Levitate).up then
     return cast(SB.Levitate, player)
   end
 
