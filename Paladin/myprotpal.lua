@@ -13,6 +13,7 @@ local function combat()
   -- Self Heal
   ------
   -- Heirloom Necklace
+  --[[
   local Neck2 = GetInventoryItemID("player", 2)
   if Neck2 == EternalEmburfuryTalisman
   and player.health.percent <= 75
@@ -23,11 +24,12 @@ local function combat()
   if player.castable(SB.FlashofLight) and player.health.percent <= 66 then
     return cast(SB.FlashofLight, player)
   end
-
+  ]]--
   ------
   -- Group Heal
   ------
-  if lowest.castable(SB.FlashofLight) and lowest.health.percent <= 66 then
+  if GroupType() ~= "solo" and lowest.castable(SB.FlashofLight)
+  and lowest.health.percent <= 33 then
     return cast(SB.FlashofLight, lowest)
   end
 
@@ -71,8 +73,8 @@ local function combat()
           local pcntdone = ((GetTime()*1000)-st)/(et-st);
           print("unit ", unit.name, " is ", pcntdone, "% done casting ", sp)
           if pcntdone > 75.0 then
-            print("hammer ", unit.name, " to interrupt non target caster")
-            return cast(SB.HammerofJustice, unit)
+            --print("hammer ", unit.name, " to interrupt non target caster")
+            --return cast(SB.HammerofJustice, unit)
           end
         end
       end
@@ -82,7 +84,7 @@ local function combat()
       if not UnitIsUnit('target', unitID)
       and IsSpellInRange("Hammer of Justice", unitID)
       and -spell(SB.HammerofJustice) == 0 then
-        print("hammer ", unit.name, " to interrupt not target mob")
+        --print("hammer ", unit.name, " to interrupt not target mob")
         --return cast(SB.HammerofJustice, unit)
       end
     end
@@ -92,6 +94,14 @@ local function combat()
   -- Combat
   ------
   --print("check reg combat")
+
+  -- BlessedHammer
+  --[[
+  if castable(SB.BlessedHammer)
+  and enemies.around(10) > 0
+  and -spell(SB.BlessedHammer) == 0 then
+    return cast(SB.BlessedHammer)
+  end ]]--
 
   -- Judgment
   if castable(SB.Judgment)
@@ -107,9 +117,17 @@ local function combat()
     return cast(SB.AvengersShield)
   end
 
+  -- ConsecrationProt
+  if castable(SB.ConsecrationProt)
+  and -spell(SB.ConsecrationProt) == 0
+  and enemies.around(10) >= 2 then
+    return cast(SB.ConsecrationProt)
+  end
+
   -- HammerOfTheRighteous
   if castable(SB.HammerOfTheRighteous)
-  and target.castable(SB.HammerOfTheRighteous) then
+  and target.castable(SB.HammerOfTheRighteous)
+  and -spell(SB.HammerOfTheRighteous) == 0 then
     return cast(SB.HammerOfTheRighteous)
   end
 
@@ -140,7 +158,8 @@ local function resting()
   ------
   -- Group Heal
   ------
-  if lowest.castable(SB.FlashofLight) and lowest.health.percent <= 66 then
+  if GroupType() ~= "solo" and lowest.castable(SB.FlashofLight)
+  and lowest.health.percent <= 66 then
     return cast(SB.FlashofLight, lowest)
   end
 
