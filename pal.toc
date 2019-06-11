@@ -14,6 +14,7 @@ Druid\guadrupal.lua
 Druid\ferdrupal.lua
 Druid\respal.lua
 Druid\balanceEXP.lua
+Druid\faker.lua
 Hunter\bmpal.lua
 Hunter\mmpal.lua
 Hunter\svpal.lua
